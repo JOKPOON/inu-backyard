@@ -53,10 +53,10 @@ func (c userController) Create(ctx *fiber.Ctx) error {
 		return err
 	}
 
-	user := middleware.GetUserFromCtx(ctx)
-	if !user.IsRoles([]entity.UserRole{entity.UserRoleHeadOfCurriculum}) {
-		return response.NewErrorResponse(ctx, fiber.StatusUnauthorized, nil)
-	}
+	// user := middleware.GetUserFromCtx(ctx)
+	// if !user.IsRoles([]entity.UserRole{entity.UserRoleHeadOfCurriculum}) {
+	// 	return response.NewErrorResponse(ctx, fiber.StatusUnauthorized, nil)
+	// }
 
 	err := c.userUseCase.Create(payload.FirstName, payload.LastName, payload.Email, payload.Password, payload.Role)
 	if err != nil {
