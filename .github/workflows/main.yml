@@ -17,7 +17,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-  
+
       - name: Set up Docker Buildx
         id: buildx
         uses: docker/setup-buildx-action@v3
@@ -28,7 +28,7 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      
+
       - name: Build image and push to Docker Hub and GitHub Container Registry
         uses: docker/build-push-action@v5
         with:
@@ -38,4 +38,34 @@ jobs:
           push: true
           cache-from: type=gha
           cache-to: type=gha,mode=max
-  
+
+  deploy:
+    name: Deploy to Alibaba Cloud
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.ECS_PRIVATE_KEY }}
+
+      - name: Upload Docker Compose files to EC2
+        run: |
+          HOST=${{ secrets.ECS_HOST }}
+          USER=${{ secrets.ECS_USER }}
+          PORT=22
+          ssh -o StrictHostKeyChecking=no $USER@$HOST << 'EOF'
+            mkdir -p /$USER/inu
+          scp -o StrictHostKeyChecking=no -P $PORT docker-compose.yml $USER@$HOST:/$USER/inu/docker-compose.yml
+      - name: Deploy Frontend to EC2
+        run: |
+          HOST=${{ secrets.ECS_HOST }}
+          USER=${{ secrets.ECS_USER }}
+          PORT=22
+          ssh -o StrictHostKeyChecking=no $USER@$HOST << 'EOF'
+            sudo docker pull ghcr.io/jokpoon/inu-backyard:latest
+            sudo docker compose -f /$USER/inu/docker-compose.yml up -d
+          EOF
