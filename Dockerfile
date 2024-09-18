@@ -32,11 +32,12 @@ FROM alpine:3.19 AS runner
 WORKDIR /app
 
 # Install python and necessary packages
-RUN apk add --no-cache python3 py3-pip py3-scipy py3-scikit-learn
+RUN apk add python3 py3-pip
+RUN apk add py3-scipy py3-scikit-learn
 
 # Copy over the requirements file and install Python dependencies
-COPY --from=builder /app/requirements.txt /app/
-RUN pip3 install --no-deps -r /app/requirements.txt --break-system-packages
+COPY --from=builder /app/requirements.txt .
+RUN pip3 install $(grep -vE "scikit_learn|scipy" /app/requirements.txt) --break-system-packages
 
 # Copy binaries and other necessary files from the builder stage
 COPY --from=builder /app/inu-backyard /app/inu-backyard
