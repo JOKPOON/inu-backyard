@@ -65,6 +65,7 @@ func (c AuthController) SignIn(ctx *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
+
 	ctx.Cookie(cookie)
 
 	return response.NewSuccessResponse(ctx, fiber.StatusOK, fiber.Map{
