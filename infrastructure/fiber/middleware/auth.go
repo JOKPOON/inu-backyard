@@ -11,17 +11,17 @@ func NewAuthMiddleware(
 	authUseCase entity.AuthUseCase,
 ) fiber.Handler {
 	return func(ctx *fiber.Ctx) error {
-		sid, err := validator.ValidateAuth(ctx)
-		if sid == "" {
-			return err
-		}
+		// sid, err := validator.ValidateAuth(ctx)
+		// if sid == "" {
+		// 	return err
+		// }
 
-		user, err := authUseCase.Authenticate(sid)
-		if err != nil {
-			return err
-		}
+		// user, err := authUseCase.Authenticate(sid)
+		// if err != nil {
+		// 	return err
+		// }
 
-		ctx.Locals("user", user)
+		// ctx.Locals("user", user)
 
 		return ctx.Next()
 	}
