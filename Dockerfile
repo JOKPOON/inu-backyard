@@ -46,5 +46,4 @@ COPY --from=builder /app/auto_migration /app/auto_migration
 
 EXPOSE 3001
 
-# Define an entrypoint to run either inu-backyard or auto_migration
-ENTRYPOINT ["/app/inu-backyard"]
+CMD [ "/app/auto_migration" , "&&" , "/app/inu-backyard" ]
