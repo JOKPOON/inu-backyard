@@ -59,6 +59,7 @@ jobs:
           PORT=22
           ssh -o StrictHostKeyChecking=no $USER@$HOST << 'EOF'
             mkdir -p /$USER/inu
+          EOF
           scp -o StrictHostKeyChecking=no -P $PORT docker-compose.yml $USER@$HOST:/$USER/inu/docker-compose.yml
       - name: Deploy Frontend to EC2
         run: |
