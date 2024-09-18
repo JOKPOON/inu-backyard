@@ -47,4 +47,4 @@ COPY --from=builder /app/auto_migration /app/auto_migration
 
 EXPOSE 3001
 
-CMD [ "/app/auto_migration" , "&&" , "/app/inu-backyard" ]
+ENTRYPOINT [ "/app/inu-backyard" ]
