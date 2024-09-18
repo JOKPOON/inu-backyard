@@ -14,4 +14,4 @@ client:
       secretKey: 2x0000000000000000000000000000000AA
   cors:
     AllowOrigins:
-      - 'http://localhost:3000'
+      - "https://localhost:3000"
