@@ -13,6 +13,7 @@ services:
 
   mysql:
     image: mysql:8.1.0
+    container_name: inu_mysql
     volumes:
       - mysql_data:/var/lib/mysql
     environment:
@@ -28,6 +29,7 @@ services:
       - caddy_net
 
   phpmyadmin:
+    container_name: inu_phpmyadmin
     image: phpmyadmin:5.2.1
     expose:
       - 8080
