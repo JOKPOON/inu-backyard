@@ -18,8 +18,8 @@ services:
       - mysql_data:/var/lib/mysql
     environment:
       MYSQL_ROOT_PASSWORD: root
-    expose:
-      - 3306
+    ports:
+      - 3306:3306
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 1s
@@ -31,8 +31,8 @@ services:
   phpmyadmin:
     container_name: inu_phpmyadmin
     image: phpmyadmin:5.2.1
-    expose:
-      - 8080
+    ports:
+      - 8080:80
     environment:
       PMA_HOST: mysql
       PMA_USER: root
