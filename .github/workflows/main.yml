@@ -59,15 +59,15 @@ jobs:
           USER=${{ secrets.ECS_USER }}
           PORT=22
           ssh -o StrictHostKeyChecking=no $USER@$HOST << 'EOF'
-            mkdir -p /$USER/inu
+            mkdir -p /home/$USER/inu
           EOF
-          scp -o StrictHostKeyChecking=no -P $PORT docker-compose.yml $USER@$HOST:/$USER/inu/docker-compose.yml
+          scp -o StrictHostKeyChecking=no -P $PORT docker-compose.yml $USER@$HOST:/home/$USER/inu/docker-compose.yml
       - name: Deploy Frontend to EC2
         run: |
           HOST=${{ secrets.ECS_HOST }}
           USER=${{ secrets.ECS_USER }}
           PORT=22
           ssh -o StrictHostKeyChecking=no $USER@$HOST << 'EOF'
-            sudo docker pull ghcr.io/jokpoon/inu-backyard:latest
-            sudo docker compose -f /$USER/inu/docker-compose.yml up -d
+            docker pull ghcr.io/jokpoon/inu-backyard:latest
+            docker compose -f /home/$USER/inu/docker-compose.yml up -d
           EOF
