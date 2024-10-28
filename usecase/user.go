@@ -1,9 +1,13 @@
 package usecase
 
 import (
+	"fmt"
+
+	"github.com/gofiber/fiber/v2"
 	"github.com/oklog/ulid/v2"
 	"github.com/team-inu/inu-backyard/entity"
 	errs "github.com/team-inu/inu-backyard/entity/error"
+	"github.com/team-inu/inu-backyard/infrastructure/fiber/middleware"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -151,6 +155,15 @@ func (u userUseCase) Delete(id string) error {
 
 	if err != nil {
 		return errs.New(errs.ErrDeleteUser, "cannot delete user by id %s", id, err)
+	}
+
+	return nil
+}
+
+func (r userUseCase) CheckUserRole(ctx *fiber.Ctx, userId string, role entity.UserRole) error {
+	user := middleware.GetUserFromCtx(ctx)
+	if !user.IsRoles([]entity.UserRole{role}) {
+		return fmt.Errorf("user %s is not %s", userId, role)
 	}
 
 	return nil

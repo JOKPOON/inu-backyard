@@ -1,5 +1,7 @@
 package entity
 
+import "github.com/gofiber/fiber/v2"
+
 type UserRole string
 
 const (
@@ -50,4 +52,5 @@ type UserUseCase interface {
 	Update(id string, user *User) error
 	Delete(id string) error
 	GetBySessionId(sessionId string) (*User, error)
+	CheckUserRole(ctx *fiber.Ctx, userId string, role UserRole) error
 }

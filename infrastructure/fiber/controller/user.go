@@ -3,7 +3,6 @@ package controller
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/team-inu/inu-backyard/entity"
-	"github.com/team-inu/inu-backyard/infrastructure/fiber/middleware"
 	"github.com/team-inu/inu-backyard/infrastructure/fiber/request"
 	"github.com/team-inu/inu-backyard/infrastructure/fiber/response"
 	"github.com/team-inu/inu-backyard/internal/validator"
@@ -100,12 +99,12 @@ func (c userController) Update(ctx *fiber.Ctx) error {
 
 	targetUserId := ctx.Params("userId")
 
-	user := middleware.GetUserFromCtx(ctx)
-	if !user.IsRoles([]entity.UserRole{entity.UserRoleHeadOfCurriculum}) && user.Id != targetUserId {
-		return response.NewErrorResponse(ctx, fiber.StatusUnauthorized, nil)
+	err := c.userUseCase.CheckUserRole(ctx, targetUserId, entity.UserRoleHeadOfCurriculum)
+	if err != nil {
+		return err
 	}
 
-	err := c.userUseCase.Update(targetUserId, &entity.User{
+	err = c.userUseCase.Update(targetUserId, &entity.User{
 		FirstName: payload.FirstName,
 		LastName:  payload.LastName,
 		Email:     payload.Email,
@@ -121,12 +120,12 @@ func (c userController) Update(ctx *fiber.Ctx) error {
 func (c userController) Delete(ctx *fiber.Ctx) error {
 	targetUserId := ctx.Params("userId")
 
-	user := middleware.GetUserFromCtx(ctx)
-	if !user.IsRoles([]entity.UserRole{entity.UserRoleHeadOfCurriculum}) && user.Id != targetUserId {
-		return response.NewErrorResponse(ctx, fiber.StatusUnauthorized, nil)
+	err := c.userUseCase.CheckUserRole(ctx, targetUserId, entity.UserRoleHeadOfCurriculum)
+	if err != nil {
+		return err
 	}
 
-	err := c.userUseCase.Delete(targetUserId)
+	err = c.userUseCase.Delete(targetUserId)
 	if err != nil {
 		return err
 	}
@@ -142,12 +141,12 @@ func (c userController) ChangePassword(ctx *fiber.Ctx) error {
 
 	targetUserId := ctx.Params("userId")
 
-	user := middleware.GetUserFromCtx(ctx)
-	if !user.IsRoles([]entity.UserRole{entity.UserRoleHeadOfCurriculum}) && user.Id != targetUserId {
-		return response.NewErrorResponse(ctx, fiber.StatusUnauthorized, nil)
+	err := c.userUseCase.CheckUserRole(ctx, targetUserId, entity.UserRoleHeadOfCurriculum)
+	if err != nil {
+		return err
 	}
 
-	err := c.authUseCase.ChangePassword(targetUserId, payload.OldPassword, payload.NewPassword)
+	err = c.authUseCase.ChangePassword(targetUserId, payload.OldPassword, payload.NewPassword)
 	if err != nil {
 		return err
 	}
