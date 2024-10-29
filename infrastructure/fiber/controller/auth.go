@@ -7,7 +7,6 @@ import (
 	"github.com/team-inu/inu-backyard/entity"
 	errs "github.com/team-inu/inu-backyard/entity/error"
 	"github.com/team-inu/inu-backyard/infrastructure/captcha"
-	"github.com/team-inu/inu-backyard/infrastructure/fiber/middleware"
 	"github.com/team-inu/inu-backyard/infrastructure/fiber/request"
 	"github.com/team-inu/inu-backyard/infrastructure/fiber/response"
 	"github.com/team-inu/inu-backyard/internal/config"
@@ -17,7 +16,7 @@ import (
 type AuthController struct {
 	config      config.AuthConfig
 	validator   validator.PayloadValidator
-	turnstile   captcha.Turnstile
+	turnstile   captcha.Validator
 	authUseCase entity.AuthUseCase
 	userUseCase entity.UserUseCase
 }
@@ -25,7 +24,7 @@ type AuthController struct {
 func NewAuthController(
 	validator validator.PayloadValidator,
 	config config.AuthConfig,
-	turnstile captcha.Turnstile,
+	turnstile captcha.Validator,
 	authUseCase entity.AuthUseCase,
 	userUseCase entity.UserUseCase,
 ) *AuthController {
@@ -39,7 +38,16 @@ func NewAuthController(
 }
 
 func (c AuthController) Me(ctx *fiber.Ctx) error {
-	return response.NewSuccessResponse(ctx, fiber.StatusOK, middleware.GetUserFromCtx(ctx))
+	user, err := c.userUseCase.GetUserFromCtx(ctx)
+	if err != nil {
+		return err
+	}
+
+	if user == nil {
+		return response.NewErrorResponse(ctx, fiber.StatusUnauthorized, errs.New(0, "cannot get user from context"))
+	}
+
+	return response.NewSuccessResponse(ctx, fiber.StatusOK, user)
 }
 
 func (c AuthController) SignIn(ctx *fiber.Ctx) error {

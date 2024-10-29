@@ -168,3 +168,12 @@ func (r userUseCase) CheckUserRole(ctx *fiber.Ctx, userId string, role entity.Us
 
 	return nil
 }
+
+func (r userUseCase) GetUserFromCtx(ctx *fiber.Ctx) (*entity.User, error) {
+	user := middleware.GetUserFromCtx(ctx)
+	if user == nil {
+		return &entity.User{}, errs.New(errs.ErrUserNotFound, "cannot get user from context")
+	}
+
+	return user, nil
+}

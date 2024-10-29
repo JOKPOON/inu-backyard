@@ -53,4 +53,5 @@ type UserUseCase interface {
 	Delete(id string) error
 	GetBySessionId(sessionId string) (*User, error)
 	CheckUserRole(ctx *fiber.Ctx, userId string, role UserRole) error
+	GetUserFromCtx(ctx *fiber.Ctx) (*User, error)
 }

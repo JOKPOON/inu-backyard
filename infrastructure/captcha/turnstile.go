@@ -11,6 +11,10 @@ type Turnstile struct {
 	secret string
 }
 
+type Validator interface {
+	Validate(token string, ip string) (bool, error)
+}
+
 type cloudflareToken struct {
 	Success bool `json:"success"`
 }
