@@ -84,6 +84,33 @@ type Course struct {
 	User     User     `json:"user"`
 }
 
+type CreateCoursePayload struct {
+	SemesterId                   string  `json:"semesterId" validate:"required"`
+	UserId                       string  `json:"userId" validate:"required"`
+	Name                         string  `json:"name" validate:"required"`
+	Code                         string  `json:"code" validate:"required"`
+	Curriculum                   string  `json:"curriculum" validate:"required"`
+	Description                  string  `json:"description" validate:"required"`
+	ExpectedPassingCloPercentage float64 `json:"expectedPassingCloPercentage" validate:"required"`
+	AcademicYear                 int     `json:"academicYear" validate:"required"`
+	GraduateYear                 int     `json:"graduateYear" validate:"required"`
+	ProgramYear                  int     `json:"programYear" validate:"required"`
+	CriteriaGrade
+}
+
+type UpdateCoursePayload struct {
+	Name                         string  `json:"name" validate:"required"`
+	Code                         string  `json:"code" validate:"required"`
+	Curriculum                   string  `json:"curriculum" validate:"required"`
+	Description                  string  `json:"description" validate:"required"`
+	ExpectedPassingCloPercentage float64 `json:"expectedPassingCloPercentage" validate:"required"`
+	AcademicYear                 int     `json:"academicYear" validate:"required"`
+	GraduateYear                 int     `json:"graduateYear" validate:"required"`
+	ProgramYear                  int     `json:"programYear" validate:"required"`
+	IsPortfolioCompleted         *bool   `json:"isPortfolioCompleted" validate:"required"`
+	CriteriaGrade
+}
+
 type CourseRepository interface {
 	GetAll() ([]Course, error)
 	GetById(id string) (*Course, error)
@@ -96,7 +123,7 @@ type CourseUseCase interface {
 	GetAll() ([]Course, error)
 	GetById(id string) (*Course, error)
 	GetByUserId(userId string) ([]Course, error)
-	Create(user User, semesterId string, userId string, name string, code string, curriculum string, description string, expectedPassingCloPercentage float64, academicYear int, graduateYear int, programYear int, criteriaGrade CriteriaGrade) error
+	Create(user User, payload CreateCoursePayload) error
 	Update(user User, id string, name string, code string, curriculum string, description string, expectedPassingCloPercentage float64, academicYear int, graduateYear int, programYear int, criteriaGrade CriteriaGrade, isPortfolioCompleted bool) error
 	Delete(user User, id string) error
 }

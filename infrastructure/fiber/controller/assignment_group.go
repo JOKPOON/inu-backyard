@@ -2,7 +2,8 @@ package controller
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"github.com/team-inu/inu-backyard/infrastructure/fiber/request"
+
+	"github.com/team-inu/inu-backyard/entity"
 	"github.com/team-inu/inu-backyard/infrastructure/fiber/response"
 )
 
@@ -18,12 +19,12 @@ func (c assignmentController) GetGroupByCourseId(ctx *fiber.Ctx) error {
 }
 
 func (c assignmentController) CreateGroup(ctx *fiber.Ctx) error {
-	var payload request.CreateAssignmentGroupPayload
+	var payload entity.CreateAssignmentGroupPayload
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
 		return err
 	}
 
-	err := c.AssignmentUseCase.CreateGroup(payload.Name, payload.CourseId, payload.Weight)
+	err := c.AssignmentUseCase.CreateGroup(payload)
 	if err != nil {
 		return err
 	}
@@ -32,14 +33,14 @@ func (c assignmentController) CreateGroup(ctx *fiber.Ctx) error {
 }
 
 func (c assignmentController) UpdateGroup(ctx *fiber.Ctx) error {
-	var payload request.UpdateAssignmentGroupPayload
+	var payload entity.UpdateAssignmentGroupPayload
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
 		return err
 	}
 
 	id := ctx.Params("assignmentGroupId")
 
-	err := c.AssignmentUseCase.UpdateGroup(id, payload.Name, payload.Weight)
+	err := c.AssignmentUseCase.UpdateGroup(id, payload)
 	if err != nil {
 		return err
 	}

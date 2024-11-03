@@ -3,7 +3,6 @@ package controller
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/team-inu/inu-backyard/entity"
-	"github.com/team-inu/inu-backyard/infrastructure/fiber/request"
 	"github.com/team-inu/inu-backyard/infrastructure/fiber/response"
 	"github.com/team-inu/inu-backyard/internal/validator"
 )
@@ -37,7 +36,7 @@ func (c assignmentController) GetById(ctx *fiber.Ctx) error {
 }
 
 func (c assignmentController) GetByCourseId(ctx *fiber.Ctx) error {
-	var payload request.GetAssignmentsByCourseIdPayload
+	var payload entity.GetAssignmentsByCourseIdPayload
 
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
 		return err
@@ -45,6 +44,15 @@ func (c assignmentController) GetByCourseId(ctx *fiber.Ctx) error {
 
 	assignments, err := c.AssignmentUseCase.GetByCourseId(payload.CourseId)
 
+	if err != nil {
+		return err
+	}
+
+	return response.NewSuccessResponse(ctx, fiber.StatusOK, assignments)
+}
+
+func (c assignmentController) GetAll(ctx *fiber.Ctx) error {
+	assignments, err := c.AssignmentUseCase.GetAll()
 	if err != nil {
 		return err
 	}
@@ -64,22 +72,12 @@ func (c assignmentController) GetByGroupId(ctx *fiber.Ctx) error {
 }
 
 func (c assignmentController) Create(ctx *fiber.Ctx) error {
-	var payload request.CreateAssignmentPayload
-
+	var payload entity.CreateAssignmentPayload
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
 		return err
 	}
 
-	err := c.AssignmentUseCase.Create(
-		payload.AssignmentGroupId,
-		payload.Name,
-		payload.Description,
-		*payload.MaxScore,
-		*payload.ExpectedScorePercentage,
-		*payload.ExpectedPassingStudentPercentage,
-		payload.CourseLearningOutcomeIds,
-		*payload.IsIncludedInClo,
-	)
+	err := c.AssignmentUseCase.Create(payload)
 	if err != nil {
 		return err
 	}
@@ -88,14 +86,14 @@ func (c assignmentController) Create(ctx *fiber.Ctx) error {
 }
 
 func (c assignmentController) Update(ctx *fiber.Ctx) error {
-	var payload request.UpdateAssignmentRequestPayload
+	var payload entity.UpdateAssignmentPayload
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
 		return err
 	}
 
 	id := ctx.Params("assignmentId")
 
-	err := c.AssignmentUseCase.Update(id, payload.Name, payload.Description, *payload.MaxScore, *payload.ExpectedScorePercentage, *payload.ExpectedPassingStudentPercentage, *payload.IsIncludedInClo)
+	err := c.AssignmentUseCase.Update(id, payload)
 	if err != nil {
 		return err
 	}
@@ -117,7 +115,7 @@ func (c assignmentController) Delete(ctx *fiber.Ctx) error {
 
 func (c assignmentController) CreateLinkCourseLearningOutcome(ctx *fiber.Ctx) error {
 	assignmentId := ctx.Params("assignmentId")
-	var payload request.CreateLinkCourseLearningOutcomePayload
+	var payload entity.CreateLinkCourseLearningOutcomePayload
 
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
 		return err

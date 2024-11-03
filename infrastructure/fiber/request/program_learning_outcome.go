@@ -1,4 +1,4 @@
-package request
+package entity
 
 type CrateProgramLearningOutcome struct {
 	Code                       string `validate:"required"`

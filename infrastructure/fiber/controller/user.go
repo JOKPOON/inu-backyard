@@ -3,7 +3,6 @@ package controller
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/team-inu/inu-backyard/entity"
-	"github.com/team-inu/inu-backyard/infrastructure/fiber/request"
 	"github.com/team-inu/inu-backyard/infrastructure/fiber/response"
 	"github.com/team-inu/inu-backyard/internal/validator"
 )
@@ -47,7 +46,7 @@ func (c userController) GetById(ctx *fiber.Ctx) error {
 }
 
 func (c userController) Create(ctx *fiber.Ctx) error {
-	var payload request.CreateUserPayload
+	var payload entity.CreateUserPayload
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
 		return err
 	}
@@ -57,7 +56,7 @@ func (c userController) Create(ctx *fiber.Ctx) error {
 	// 	return response.NewErrorResponse(ctx, fiber.StatusUnauthorized, nil)
 	// }
 
-	err := c.userUseCase.Create(payload.FirstName, payload.LastName, payload.Email, payload.Password, payload.Role)
+	err := c.userUseCase.Create(payload)
 	if err != nil {
 		return err
 	}
@@ -66,7 +65,7 @@ func (c userController) Create(ctx *fiber.Ctx) error {
 }
 
 func (c userController) CreateMany(ctx *fiber.Ctx) error {
-	var payload request.CreateBulkUserPayload
+	var payload entity.CreateBulkUserPayload
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
 		return err
 	}
@@ -92,7 +91,7 @@ func (c userController) CreateMany(ctx *fiber.Ctx) error {
 }
 
 func (c userController) Update(ctx *fiber.Ctx) error {
-	var payload request.UpdateUserPayload
+	var payload entity.UpdateUserPayload
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
 		return err
 	}
@@ -134,7 +133,7 @@ func (c userController) Delete(ctx *fiber.Ctx) error {
 }
 
 func (c userController) ChangePassword(ctx *fiber.Ctx) error {
-	var payload request.ChangePasswordPayload
+	var payload entity.ChangePasswordPayload
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
 		return err
 	}

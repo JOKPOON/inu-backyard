@@ -29,7 +29,7 @@ func NewCoursePortfolioUseCase(
 	enrollmentUseCase entity.EnrollmentUseCase,
 	assignmentUseCase entity.AssignmentUseCase,
 	scoreUseCase entity.ScoreUseCase,
-	studentUscase entity.StudentUseCase,
+	studentUsecase entity.StudentUseCase,
 	courseLearningOutcomeUseCase entity.CourseLearningOutcomeUseCase,
 	courseStreamUseCase entity.CourseStreamsUseCase,
 ) entity.CoursePortfolioUseCase {
@@ -40,10 +40,77 @@ func NewCoursePortfolioUseCase(
 		EnrollmentUseCase:            enrollmentUseCase,
 		AssignmentUseCase:            assignmentUseCase,
 		ScoreUseCase:                 scoreUseCase,
-		StudentUseCase:               studentUscase,
+		StudentUseCase:               studentUsecase,
 		CourseLearningOutcomeUseCase: courseLearningOutcomeUseCase,
 		CourseStreamUseCase:          courseStreamUseCase,
 	}
+}
+
+func generateOutcome(cloWithPos []entity.CourseLearningOutcomeWithPO) ([]entity.NestedOutcome, []entity.Outcome, []entity.Outcome) {
+	addedSubPlo := make(map[string]bool, 0)
+
+	plosByPloId := make(map[string]entity.NestedOutcome, 0)
+	closByCloId := make(map[string]entity.Outcome, 0)
+	posByPoId := make(map[string]entity.Outcome, 0)
+
+	plos := make([]entity.NestedOutcome, 0)
+	clos := make([]entity.Outcome, 0)
+	pos := make([]entity.Outcome, 0)
+
+	for _, c := range cloWithPos {
+		plosFromMap, found := plosByPloId[c.ProgramLearningOutcomeCode]
+
+		if !found {
+			addedSubPlo[c.SubProgramLearningOutcomeCode] = true
+
+			plosByPloId[c.ProgramLearningOutcomeCode] = entity.NestedOutcome{
+				Code: c.ProgramLearningOutcomeCode,
+				Name: c.ProgramLearningOutcomeName,
+				Nested: []entity.Outcome{
+					{
+						Code: c.SubProgramLearningOutcomeCode,
+						Name: c.SubProgramLearningOutcomeName,
+					},
+				},
+			}
+		} else {
+			if _, isSubPloAdded := addedSubPlo[c.SubProgramLearningOutcomeCode]; !isSubPloAdded {
+				addedSubPlo[c.SubProgramLearningOutcomeCode] = true
+
+				plosFromMap.Nested = append(
+					plosByPloId[c.ProgramLearningOutcomeCode].Nested,
+					entity.Outcome{
+						Code: c.SubProgramLearningOutcomeCode,
+						Name: c.SubProgramLearningOutcomeName,
+					},
+				)
+
+				plosByPloId[c.ProgramLearningOutcomeCode] = plosFromMap
+			}
+		}
+
+		closByCloId[c.Code] = entity.Outcome{
+			Code: c.Code,
+			Name: c.Description,
+		}
+
+		posByPoId[c.ProgramOutcomeName] = entity.Outcome{
+			Code: c.ProgramOutcomeCode,
+			Name: c.ProgramOutcomeName,
+		}
+
+	}
+	for _, plo := range plosByPloId {
+		plos = append(plos, plo)
+	}
+	for _, clo := range closByCloId {
+		clos = append(clos, clo)
+	}
+	for _, po := range posByPoId {
+		pos = append(pos, po)
+	}
+
+	return plos, clos, pos
 }
 
 func (u coursePortfolioUseCase) Generate(courseId string) (*entity.CoursePortfolio, error) {
@@ -81,73 +148,6 @@ func (u coursePortfolioUseCase) Generate(courseId string) (*entity.CoursePortfol
 	closWithPos, err := u.CourseLearningOutcomeUseCase.GetByCourseId(courseId)
 	if err != nil {
 		return nil, errs.New(errs.SameCode, "cannot get clo while evaluate tabee outcome", err)
-	}
-
-	generateOutcome := func(cloWithPos []entity.CourseLearningOutcomeWithPO) ([]entity.NestedOutcome, []entity.Outcome, []entity.Outcome) {
-		addedSubPlo := make(map[string]bool, 0)
-
-		plosByPloId := make(map[string]entity.NestedOutcome, 0)
-		closByCloId := make(map[string]entity.Outcome, 0)
-		posByPoId := make(map[string]entity.Outcome, 0)
-
-		plos := make([]entity.NestedOutcome, 0)
-		clos := make([]entity.Outcome, 0)
-		pos := make([]entity.Outcome, 0)
-
-		for _, c := range cloWithPos {
-			plosFromMap, found := plosByPloId[c.ProgramLearningOutcomeCode]
-
-			if !found {
-				addedSubPlo[c.SubProgramLearningOutcomeCode] = true
-
-				plosByPloId[c.ProgramLearningOutcomeCode] = entity.NestedOutcome{
-					Code: c.ProgramLearningOutcomeCode,
-					Name: c.ProgramLearningOutcomeName,
-					Nested: []entity.Outcome{
-						{
-							Code: c.SubProgramLearningOutcomeCode,
-							Name: c.SubProgramLearningOutcomeName,
-						},
-					},
-				}
-			} else {
-				if _, isSubPloAdded := addedSubPlo[c.SubProgramLearningOutcomeCode]; !isSubPloAdded {
-					addedSubPlo[c.SubProgramLearningOutcomeCode] = true
-
-					plosFromMap.Nested = append(
-						plosByPloId[c.ProgramLearningOutcomeCode].Nested,
-						entity.Outcome{
-							Code: c.SubProgramLearningOutcomeCode,
-							Name: c.SubProgramLearningOutcomeName,
-						},
-					)
-
-					plosByPloId[c.ProgramLearningOutcomeCode] = plosFromMap
-				}
-			}
-
-			closByCloId[c.Code] = entity.Outcome{
-				Code: c.Code,
-				Name: c.Description,
-			}
-
-			posByPoId[c.ProgramOutcomeName] = entity.Outcome{
-				Code: c.ProgramOutcomeCode,
-				Name: c.ProgramOutcomeName,
-			}
-
-		}
-		for _, plo := range plosByPloId {
-			plos = append(plos, plo)
-		}
-		for _, clo := range closByCloId {
-			clos = append(clos, clo)
-		}
-		for _, po := range posByPoId {
-			pos = append(pos, po)
-		}
-
-		return plos, clos, pos
 	}
 
 	plos, clos, pos := generateOutcome(closWithPos)

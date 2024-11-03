@@ -3,7 +3,17 @@ package entity
 type Semester struct {
 	Id               string `json:"id" gorm:"primaryKey;type:char(255)"`
 	Year             int    `json:"year"`
-	SemesterSequence string `json:"semesterSequence"`
+	SemesterSequence string `json:"semester_sequence"`
+}
+
+type CreateSemesterPayload struct {
+	Year             int    `json:"year" validate:"required"`
+	SemesterSequence string `json:"semester_sequence" validate:"required"`
+}
+
+type UpdateSemesterPayload struct {
+	Year             int    `json:"year" validate:"required"`
+	SemesterSequence string `json:"semester_sequence" validate:"required"`
 }
 
 type SemesterRepository interface {

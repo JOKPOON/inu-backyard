@@ -1,4 +1,4 @@
-package request
+package entity
 
 type CreateSubProgramLeaningOutcome struct {
 	Code                     string `validate:"required"`

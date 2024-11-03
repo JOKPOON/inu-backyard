@@ -1,4 +1,4 @@
-package request
+package entity
 
 type PredictPayload struct {
 	ProgrammeName string   `json:"programmeName" validate:"required"`

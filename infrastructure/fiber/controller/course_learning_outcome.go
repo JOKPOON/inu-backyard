@@ -3,7 +3,6 @@ package controller
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/team-inu/inu-backyard/entity"
-	"github.com/team-inu/inu-backyard/infrastructure/fiber/request"
 	"github.com/team-inu/inu-backyard/infrastructure/fiber/response"
 	"github.com/team-inu/inu-backyard/internal/validator"
 )
@@ -57,21 +56,12 @@ func (c courseLearningOutcomeController) GetByCourseId(ctx *fiber.Ctx) error {
 }
 
 func (c courseLearningOutcomeController) Create(ctx *fiber.Ctx) error {
-	var payload request.CreateCourseLearningOutcomePayload
+	var payload entity.CreateCourseLearningOutcomePayload
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
 		return err
 	}
 
-	err := c.courseLearningOutcomeUseCase.Create(entity.CreateCourseLearningOutcomeDto{
-		Code:                                payload.Code,
-		Description:                         payload.Description,
-		Status:                              payload.Status,
-		ExpectedPassingAssignmentPercentage: payload.ExpectedPassingAssignmentPercentage,
-		ExpectedPassingStudentPercentage:    payload.ExpectedPassingStudentPercentage,
-		CourseId:                            payload.CourseId,
-		ProgramOutcomeId:                    payload.ProgramOutcomeId,
-		SubProgramLearningOutcomeIds:        payload.SubProgramLearningOutcomeIds,
-	})
+	err := c.courseLearningOutcomeUseCase.Create(payload)
 	if err != nil {
 		return err
 	}
@@ -81,7 +71,7 @@ func (c courseLearningOutcomeController) Create(ctx *fiber.Ctx) error {
 
 func (c courseLearningOutcomeController) CreateLinkSubProgramLearningOutcome(ctx *fiber.Ctx) error {
 	cloId := ctx.Params("cloId")
-	var payload request.CreateLinkSubProgramLearningOutcomePayload
+	var payload entity.CreateLinkSubProgramLearningOutcomePayload
 
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
 		return err
@@ -96,7 +86,7 @@ func (c courseLearningOutcomeController) CreateLinkSubProgramLearningOutcome(ctx
 }
 
 func (c courseLearningOutcomeController) Update(ctx *fiber.Ctx) error {
-	var payload request.UpdateCourseLearningOutcomePayload
+	var payload entity.UpdateCourseLearningOutcomePayload
 
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
 		return err
@@ -104,14 +94,7 @@ func (c courseLearningOutcomeController) Update(ctx *fiber.Ctx) error {
 
 	id := ctx.Params("cloId")
 
-	err := c.courseLearningOutcomeUseCase.Update(id, entity.UpdateCourseLeaningOutcomeDto{
-		Code:                                payload.Code,
-		Description:                         payload.Description,
-		ExpectedPassingAssignmentPercentage: payload.ExpectedPassingAssignmentPercentage,
-		ExpectedPassingStudentPercentage:    payload.ExpectedPassingStudentPercentage,
-		Status:                              payload.Status,
-		ProgramOutcomeId:                    payload.ProgramOutcomeId,
-	})
+	err := c.courseLearningOutcomeUseCase.Update(id, payload)
 
 	if err != nil {
 		return err
@@ -133,7 +116,7 @@ func (c courseLearningOutcomeController) Delete(ctx *fiber.Ctx) error {
 
 func (c courseLearningOutcomeController) DeleteLinkSubProgramLearningOutcome(ctx *fiber.Ctx) error {
 	cloId := ctx.Params("cloId")
-	subPloId := ctx.Params("subploId")
+	subPloId := ctx.Params("sploId")
 
 	err := c.courseLearningOutcomeUseCase.DeleteLinkSubProgramLearningOutcome(cloId, subPloId)
 	if err != nil {

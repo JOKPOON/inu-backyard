@@ -4,7 +4,7 @@ import (
 	"github.com/oklog/ulid/v2"
 	"github.com/team-inu/inu-backyard/entity"
 	errs "github.com/team-inu/inu-backyard/entity/error"
-	slice "github.com/team-inu/inu-backyard/internal/utils"
+	slice "github.com/team-inu/inu-backyard/internal/utils/slice"
 )
 
 type assignmentUseCase struct {
@@ -23,6 +23,15 @@ func NewAssignmentUseCase(
 		courseLearningOutcomeUseCase: courseLearningOutcomeUseCase,
 		courseUseCase:                courseUseCase,
 	}
+}
+
+func (u assignmentUseCase) GetAll() ([]entity.Assignment, error) {
+	assignments, err := u.assignmentRepo.GetAll()
+	if err != nil {
+		return nil, errs.New(errs.ErrQueryAssignment, "cannot get all assignments", err)
+	}
+
+	return assignments, nil
 }
 
 func (u assignmentUseCase) GetById(id string) (*entity.Assignment, error) {
@@ -75,24 +84,24 @@ func (u assignmentUseCase) GetPassingStudentPercentage(assignmentId string) (flo
 	return passingStudentPercentage, nil
 }
 
-func (u assignmentUseCase) Create(assignmentGroupId string, name string, description string, maxScore int, expectedScorePercentage float64, expectedPassingStudentPercentage float64, courseLearningOutcomeIds []string, isIncludedInClo bool) error {
-	assignmentGroup, err := u.GetGroupByGroupId(assignmentGroupId)
+func (u assignmentUseCase) Create(payload entity.CreateAssignmentPayload) error {
+	assignmentGroup, err := u.GetGroupByGroupId(payload.AssignmentGroupId)
 	if err != nil {
-		return errs.New(errs.SameCode, "cannot validate group id %s while creating assignment", assignmentGroupId, err)
+		return errs.New(errs.SameCode, "cannot validate group id %s while creating assignment", payload.AssignmentGroupId, err)
 	} else if assignmentGroup == nil {
-		return errs.New(errs.ErrAssignmentNotFound, "assignment group id %s not found while creating assignment", assignmentGroupId)
+		return errs.New(errs.ErrAssignmentNotFound, "assignment group id %s not found while creating assignment", payload.AssignmentGroupId)
 	}
 
-	if len(courseLearningOutcomeIds) == 0 {
+	if len(payload.CourseLearningOutcomeIds) == 0 {
 		return errs.New(errs.ErrCreateAssignment, "assignment must have at least one clo")
 	}
 
-	duplicateCloIds := slice.GetDuplicateValue(courseLearningOutcomeIds)
+	duplicateCloIds := slice.GetDuplicateValue(payload.CourseLearningOutcomeIds)
 	if len(duplicateCloIds) != 0 {
 		return errs.New(errs.ErrCreateAssignment, "duplicate clo ids %v", duplicateCloIds)
 	}
 
-	nonExistedCloIds, err := u.courseLearningOutcomeUseCase.FilterNonExisted(courseLearningOutcomeIds)
+	nonExistedCloIds, err := u.courseLearningOutcomeUseCase.FilterNonExisted(payload.CourseLearningOutcomeIds)
 	if err != nil {
 		return errs.New(errs.SameCode, "cannot get non existed clo ids while creating assignment")
 	} else if len(nonExistedCloIds) != 0 {
@@ -100,7 +109,7 @@ func (u assignmentUseCase) Create(assignmentGroupId string, name string, descrip
 	}
 
 	courseLeaningOutcomes := []*entity.CourseLearningOutcome{}
-	for _, id := range courseLearningOutcomeIds {
+	for _, id := range payload.CourseLearningOutcomeIds {
 		courseLeaningOutcomes = append(courseLeaningOutcomes, &entity.CourseLearningOutcome{
 			Id: id,
 		})
@@ -108,14 +117,14 @@ func (u assignmentUseCase) Create(assignmentGroupId string, name string, descrip
 
 	assignment := entity.Assignment{
 		Id:                               ulid.Make().String(),
-		Name:                             name,
-		Description:                      description,
-		MaxScore:                         maxScore,
-		ExpectedScorePercentage:          expectedScorePercentage,
-		ExpectedPassingStudentPercentage: expectedPassingStudentPercentage,
+		Name:                             payload.Name,
+		Description:                      payload.Description,
+		MaxScore:                         *payload.MaxScore,
+		ExpectedScorePercentage:          *payload.ExpectedScorePercentage,
+		ExpectedPassingStudentPercentage: *payload.ExpectedPassingStudentPercentage,
 		CourseLearningOutcomes:           courseLeaningOutcomes,
-		IsIncludedInClo:                  &isIncludedInClo,
-		AssignmentGroupId:                assignmentGroupId,
+		IsIncludedInClo:                  payload.IsIncludedInClo,
+		AssignmentGroupId:                payload.AssignmentGroupId,
 	}
 
 	err = u.assignmentRepo.Create(&assignment)
@@ -126,7 +135,7 @@ func (u assignmentUseCase) Create(assignmentGroupId string, name string, descrip
 	return nil
 }
 
-func (u assignmentUseCase) Update(id string, name string, description string, maxScore int, expectedScorePercentage float64, expectedPassingStudentPercentage float64, isIncludedInClo bool) error {
+func (u assignmentUseCase) Update(id string, payload entity.UpdateAssignmentPayload) error {
 	existAssignment, err := u.GetById(id)
 	if err != nil {
 		return errs.New(errs.SameCode, "cannot get assignment id %s to update", id, err)
@@ -135,12 +144,12 @@ func (u assignmentUseCase) Update(id string, name string, description string, ma
 	}
 
 	err = u.assignmentRepo.Update(id, &entity.Assignment{
-		Name:                             name,
-		Description:                      description,
-		MaxScore:                         maxScore,
-		ExpectedScorePercentage:          expectedScorePercentage,
-		ExpectedPassingStudentPercentage: expectedPassingStudentPercentage,
-		IsIncludedInClo:                  &isIncludedInClo,
+		Name:                             payload.Name,
+		Description:                      payload.Description,
+		MaxScore:                         *payload.MaxScore,
+		ExpectedScorePercentage:          *payload.ExpectedScorePercentage,
+		ExpectedPassingStudentPercentage: *payload.ExpectedPassingStudentPercentage,
+		IsIncludedInClo:                  payload.IsIncludedInClo,
 	})
 
 	if err != nil {

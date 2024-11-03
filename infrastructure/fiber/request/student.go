@@ -1,4 +1,4 @@
-package request
+package entity
 
 type CreateStudentPayload struct {
 	KmuttId   string   `json:"kmuttId" validate:"required"`

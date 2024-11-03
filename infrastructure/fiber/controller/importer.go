@@ -3,7 +3,7 @@ package controller
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/team-inu/inu-backyard/infrastructure/fiber/middleware"
-	"github.com/team-inu/inu-backyard/infrastructure/fiber/request"
+	request "github.com/team-inu/inu-backyard/infrastructure/fiber/request"
 	"github.com/team-inu/inu-backyard/infrastructure/fiber/response"
 	"github.com/team-inu/inu-backyard/internal/validator"
 	"github.com/team-inu/inu-backyard/usecase"

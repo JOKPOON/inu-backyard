@@ -15,6 +15,17 @@ func NewAssignmentRepositoryGorm(gorm *gorm.DB) entity.AssignmentRepository {
 	return &assignmentRepositoryGorm{gorm: gorm}
 }
 
+func (r assignmentRepositoryGorm) GetAll() ([]entity.Assignment, error) {
+	var assignments []entity.Assignment
+
+	err := r.gorm.Find(&assignments).Error
+	if err != nil {
+		return nil, fmt.Errorf("cannot query to get all assignments: %w", err)
+	}
+
+	return assignments, nil
+}
+
 func (r assignmentRepositoryGorm) GetById(id string) (*entity.Assignment, error) {
 	var assignment *entity.Assignment
 

@@ -241,10 +241,10 @@ func (f *fiberServer) initController() error {
 	clo.Delete("/:cloId", courseLearningOutcomeController.Delete)
 
 	// sub program learning outcome by course learning outcome route
-	subPloByClo := clo.Group("/:cloId/subplos", authMiddleware)
+	sploByClo := clo.Group("/:cloId/splos", authMiddleware)
 
-	subPloByClo.Post("/", courseLearningOutcomeController.CreateLinkSubProgramLearningOutcome)
-	subPloByClo.Delete("/:subploId", courseLearningOutcomeController.DeleteLinkSubProgramLearningOutcome)
+	sploByClo.Post("/", courseLearningOutcomeController.CreateLinkSubProgramLearningOutcome)
+	sploByClo.Delete("/:sploId", courseLearningOutcomeController.DeleteLinkSubProgramLearningOutcome)
 
 	// program learning outcome route
 	plo := api.Group("/plos", authMiddleware)
@@ -257,13 +257,13 @@ func (f *fiberServer) initController() error {
 	plo.Delete("/:ploId", programLearningOutcomeController.Delete)
 
 	// sub program learning outcome route
-	subPlo := api.Group("/splos", authMiddleware)
+	splo := api.Group("/splos", authMiddleware)
 
-	subPlo.Get("/", subProgramLearningOutcomeController.GetAll)
-	subPlo.Post("/", subProgramLearningOutcomeController.Create)
-	subPlo.Get("/:sploId", subProgramLearningOutcomeController.GetById)
-	subPlo.Patch("/:sploId", subProgramLearningOutcomeController.Update)
-	subPlo.Delete("/:sploId", subProgramLearningOutcomeController.Delete)
+	splo.Get("/", subProgramLearningOutcomeController.GetAll)
+	splo.Post("/", subProgramLearningOutcomeController.Create)
+	splo.Get("/:sploId", subProgramLearningOutcomeController.GetById)
+	splo.Patch("/:sploId", subProgramLearningOutcomeController.Update)
+	splo.Delete("/:sploId", subProgramLearningOutcomeController.Delete)
 
 	// program outcome route
 	pos := api.Group("/pos", authMiddleware)
@@ -319,6 +319,7 @@ func (f *fiberServer) initController() error {
 	assignment := api.Group("/assignments", authMiddleware)
 
 	assignment.Post("/", assignmentController.Create)
+	assignment.Get("/", assignmentController.GetAll)
 	assignment.Get("/:assignmentId", assignmentController.GetById)
 	assignment.Patch("/:assignmentId", assignmentController.Update)
 	assignment.Delete("/:assignmentId", assignmentController.Delete)

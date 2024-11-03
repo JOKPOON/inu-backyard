@@ -4,7 +4,6 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/team-inu/inu-backyard/entity"
 	"github.com/team-inu/inu-backyard/infrastructure/fiber/middleware"
-	"github.com/team-inu/inu-backyard/infrastructure/fiber/request"
 	"github.com/team-inu/inu-backyard/infrastructure/fiber/response"
 	"github.com/team-inu/inu-backyard/internal/validator"
 	"github.com/team-inu/inu-backyard/usecase"
@@ -70,7 +69,7 @@ func (c courseController) GetByUserId(ctx *fiber.Ctx) error {
 }
 
 func (c courseController) Create(ctx *fiber.Ctx) error {
-	var payload request.CreateCourseRequestPayload
+	var payload entity.CreateCoursePayload
 
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
 		return err
@@ -80,17 +79,7 @@ func (c courseController) Create(ctx *fiber.Ctx) error {
 
 	err := c.courseUseCase.Create(
 		*user,
-		payload.SemesterId,
-		payload.UserId,
-		payload.Name,
-		payload.Code,
-		payload.Curriculum,
-		payload.Description,
-		payload.ExpectedPassingCloPercentage,
-		payload.AcademicYear,
-		payload.GraduateYear,
-		payload.ProgramYear,
-		payload.CriteriaGrade,
+		payload,
 	)
 	if err != nil {
 		return err
@@ -100,7 +89,7 @@ func (c courseController) Create(ctx *fiber.Ctx) error {
 }
 
 func (c courseController) Update(ctx *fiber.Ctx) error {
-	var payload request.UpdateCourseRequestPayload
+	var payload entity.UpdateCoursePayload
 
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
 		return err

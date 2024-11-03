@@ -6,6 +6,7 @@
     "foreignkey",
     "gofiber",
     "Gorm",
+    "oklog",
     "Plos",
     "splo",
     "splos",

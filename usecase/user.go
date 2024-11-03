@@ -8,6 +8,7 @@ import (
 	"github.com/team-inu/inu-backyard/entity"
 	errs "github.com/team-inu/inu-backyard/entity/error"
 	"github.com/team-inu/inu-backyard/infrastructure/fiber/middleware"
+	"github.com/team-inu/inu-backyard/internal/utils"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -69,21 +70,17 @@ func (u userUseCase) GetByParams(params *entity.User, limit int, offset int) ([]
 	return users, nil
 }
 
-func (u userUseCase) Create(firstName string, lastName string, email string, password string, role entity.UserRole) error {
-	bcryptPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+func (u userUseCase) Create(payload entity.CreateUserPayload) error {
+	hashPassword, err := utils.HashPassword(payload.Password)
 	if err != nil {
-		return errs.New(errs.ErrCreateUser, "cannot create user", err)
-	}
 
-	hasPassword := string(bcryptPassword)
+	}
 
 	user := &entity.User{
 		Id:        ulid.Make().String(),
-		FirstName: firstName,
-		LastName:  lastName,
-		Email:     email,
-		Password:  hasPassword,
-		Role:      role,
+		FirstName: payload.FirstName,
+		LastName:  payload.LastName,
+		Password:  hashPassword,
 	}
 
 	err = u.userRepo.Create(user)

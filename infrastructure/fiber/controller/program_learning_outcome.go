@@ -3,7 +3,7 @@ package controller
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/team-inu/inu-backyard/entity"
-	"github.com/team-inu/inu-backyard/infrastructure/fiber/request"
+	request "github.com/team-inu/inu-backyard/infrastructure/fiber/request"
 	"github.com/team-inu/inu-backyard/infrastructure/fiber/response"
 	"github.com/team-inu/inu-backyard/internal/validator"
 )
@@ -50,14 +50,14 @@ func (c programLearningOutcomeController) Create(ctx *fiber.Ctx) error {
 		return err
 	}
 
-	plos := make([]entity.CrateProgramLearningOutcomeDto, 0, len(payload.ProgramLearningOutcomes))
+	plos := make([]entity.CreateProgramLearningOutcomeDto, 0, len(payload.ProgramLearningOutcomes))
 	for _, plo := range payload.ProgramLearningOutcomes {
 		subPlos := make([]entity.CreateSubProgramLearningOutcomeDto, 0, len(payload.ProgramLearningOutcomes))
 		for _, subPlo := range plo.SubProgramLearningOutcomes {
 			subPlos = append(subPlos, entity.CreateSubProgramLearningOutcomeDto(subPlo))
 		}
 
-		plos = append(plos, entity.CrateProgramLearningOutcomeDto{
+		plos = append(plos, entity.CreateProgramLearningOutcomeDto{
 			Code:                       plo.Code,
 			DescriptionThai:            plo.DescriptionThai,
 			DescriptionEng:             plo.DescriptionEng,

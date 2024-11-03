@@ -3,7 +3,7 @@ package usecase
 import (
 	"github.com/team-inu/inu-backyard/entity"
 	errs "github.com/team-inu/inu-backyard/entity/error"
-	slice "github.com/team-inu/inu-backyard/internal/utils"
+	slice "github.com/team-inu/inu-backyard/internal/utils/slice"
 )
 
 type studentUseCase struct {

@@ -13,6 +13,12 @@ type MockUserUseCase struct {
 
 func (m *MockUserUseCase) GetAll() ([]entity.User, error) {
 	args := m.Called()
+	if args.Get(0) == nil {
+		if args.Error(1) != nil {
+			return nil, args.Error(1)
+		}
+		return nil, nil
+	}
 	return args.Get(0).([]entity.User), args.Error(1)
 }
 

@@ -3,7 +3,6 @@ package controller
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/team-inu/inu-backyard/entity"
-	"github.com/team-inu/inu-backyard/infrastructure/fiber/request"
 	"github.com/team-inu/inu-backyard/infrastructure/fiber/response"
 	"github.com/team-inu/inu-backyard/internal/validator"
 )
@@ -45,7 +44,7 @@ func (c semesterController) GetById(ctx *fiber.Ctx) error {
 }
 
 func (c semesterController) Create(ctx *fiber.Ctx) error {
-	var payload request.CreateSemesterPayload
+	var payload entity.CreateSemesterPayload
 
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
 		return err
@@ -61,7 +60,7 @@ func (c semesterController) Create(ctx *fiber.Ctx) error {
 
 func (c semesterController) Update(ctx *fiber.Ctx) error {
 	semesterId := ctx.Params("semesterId")
-	var payload request.UpdateSemesterPayload
+	var payload entity.UpdateSemesterPayload
 
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
 		return err

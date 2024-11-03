@@ -7,7 +7,6 @@ import (
 	"github.com/team-inu/inu-backyard/entity"
 	errs "github.com/team-inu/inu-backyard/entity/error"
 	"github.com/team-inu/inu-backyard/infrastructure/captcha"
-	"github.com/team-inu/inu-backyard/infrastructure/fiber/request"
 	"github.com/team-inu/inu-backyard/infrastructure/fiber/response"
 	"github.com/team-inu/inu-backyard/internal/config"
 	"github.com/team-inu/inu-backyard/internal/validator"
@@ -51,13 +50,13 @@ func (c AuthController) Me(ctx *fiber.Ctx) error {
 }
 
 func (c AuthController) SignIn(ctx *fiber.Ctx) error {
-	var payload request.SignInPayload
+	var payload entity.SignInPayload
 	if ok, err := c.validator.Validate(&payload, ctx); !ok {
 		return err
 	}
 
 	ipAddress := ctx.IP()
-	userAgent := ctx.Context().UserAgent()
+	userAgent := string(ctx.Context().UserAgent())
 
 	cfToken := string(ctx.Request().Header.Peek("Cf-Token")[:])
 
@@ -69,7 +68,7 @@ func (c AuthController) SignIn(ctx *fiber.Ctx) error {
 
 	}
 
-	cookie, err := c.authUseCase.SignIn(payload.Email, payload.Password, ipAddress, string(userAgent))
+	cookie, err := c.authUseCase.SignIn(payload, ipAddress, userAgent)
 	if err != nil {
 		return err
 	}

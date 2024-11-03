@@ -52,43 +52,43 @@ func (u courseUseCase) GetByUserId(userId string) ([]entity.Course, error) {
 	return course, nil
 }
 
-func (u courseUseCase) Create(user entity.User, semesterId string, userId string, name string, code string, curriculum string, description string, expectedPassingCloPercentage float64, academicYear int, graduateYear int, programYear int, criteriaGrade entity.CriteriaGrade) error {
+func (u courseUseCase) Create(user entity.User, payload entity.CreateCoursePayload) error {
 	if !user.IsRoles([]entity.UserRole{entity.UserRoleHeadOfCurriculum}) {
 		return errs.New(errs.ErrCreateCourse, "no permission to create course")
 	}
 
-	semester, err := u.semesterUseCase.GetById(semesterId)
+	semester, err := u.semesterUseCase.GetById(payload.SemesterId)
 	if err != nil {
-		return errs.New(errs.SameCode, "cannot get semester id %s while creating course", semesterId, err)
+		return errs.New(errs.SameCode, "cannot get semester id %s while creating course", payload.SemesterId, err)
 	} else if semester == nil {
-		return errs.New(errs.ErrSemesterNotFound, "semester id %s not found while creating course", semesterId)
+		return errs.New(errs.ErrSemesterNotFound, "semester id %s not found while creating course", payload.SemesterId)
 	}
 
-	lecturer, err := u.userUseCase.GetById(userId)
+	lecturer, err := u.userUseCase.GetById(payload.UserId)
 	if err != nil {
-		return errs.New(errs.SameCode, "cannot get user id %s while creating course", userId, err)
+		return errs.New(errs.SameCode, "cannot get user id %s while creating course", payload.UserId, err)
 	} else if lecturer == nil {
-		return errs.New(errs.ErrUserNotFound, "user id %s not found while creating course", userId)
+		return errs.New(errs.ErrUserNotFound, "user id %s not found while creating course", payload.UserId)
 	}
 
-	if !criteriaGrade.IsValid() {
+	if !payload.CriteriaGrade.IsValid() {
 		return errs.New(errs.ErrCreateCourse, "invalid criteria grade")
 	}
 
 	emptyJson, _ := json.Marshal(map[string]string{})
 	course := entity.Course{
 		Id:                           ulid.Make().String(),
-		SemesterId:                   semesterId,
-		UserId:                       userId,
-		Name:                         name,
-		Code:                         code,
-		Curriculum:                   curriculum,
-		Description:                  description,
-		ExpectedPassingCloPercentage: expectedPassingCloPercentage,
-		AcademicYear:                 academicYear,
-		GraduateYear:                 graduateYear,
-		ProgramYear:                  programYear,
-		CriteriaGrade:                criteriaGrade,
+		Name:                         payload.Name,
+		Code:                         payload.Code,
+		Curriculum:                   payload.Curriculum,
+		Description:                  payload.Description,
+		ExpectedPassingCloPercentage: payload.ExpectedPassingCloPercentage,
+		AcademicYear:                 payload.AcademicYear,
+		GraduateYear:                 payload.GraduateYear,
+		ProgramYear:                  payload.ProgramYear,
+		UserId:                       payload.UserId,
+		SemesterId:                   payload.SemesterId,
+		CriteriaGrade:                payload.CriteriaGrade,
 		PortfolioData:                emptyJson,
 	}
 

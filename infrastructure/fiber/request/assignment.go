@@ -1,4 +1,4 @@
-package request
+package entity
 
 type CreateAssignmentPayload struct {
 	Name                             string   `json:"name" validate:"required"`

@@ -1,4 +1,4 @@
-package request
+package entity
 
 import "github.com/team-inu/inu-backyard/entity"
 

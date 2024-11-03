@@ -31,19 +31,19 @@ func (u assignmentUseCase) GetGroupByCourseId(courseId string, withAssignment bo
 	return assignmentGroup, nil
 }
 
-func (u assignmentUseCase) CreateGroup(name string, courseId string, weight int) error {
-	course, err := u.courseUseCase.GetById(courseId)
+func (u assignmentUseCase) CreateGroup(payload entity.CreateAssignmentGroupPayload) error {
+	course, err := u.courseUseCase.GetById(payload.CourseId)
 	if err != nil {
-		return errs.New(errs.SameCode, "cannot validate course id %s while creating assignment group", courseId, err)
+		return errs.New(errs.SameCode, "cannot validate course id %s while creating assignment group", payload.CourseId, err)
 	} else if course == nil {
-		return errs.New(errs.ErrCourseNotFound, "course id %s now found while creating assignment group", courseId)
+		return errs.New(errs.ErrCourseNotFound, "course id %s now found while creating assignment group", payload.CourseId)
 	}
 
 	assignment := entity.AssignmentGroup{
 		Id:       ulid.Make().String(),
-		Name:     name,
-		CourseId: courseId,
-		Weight:   weight,
+		Name:     payload.Name,
+		CourseId: payload.CourseId,
+		Weight:   payload.Weight,
 	}
 
 	err = u.assignmentRepo.CreateGroup(&assignment)
@@ -54,7 +54,7 @@ func (u assignmentUseCase) CreateGroup(name string, courseId string, weight int)
 	return nil
 }
 
-func (u assignmentUseCase) UpdateGroup(assignmentGroupId string, name string, weight int) error {
+func (u assignmentUseCase) UpdateGroup(assignmentGroupId string, payload entity.UpdateAssignmentGroupPayload) error {
 	assignmentGroup, err := u.GetGroupByGroupId(assignmentGroupId)
 	if err != nil {
 		return errs.New(errs.SameCode, "cannot validate assignment group id %s to update", assignmentGroupId, err)
@@ -62,7 +62,10 @@ func (u assignmentUseCase) UpdateGroup(assignmentGroupId string, name string, we
 		return errs.New(errs.ErrAssignmentNotFound, "assignment group id %s to update not found", assignmentGroupId)
 	}
 
-	err = u.assignmentRepo.UpdateGroup(assignmentGroupId, &entity.AssignmentGroup{Name: name, Weight: weight})
+	err = u.assignmentRepo.UpdateGroup(assignmentGroupId, &entity.AssignmentGroup{
+		Name:   payload.Name,
+		Weight: payload.Weight,
+	})
 	if err != nil {
 		return errs.New(errs.ErrUpdateAssignment, "cannot update assignment group id %s", assignmentGroupId)
 	}

@@ -1,4 +1,4 @@
-package request
+package entity
 
 type CreateSemesterPayload struct {
 	Year             int    `json:"year" validate:"required"`

@@ -4,7 +4,7 @@ import (
 	"github.com/oklog/ulid/v2"
 	"github.com/team-inu/inu-backyard/entity"
 	errs "github.com/team-inu/inu-backyard/entity/error"
-	slice "github.com/team-inu/inu-backyard/internal/utils"
+	slice "github.com/team-inu/inu-backyard/internal/utils/slice"
 )
 
 type courseLearningOutcomeUseCase struct {
@@ -62,26 +62,26 @@ func (u courseLearningOutcomeUseCase) GetByCourseId(courseId string) ([]entity.C
 	return clo, nil
 }
 
-func (u courseLearningOutcomeUseCase) Create(dto entity.CreateCourseLearningOutcomeDto) error {
-	if len(dto.SubProgramLearningOutcomeIds) == 0 {
+func (u courseLearningOutcomeUseCase) Create(payload entity.CreateCourseLearningOutcomePayload) error {
+	if len(payload.SubProgramLearningOutcomeIds) == 0 {
 		return errs.New(errs.ErrCreateCLO, "sub program learning outcome must not be empty when creating clo")
 	}
 
-	course, err := u.courseUseCase.GetById(dto.CourseId)
+	course, err := u.courseUseCase.GetById(payload.CourseId)
 	if err != nil {
-		return errs.New(errs.SameCode, "cannot get course id %s while creating clo", dto.CourseId, err)
+		return errs.New(errs.SameCode, "cannot get course id %s while creating clo", payload.CourseId, err)
 	} else if course == nil {
-		return errs.New(errs.ErrCourseNotFound, "course id %s not found while creating clo", dto.CourseId)
+		return errs.New(errs.ErrCourseNotFound, "course id %s not found while creating clo", payload.CourseId)
 	}
 
-	po, err := u.programOutcomeUseCase.GetById(dto.ProgramOutcomeId)
+	po, err := u.programOutcomeUseCase.GetById(payload.ProgramOutcomeId)
 	if err != nil {
-		return errs.New(errs.SameCode, "cannot get program outcome id %s while creating clo", dto.ProgramOutcomeId, err)
+		return errs.New(errs.SameCode, "cannot get program outcome id %s while creating clo", payload.ProgramOutcomeId, err)
 	} else if po == nil {
-		return errs.New(errs.ErrCourseNotFound, "program outcome id %s not found while creating clo", dto.ProgramOutcomeId)
+		return errs.New(errs.ErrCourseNotFound, "program outcome id %s not found while creating clo", payload.ProgramOutcomeId)
 	}
 
-	nonExistedSubPloIds, err := u.programLearningOutcomeUseCase.FilterNonExistedSubPLO(dto.SubProgramLearningOutcomeIds)
+	nonExistedSubPloIds, err := u.programLearningOutcomeUseCase.FilterNonExistedSubPLO(payload.SubProgramLearningOutcomeIds)
 	if err != nil {
 		return errs.New(errs.SameCode, "cannot get non existed sub plo ids while creating clo")
 	} else if len(nonExistedSubPloIds) != 0 {
@@ -89,7 +89,7 @@ func (u courseLearningOutcomeUseCase) Create(dto entity.CreateCourseLearningOutc
 	}
 
 	subPlos := []*entity.SubProgramLearningOutcome{}
-	for _, ploId := range dto.SubProgramLearningOutcomeIds {
+	for _, ploId := range payload.SubProgramLearningOutcomeIds {
 		subPlos = append(subPlos, &entity.SubProgramLearningOutcome{
 			Id: ploId,
 		})
@@ -97,13 +97,13 @@ func (u courseLearningOutcomeUseCase) Create(dto entity.CreateCourseLearningOutc
 
 	clo := entity.CourseLearningOutcome{
 		Id:                                  ulid.Make().String(),
-		Code:                                dto.Code,
-		Description:                         dto.Description,
-		Status:                              dto.Status,
-		ExpectedPassingAssignmentPercentage: dto.ExpectedPassingAssignmentPercentage,
-		ExpectedPassingStudentPercentage:    dto.ExpectedPassingStudentPercentage,
-		ProgramOutcomeId:                    dto.ProgramOutcomeId,
-		CourseId:                            dto.CourseId,
+		Code:                                payload.Code,
+		Description:                         payload.Description,
+		Status:                              payload.Status,
+		ExpectedPassingAssignmentPercentage: payload.ExpectedPassingAssignmentPercentage,
+		ExpectedPassingStudentPercentage:    payload.ExpectedPassingStudentPercentage,
+		ProgramOutcomeId:                    payload.ProgramOutcomeId,
+		CourseId:                            payload.CourseId,
 		SubProgramLearningOutcomes:          subPlos,
 	}
 
@@ -142,7 +142,7 @@ func (u courseLearningOutcomeUseCase) CreateLinkSubProgramLearningOutcome(id str
 	return nil
 }
 
-func (u courseLearningOutcomeUseCase) Update(id string, dto entity.UpdateCourseLeaningOutcomeDto) error {
+func (u courseLearningOutcomeUseCase) Update(id string, payload entity.UpdateCourseLearningOutcomePayload) error {
 	existCourseLearningOutcome, err := u.GetById(id)
 	if err != nil {
 		return errs.New(errs.SameCode, "cannot get courseLearningOutcome id %s to update", id, err)
@@ -150,20 +150,20 @@ func (u courseLearningOutcomeUseCase) Update(id string, dto entity.UpdateCourseL
 		return errs.New(errs.ErrCLONotFound, "cannot get courseLearningOutcome id %s to update", id)
 	}
 
-	existedProgramOutcome, err := u.programOutcomeUseCase.GetById(dto.ProgramOutcomeId)
+	existedProgramOutcome, err := u.programOutcomeUseCase.GetById(payload.ProgramOutcomeId)
 	if err != nil {
-		return errs.New(errs.SameCode, "cannot get program outcome id %s to update clo", dto.ProgramOutcomeId, err)
+		return errs.New(errs.SameCode, "cannot get program outcome id %s to update clo", payload.ProgramOutcomeId, err)
 	} else if existedProgramOutcome == nil {
-		return errs.New(errs.ErrPONotFound, "program outcome id %s not found while updating clo", dto.ProgramOutcomeId)
+		return errs.New(errs.ErrPONotFound, "program outcome id %s not found while updating clo", payload.ProgramOutcomeId)
 	}
 
 	err = u.courseLearningOutcomeRepo.Update(id, &entity.CourseLearningOutcome{
-		Code:                                dto.Code,
-		Description:                         dto.Description,
-		ExpectedPassingAssignmentPercentage: dto.ExpectedPassingAssignmentPercentage,
-		ExpectedPassingStudentPercentage:    dto.ExpectedPassingStudentPercentage,
-		Status:                              dto.Status,
-		ProgramOutcomeId:                    dto.ProgramOutcomeId,
+		Code:                                payload.Code,
+		Description:                         payload.Description,
+		ExpectedPassingAssignmentPercentage: payload.ExpectedPassingAssignmentPercentage,
+		ExpectedPassingStudentPercentage:    payload.ExpectedPassingStudentPercentage,
+		Status:                              payload.Status,
+		ProgramOutcomeId:                    payload.ProgramOutcomeId,
 	})
 
 	if err != nil {

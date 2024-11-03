@@ -4,7 +4,7 @@ import (
 	"github.com/oklog/ulid/v2"
 	"github.com/team-inu/inu-backyard/entity"
 	errs "github.com/team-inu/inu-backyard/entity/error"
-	slice "github.com/team-inu/inu-backyard/internal/utils"
+	slice "github.com/team-inu/inu-backyard/internal/utils/slice"
 )
 
 type programLearningOutcomeUseCase struct {
@@ -40,7 +40,7 @@ func (u programLearningOutcomeUseCase) GetById(id string) (*entity.ProgramLearni
 	return plo, nil
 }
 
-func (u programLearningOutcomeUseCase) Create(dto []entity.CrateProgramLearningOutcomeDto) error {
+func (u programLearningOutcomeUseCase) Create(dto []entity.CreateProgramLearningOutcomeDto) error {
 	programmeNames := make([]string, 0, len(dto))
 	for _, plo := range dto {
 		programmeNames = append(programmeNames, plo.ProgrammeName)

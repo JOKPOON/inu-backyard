@@ -1,4 +1,4 @@
-package request
+package entity
 
 type CreateCourseLearningOutcomePayload struct {
 	Code                                string   `json:"code" validate:"required"`
