@@ -48,13 +48,11 @@ func (u programOutcomeUseCase) GetByCode(code string) (*entity.ProgramOutcome, e
 	return po, nil
 }
 
-func (u programOutcomeUseCase) Create(dto []entity.ProgramOutcome) error {
+func (u programOutcomeUseCase) Create(dto []entity.CreateProgramOutcome) error {
 	pos := make([]entity.ProgramOutcome, 0, len(dto))
 	for _, po := range dto {
-		id := ulid.Make().String()
-
 		pos = append(pos, entity.ProgramOutcome{
-			Id:          id,
+			Id:          ulid.Make().String(),
 			Code:        po.Code,
 			Name:        po.Name,
 			Description: po.Description,

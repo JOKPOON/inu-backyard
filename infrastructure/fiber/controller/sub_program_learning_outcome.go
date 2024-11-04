@@ -3,7 +3,6 @@ package controller
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/team-inu/inu-backyard/entity"
-	request "github.com/team-inu/inu-backyard/infrastructure/fiber/request"
 	"github.com/team-inu/inu-backyard/infrastructure/fiber/response"
 	"github.com/team-inu/inu-backyard/internal/validator"
 )
@@ -45,17 +44,12 @@ func (c SubProgramLearningOutcomeController) GetById(ctx *fiber.Ctx) error {
 }
 
 func (c SubProgramLearningOutcomeController) Create(ctx *fiber.Ctx) error {
-	var payload request.CreateSubProgramLearningOutcomePayload
+	var payload entity.CreateSubProgramLearningOutcomePayload
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
 		return err
 	}
 
-	subPlos := make([]entity.CreateSubProgramLearningOutcomeDto, 0, len(payload.SubProgramLearningOutcomes))
-	for _, subPlo := range payload.SubProgramLearningOutcomes {
-		subPlos = append(subPlos, entity.CreateSubProgramLearningOutcomeDto(subPlo))
-	}
-
-	err := c.ProgramLearningOutcomeUseCase.CreateSubPLO(subPlos)
+	err := c.ProgramLearningOutcomeUseCase.CreateSubPLO(payload.SubProgramLearningOutcomes)
 	if err != nil {
 		return err
 	}
@@ -64,7 +58,7 @@ func (c SubProgramLearningOutcomeController) Create(ctx *fiber.Ctx) error {
 }
 
 func (c SubProgramLearningOutcomeController) Update(ctx *fiber.Ctx) error {
-	var payload request.UpdateSubProgramLearningOutcomePayload
+	var payload entity.UpdateSubProgramLearningOutcomePayload
 
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
 		return err

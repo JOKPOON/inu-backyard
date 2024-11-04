@@ -43,9 +43,9 @@ func (u programLearningOutcomeUseCase) GetSubPLO(id string) (*entity.SubProgramL
 	return splo, nil
 }
 
-func (u programLearningOutcomeUseCase) CreateSubPLO(dto []entity.CreateSubProgramLearningOutcomeDto) error {
+func (u programLearningOutcomeUseCase) CreateSubPLO(payload []entity.CreateSubProgramLearningOutcome) error {
 	ploIds := []string{}
-	for _, subPlo := range dto {
+	for _, subPlo := range payload {
 		ploIds = append(ploIds, subPlo.ProgramLearningOutcomeId)
 	}
 
@@ -57,8 +57,8 @@ func (u programLearningOutcomeUseCase) CreateSubPLO(dto []entity.CreateSubProgra
 		return errs.New(errs.ErrCreateSubPLO, "plo ids not existed while creating sub plo %v", nonExistedPloIds)
 	}
 
-	subPlos := make([]entity.SubProgramLearningOutcome, 0, len(dto))
-	for _, subPlo := range dto {
+	subPlos := make([]entity.SubProgramLearningOutcome, 0, len(payload))
+	for _, subPlo := range payload {
 		subPlos = append(subPlos, entity.SubProgramLearningOutcome{
 			Id:                       ulid.Make().String(),
 			Code:                     subPlo.Code,

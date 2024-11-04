@@ -31,7 +31,7 @@ type ProgramLearningOutcomeUseCase interface {
 	GetSubPloByPloId(ploId string) ([]SubProgramLearningOutcome, error)
 	GetSubPloByCode(code string, programme string, year int) (*SubProgramLearningOutcome, error)
 	GetAllSubPlo() ([]SubProgramLearningOutcome, error)
-	CreateSubPLO(dto []CreateSubProgramLearningOutcomeDto) error
+	CreateSubPLO(dto []CreateSubProgramLearningOutcome) error
 	UpdateSubPLO(id string, programLearningOutcome *SubProgramLearningOutcome) error
 	DeleteSubPLO(id string) error
 	FilterNonExistedSubPLO(subPloIds []string) ([]string, error)
@@ -98,7 +98,7 @@ type CreateSubProgramLearningOutcome struct {
 	Code                     string `validate:"required" json:"code"`
 	DescriptionThai          string `validate:"required" json:"description_thai"`
 	DescriptionEng           string `json:"description_eng"`
-	ProgramLearningOutcomeId string `json:"program_learning_outcome_id"`
+	ProgramLearningOutcomeId string `validate:"required" json:"program_learning_outcome_id"`
 }
 
 type CreateSubProgramLearningOutcomePayload struct {

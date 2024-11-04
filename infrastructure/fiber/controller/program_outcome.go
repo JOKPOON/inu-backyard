@@ -3,7 +3,6 @@ package controller
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/team-inu/inu-backyard/entity"
-	request "github.com/team-inu/inu-backyard/infrastructure/fiber/request"
 	"github.com/team-inu/inu-backyard/infrastructure/fiber/response"
 	"github.com/team-inu/inu-backyard/internal/validator"
 )
@@ -45,22 +44,12 @@ func (c ProgramOutcomeController) GetById(ctx *fiber.Ctx) error {
 }
 
 func (c ProgramOutcomeController) Create(ctx *fiber.Ctx) error {
-	var payload request.CreateProgramOutcomePayload
+	var payload entity.CreateProgramOutcomePayload
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
 		return err
 	}
 
-	pos := make([]entity.ProgramOutcome, 0, len(payload.ProgramOutcomes))
-	for _, po := range payload.ProgramOutcomes {
-
-		pos = append(pos, entity.ProgramOutcome{
-			Code:        po.Code,
-			Name:        po.Name,
-			Description: po.Description,
-		})
-	}
-
-	err := c.ProgramOutcomeUseCase.Create(pos)
+	err := c.ProgramOutcomeUseCase.Create(payload.ProgramOutcomes)
 	if err != nil {
 		return err
 	}
@@ -69,7 +58,7 @@ func (c ProgramOutcomeController) Create(ctx *fiber.Ctx) error {
 }
 
 func (c ProgramOutcomeController) Update(ctx *fiber.Ctx) error {
-	var payload request.UpdateProgramOutcomePayload
+	var payload entity.UpdateProgramOutcomePayload
 
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
 		return err
