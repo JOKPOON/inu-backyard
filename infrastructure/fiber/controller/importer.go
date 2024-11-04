@@ -9,27 +9,27 @@ import (
 	"github.com/team-inu/inu-backyard/usecase"
 )
 
-type importerController struct {
-	importerUseCase usecase.ImporterUseCase
-	validator       validator.PayloadValidator
+type ImporterController struct {
+	ImporterUseCase usecase.ImporterUseCase
+	Validator       validator.PayloadValidator
 }
 
-func NewImporterController(validator validator.PayloadValidator, importerUseCase usecase.ImporterUseCase) importerController {
-	return importerController{
-		importerUseCase: importerUseCase,
-		validator:       validator,
+func NewImporterController(validator validator.PayloadValidator, importerUseCase usecase.ImporterUseCase) ImporterController {
+	return ImporterController{
+		ImporterUseCase: importerUseCase,
+		Validator:       validator,
 	}
 }
 
-func (c importerController) Import(ctx *fiber.Ctx) error {
+func (c ImporterController) Import(ctx *fiber.Ctx) error {
 	var payload request.ImportCoursePayload
-	if ok, err := c.validator.Validate(&payload, ctx); !ok {
+	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
 		return err
 	}
 
 	user := middleware.GetUserFromCtx(ctx)
 
-	err := c.importerUseCase.UpdateOrCreate(
+	err := c.ImporterUseCase.UpdateOrCreate(
 		payload.CourseId,
 		user.Id,
 		payload.StudentIds,

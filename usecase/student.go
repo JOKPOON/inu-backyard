@@ -74,7 +74,7 @@ func (u studentUseCase) CreateMany(students []entity.Student) error {
 		return errs.New(errs.ErrCreateStudent, "there are existed student id in the database %v", exitedStudentIds)
 	}
 
-	deduplicateDepartmentNames := slice.DeduplicateValues(departmentNames)
+	deduplicateDepartmentNames := slice.RemoveDuplicates(departmentNames)
 	nonExistedDepartmentNames, err := u.departmentUseCase.FilterNonExisted(deduplicateDepartmentNames)
 	if err != nil {
 		return errs.New(errs.SameCode, "cannot get non existed department while creating students")
@@ -82,7 +82,7 @@ func (u studentUseCase) CreateMany(students []entity.Student) error {
 		return errs.New(errs.ErrCreateEnrollment, "there are non exist department %v", nonExistedDepartmentNames)
 	}
 
-	deduplicateProgrammeNames := slice.DeduplicateValues(programmeNames)
+	deduplicateProgrammeNames := slice.RemoveDuplicates(programmeNames)
 	nonExistedProgrammeNames, err := u.programmeUseCase.FilterNonExisted(deduplicateProgrammeNames)
 	if err != nil {
 		return errs.New(errs.SameCode, "cannot get non existed programme while creating students")

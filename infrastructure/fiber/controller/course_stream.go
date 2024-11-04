@@ -8,20 +8,20 @@ import (
 	"github.com/team-inu/inu-backyard/internal/validator"
 )
 
-type courseStreamController struct {
+type CourseStreamController struct {
 	CourseStreamUseCase entity.CourseStreamsUseCase
 	Validator           validator.PayloadValidator
 }
 
-func NewCourseStreamController(validator validator.PayloadValidator, courseStreamUseCase entity.CourseStreamsUseCase) *courseStreamController {
-	return &courseStreamController{
+func NewCourseStreamController(validator validator.PayloadValidator, courseStreamUseCase entity.CourseStreamsUseCase) *CourseStreamController {
+	return &CourseStreamController{
 		CourseStreamUseCase: courseStreamUseCase,
 		Validator:           validator,
 	}
 }
 
 // 555
-func (c courseStreamController) Get(ctx *fiber.Ctx) error {
+func (c CourseStreamController) Get(ctx *fiber.Ctx) error {
 	var payload request.GetCourseStreamRequestPayload
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
 		return err
@@ -53,7 +53,7 @@ func (c courseStreamController) Get(ctx *fiber.Ctx) error {
 	return nil
 }
 
-func (c courseStreamController) Delete(ctx *fiber.Ctx) error {
+func (c CourseStreamController) Delete(ctx *fiber.Ctx) error {
 	id := ctx.Params("courseStreamId")
 
 	err := c.CourseStreamUseCase.Delete(id)
@@ -64,7 +64,7 @@ func (c courseStreamController) Delete(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusOK, nil)
 }
 
-func (c courseStreamController) Create(ctx *fiber.Ctx) error {
+func (c CourseStreamController) Create(ctx *fiber.Ctx) error {
 	var payload request.CreateCourseStreamRequestPayload
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
 		return err

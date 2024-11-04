@@ -13,11 +13,11 @@ import (
 )
 
 type AuthController struct {
-	config      config.AuthConfig
-	validator   validator.PayloadValidator
-	turnstile   captcha.Validator
-	authUseCase entity.AuthUseCase
-	userUseCase entity.UserUseCase
+	Config      config.AuthConfig
+	Validator   validator.PayloadValidator
+	Turnstile   captcha.Validator
+	AuthUseCase entity.AuthUseCase
+	UserUseCase entity.UserUseCase
 }
 
 func NewAuthController(
@@ -28,16 +28,16 @@ func NewAuthController(
 	userUseCase entity.UserUseCase,
 ) *AuthController {
 	return &AuthController{
-		config:      config,
-		validator:   validator,
-		turnstile:   turnstile,
-		authUseCase: authUseCase,
-		userUseCase: userUseCase,
+		Config:      config,
+		Validator:   validator,
+		Turnstile:   turnstile,
+		AuthUseCase: authUseCase,
+		UserUseCase: userUseCase,
 	}
 }
 
 func (c AuthController) Me(ctx *fiber.Ctx) error {
-	user, err := c.userUseCase.GetUserFromCtx(ctx)
+	user, err := c.UserUseCase.GetUserFromCtx(ctx)
 	if err != nil {
 		return err
 	}
@@ -51,7 +51,7 @@ func (c AuthController) Me(ctx *fiber.Ctx) error {
 
 func (c AuthController) SignIn(ctx *fiber.Ctx) error {
 	var payload entity.SignInPayload
-	if ok, err := c.validator.Validate(&payload, ctx); !ok {
+	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
 		return err
 	}
 
@@ -60,7 +60,7 @@ func (c AuthController) SignIn(ctx *fiber.Ctx) error {
 
 	cfToken := string(ctx.Request().Header.Peek("Cf-Token")[:])
 
-	isTokenValid, err := c.turnstile.Validate(cfToken, ipAddress)
+	isTokenValid, err := c.Turnstile.Validate(cfToken, ipAddress)
 	if err != nil {
 		return response.NewErrorResponse(ctx, fiber.StatusUnauthorized, errs.New(0, "cannot validate challenge token"))
 	} else if !isTokenValid {
@@ -68,7 +68,7 @@ func (c AuthController) SignIn(ctx *fiber.Ctx) error {
 
 	}
 
-	cookie, err := c.authUseCase.SignIn(payload, ipAddress, userAgent)
+	cookie, err := c.AuthUseCase.SignIn(payload, ipAddress, userAgent)
 	if err != nil {
 		return err
 	}
@@ -81,8 +81,8 @@ func (c AuthController) SignIn(ctx *fiber.Ctx) error {
 }
 
 func (c AuthController) SignOut(ctx *fiber.Ctx) error {
-	sid := ctx.Cookies(c.config.Session.CookieName)
-	cookie, err := c.authUseCase.SignOut(sid)
+	sid := ctx.Cookies(c.Config.Session.CookieName)
+	cookie, err := c.AuthUseCase.SignOut(sid)
 	if err != nil {
 		return err
 	}

@@ -50,7 +50,7 @@ func (u programmeUseCase) Create(name string) error {
 	return nil
 }
 
-func (u programmeUseCase) Update(name string, programme *entity.Programme) error {
+func (u programmeUseCase) Update(name string, programme *entity.UpdateProgrammePayload) error {
 	existProgramme, err := u.Get(name)
 	if err != nil {
 		return errs.New(errs.SameCode, "cannot get programme name %s to update", name, err)
@@ -58,7 +58,7 @@ func (u programmeUseCase) Update(name string, programme *entity.Programme) error
 		return errs.New(errs.ErrProgrammeNotFound, "cannot get programme name %s to update", name)
 	}
 
-	err = u.programmeRepo.Update(name, programme)
+	err = u.programmeRepo.Update(name, &entity.Programme{Name: programme.Name})
 	if err != nil {
 		return errs.New(errs.ErrUpdateProgramme, "cannot update programme by id %s", programme.Name, err)
 	}

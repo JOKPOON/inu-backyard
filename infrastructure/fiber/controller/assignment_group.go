@@ -7,7 +7,7 @@ import (
 	"github.com/team-inu/inu-backyard/infrastructure/fiber/response"
 )
 
-func (c assignmentController) GetGroupByCourseId(ctx *fiber.Ctx) error {
+func (c AssignmentController) GetGroupByCourseId(ctx *fiber.Ctx) error {
 	courseId := ctx.Params("courseId")
 
 	assignmentGroups, err := c.AssignmentUseCase.GetGroupByCourseId(courseId, false)
@@ -18,7 +18,7 @@ func (c assignmentController) GetGroupByCourseId(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusOK, assignmentGroups)
 }
 
-func (c assignmentController) CreateGroup(ctx *fiber.Ctx) error {
+func (c AssignmentController) CreateGroup(ctx *fiber.Ctx) error {
 	var payload entity.CreateAssignmentGroupPayload
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
 		return err
@@ -32,7 +32,7 @@ func (c assignmentController) CreateGroup(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusCreated, nil)
 }
 
-func (c assignmentController) UpdateGroup(ctx *fiber.Ctx) error {
+func (c AssignmentController) UpdateGroup(ctx *fiber.Ctx) error {
 	var payload entity.UpdateAssignmentGroupPayload
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
 		return err
@@ -48,7 +48,7 @@ func (c assignmentController) UpdateGroup(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusOK, nil)
 }
 
-func (c assignmentController) DeleteGroup(ctx *fiber.Ctx) error {
+func (c AssignmentController) DeleteGroup(ctx *fiber.Ctx) error {
 	id := ctx.Params("assignmentGroupId")
 
 	err := c.AssignmentUseCase.DeleteGroup(id)

@@ -3,25 +3,24 @@ package controller
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/team-inu/inu-backyard/entity"
-	request "github.com/team-inu/inu-backyard/infrastructure/fiber/request"
 	"github.com/team-inu/inu-backyard/infrastructure/fiber/response"
 	"github.com/team-inu/inu-backyard/internal/validator"
 )
 
-type programmeController struct {
-	programmeUseCase entity.ProgrammeUseCase
+type ProgrammeController struct {
+	ProgrammeUseCase entity.ProgrammeUseCase
 	Validator        validator.PayloadValidator
 }
 
-func NewProgrammeController(validator validator.PayloadValidator, programmeUseCase entity.ProgrammeUseCase) *programmeController {
-	return &programmeController{
-		programmeUseCase: programmeUseCase,
+func NewProgrammeController(validator validator.PayloadValidator, programmeUseCase entity.ProgrammeUseCase) *ProgrammeController {
+	return &ProgrammeController{
+		ProgrammeUseCase: programmeUseCase,
 		Validator:        validator,
 	}
 }
 
-func (c programmeController) GetAll(ctx *fiber.Ctx) error {
-	programmes, err := c.programmeUseCase.GetAll()
+func (c ProgrammeController) GetAll(ctx *fiber.Ctx) error {
+	programmes, err := c.ProgrammeUseCase.GetAll()
 	if err != nil {
 		return err
 	}
@@ -29,11 +28,10 @@ func (c programmeController) GetAll(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusOK, programmes)
 }
 
-func (c programmeController) GetByName(ctx *fiber.Ctx) error {
+func (c ProgrammeController) GetByName(ctx *fiber.Ctx) error {
 	name := ctx.Params("programmeName")
 
-	programme, err := c.programmeUseCase.Get(name)
-
+	programme, err := c.ProgrammeUseCase.Get(name)
 	if err != nil {
 		return err
 	}
@@ -45,15 +43,14 @@ func (c programmeController) GetByName(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusOK, programme)
 }
 
-func (c programmeController) Create(ctx *fiber.Ctx) error {
-	var payload request.CreateProgrammePayload
+func (c ProgrammeController) Create(ctx *fiber.Ctx) error {
+	var payload entity.CreateProgrammePayload
 
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
 		return err
 	}
 
-	err := c.programmeUseCase.Create(payload.Name)
-
+	err := c.ProgrammeUseCase.Create(payload.Name)
 	if err != nil {
 		return err
 	}
@@ -61,8 +58,8 @@ func (c programmeController) Create(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusCreated, nil)
 }
 
-func (c programmeController) Update(ctx *fiber.Ctx) error {
-	var payload request.UpdateProgrammePayload
+func (c ProgrammeController) Update(ctx *fiber.Ctx) error {
+	var payload entity.UpdateProgrammePayload
 
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
 		return err
@@ -70,10 +67,7 @@ func (c programmeController) Update(ctx *fiber.Ctx) error {
 
 	name := ctx.Params("programmeName")
 
-	err := c.programmeUseCase.Update(name, &entity.Programme{
-		Name: payload.Name,
-	})
-
+	err := c.ProgrammeUseCase.Update(name, &payload)
 	if err != nil {
 		return err
 	}
@@ -81,11 +75,10 @@ func (c programmeController) Update(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusOK, nil)
 }
 
-func (c programmeController) Delete(ctx *fiber.Ctx) error {
+func (c ProgrammeController) Delete(ctx *fiber.Ctx) error {
 	name := ctx.Params("programmeName")
 
-	err := c.programmeUseCase.Delete(name)
-
+	err := c.ProgrammeUseCase.Delete(name)
 	if err != nil {
 		return err
 	}

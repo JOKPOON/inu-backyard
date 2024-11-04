@@ -7,19 +7,19 @@ import (
 	"github.com/team-inu/inu-backyard/internal/validator"
 )
 
-type assignmentController struct {
+type AssignmentController struct {
 	AssignmentUseCase entity.AssignmentUseCase
 	Validator         validator.PayloadValidator
 }
 
-func NewAssignmentController(validator validator.PayloadValidator, assignmentUseCase entity.AssignmentUseCase) *assignmentController {
-	return &assignmentController{
+func NewAssignmentController(validator validator.PayloadValidator, assignmentUseCase entity.AssignmentUseCase) *AssignmentController {
+	return &AssignmentController{
 		AssignmentUseCase: assignmentUseCase,
 		Validator:         validator,
 	}
 }
 
-func (c assignmentController) GetById(ctx *fiber.Ctx) error {
+func (c AssignmentController) GetById(ctx *fiber.Ctx) error {
 	assignmentId := ctx.Params("assignmentId")
 
 	assignment, err := c.AssignmentUseCase.GetById(assignmentId)
@@ -35,7 +35,7 @@ func (c assignmentController) GetById(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusOK, assignment)
 }
 
-func (c assignmentController) GetByCourseId(ctx *fiber.Ctx) error {
+func (c AssignmentController) GetByCourseId(ctx *fiber.Ctx) error {
 	var payload entity.GetAssignmentsByCourseIdPayload
 
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
@@ -51,7 +51,7 @@ func (c assignmentController) GetByCourseId(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusOK, assignments)
 }
 
-func (c assignmentController) GetAll(ctx *fiber.Ctx) error {
+func (c AssignmentController) GetAll(ctx *fiber.Ctx) error {
 	assignments, err := c.AssignmentUseCase.GetAll()
 	if err != nil {
 		return err
@@ -60,7 +60,7 @@ func (c assignmentController) GetAll(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusOK, assignments)
 }
 
-func (c assignmentController) GetByGroupId(ctx *fiber.Ctx) error {
+func (c AssignmentController) GetByGroupId(ctx *fiber.Ctx) error {
 	assignmentGroupId := ctx.Params("assignmentGroupId")
 
 	assignmentGroups, err := c.AssignmentUseCase.GetByGroupId(assignmentGroupId)
@@ -71,7 +71,7 @@ func (c assignmentController) GetByGroupId(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusOK, assignmentGroups)
 }
 
-func (c assignmentController) Create(ctx *fiber.Ctx) error {
+func (c AssignmentController) Create(ctx *fiber.Ctx) error {
 	var payload entity.CreateAssignmentPayload
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
 		return err
@@ -85,7 +85,7 @@ func (c assignmentController) Create(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusCreated, nil)
 }
 
-func (c assignmentController) Update(ctx *fiber.Ctx) error {
+func (c AssignmentController) Update(ctx *fiber.Ctx) error {
 	var payload entity.UpdateAssignmentPayload
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
 		return err
@@ -101,7 +101,7 @@ func (c assignmentController) Update(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusOK, nil)
 }
 
-func (c assignmentController) Delete(ctx *fiber.Ctx) error {
+func (c AssignmentController) Delete(ctx *fiber.Ctx) error {
 	id := ctx.Params("assignmentId")
 
 	err := c.AssignmentUseCase.Delete(id)
@@ -113,7 +113,7 @@ func (c assignmentController) Delete(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusOK, nil)
 }
 
-func (c assignmentController) CreateLinkCourseLearningOutcome(ctx *fiber.Ctx) error {
+func (c AssignmentController) CreateLinkCourseLearningOutcome(ctx *fiber.Ctx) error {
 	assignmentId := ctx.Params("assignmentId")
 	var payload entity.CreateLinkCourseLearningOutcomePayload
 
@@ -129,7 +129,7 @@ func (c assignmentController) CreateLinkCourseLearningOutcome(ctx *fiber.Ctx) er
 	return response.NewSuccessResponse(ctx, fiber.StatusCreated, nil)
 }
 
-func (c assignmentController) DeleteLinkCourseLearningOutcome(ctx *fiber.Ctx) error {
+func (c AssignmentController) DeleteLinkCourseLearningOutcome(ctx *fiber.Ctx) error {
 	assignmentId := ctx.Params("assignmentId")
 	cloId := ctx.Params("cloId")
 

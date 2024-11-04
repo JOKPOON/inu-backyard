@@ -8,20 +8,20 @@ import (
 	"github.com/team-inu/inu-backyard/internal/validator"
 )
 
-type programOutcomeController struct {
-	programOutcomeUseCase entity.ProgramOutcomeUseCase
+type ProgramOutcomeController struct {
+	ProgramOutcomeUseCase entity.ProgramOutcomeUseCase
 	Validator             validator.PayloadValidator
 }
 
-func NewProgramOutcomeController(validator validator.PayloadValidator, programOutcomeUseCase entity.ProgramOutcomeUseCase) *programOutcomeController {
-	return &programOutcomeController{
-		programOutcomeUseCase: programOutcomeUseCase,
+func NewProgramOutcomeController(validator validator.PayloadValidator, programOutcomeUseCase entity.ProgramOutcomeUseCase) *ProgramOutcomeController {
+	return &ProgramOutcomeController{
+		ProgramOutcomeUseCase: programOutcomeUseCase,
 		Validator:             validator,
 	}
 }
 
-func (c programOutcomeController) GetAll(ctx *fiber.Ctx) error {
-	pos, err := c.programOutcomeUseCase.GetAll()
+func (c ProgramOutcomeController) GetAll(ctx *fiber.Ctx) error {
+	pos, err := c.ProgramOutcomeUseCase.GetAll()
 	if err != nil {
 		return err
 	}
@@ -29,10 +29,10 @@ func (c programOutcomeController) GetAll(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusOK, pos)
 }
 
-func (c programOutcomeController) GetById(ctx *fiber.Ctx) error {
+func (c ProgramOutcomeController) GetById(ctx *fiber.Ctx) error {
 	poId := ctx.Params("poId")
 
-	po, err := c.programOutcomeUseCase.GetById(poId)
+	po, err := c.ProgramOutcomeUseCase.GetById(poId)
 	if err != nil {
 		return err
 	}
@@ -44,7 +44,7 @@ func (c programOutcomeController) GetById(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusOK, po)
 }
 
-func (c programOutcomeController) Create(ctx *fiber.Ctx) error {
+func (c ProgramOutcomeController) Create(ctx *fiber.Ctx) error {
 	var payload request.CreateProgramOutcomePayload
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
 		return err
@@ -60,7 +60,7 @@ func (c programOutcomeController) Create(ctx *fiber.Ctx) error {
 		})
 	}
 
-	err := c.programOutcomeUseCase.Create(pos)
+	err := c.ProgramOutcomeUseCase.Create(pos)
 	if err != nil {
 		return err
 	}
@@ -68,7 +68,7 @@ func (c programOutcomeController) Create(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusCreated, nil)
 }
 
-func (c programOutcomeController) Update(ctx *fiber.Ctx) error {
+func (c ProgramOutcomeController) Update(ctx *fiber.Ctx) error {
 	var payload request.UpdateProgramOutcomePayload
 
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
@@ -77,7 +77,7 @@ func (c programOutcomeController) Update(ctx *fiber.Ctx) error {
 
 	id := ctx.Params("poId")
 
-	err := c.programOutcomeUseCase.Update(id, &entity.ProgramOutcome{
+	err := c.ProgramOutcomeUseCase.Update(id, &entity.ProgramOutcome{
 		Code:        payload.Code,
 		Name:        payload.Name,
 		Description: payload.Description,
@@ -90,15 +90,15 @@ func (c programOutcomeController) Update(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusOK, nil)
 }
 
-func (c programOutcomeController) Delete(ctx *fiber.Ctx) error {
+func (c ProgramOutcomeController) Delete(ctx *fiber.Ctx) error {
 	poId := ctx.Params("poId")
 
-	_, err := c.programOutcomeUseCase.GetById(poId)
+	_, err := c.ProgramOutcomeUseCase.GetById(poId)
 	if err != nil {
 		return err
 	}
 
-	err = c.programOutcomeUseCase.Delete(poId)
+	err = c.ProgramOutcomeUseCase.Delete(poId)
 	if err != nil {
 		return err
 	}

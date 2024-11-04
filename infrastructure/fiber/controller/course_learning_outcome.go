@@ -7,20 +7,20 @@ import (
 	"github.com/team-inu/inu-backyard/internal/validator"
 )
 
-type courseLearningOutcomeController struct {
-	courseLearningOutcomeUseCase entity.CourseLearningOutcomeUseCase
+type CourseLearningOutcomeController struct {
+	CourseLearningOutcomeUseCase entity.CourseLearningOutcomeUseCase
 	Validator                    validator.PayloadValidator
 }
 
-func NewCourseLearningOutcomeController(validator validator.PayloadValidator, courseLearningOutcomeUseCase entity.CourseLearningOutcomeUseCase) *courseLearningOutcomeController {
-	return &courseLearningOutcomeController{
-		courseLearningOutcomeUseCase: courseLearningOutcomeUseCase,
+func NewCourseLearningOutcomeController(validator validator.PayloadValidator, courseLearningOutcomeUseCase entity.CourseLearningOutcomeUseCase) *CourseLearningOutcomeController {
+	return &CourseLearningOutcomeController{
+		CourseLearningOutcomeUseCase: courseLearningOutcomeUseCase,
 		Validator:                    validator,
 	}
 }
 
-func (c courseLearningOutcomeController) GetAll(ctx *fiber.Ctx) error {
-	clos, err := c.courseLearningOutcomeUseCase.GetAll()
+func (c CourseLearningOutcomeController) GetAll(ctx *fiber.Ctx) error {
+	clos, err := c.CourseLearningOutcomeUseCase.GetAll()
 	if err != nil {
 		return err
 	}
@@ -29,10 +29,10 @@ func (c courseLearningOutcomeController) GetAll(ctx *fiber.Ctx) error {
 
 }
 
-func (c courseLearningOutcomeController) GetById(ctx *fiber.Ctx) error {
+func (c CourseLearningOutcomeController) GetById(ctx *fiber.Ctx) error {
 	cloId := ctx.Params("cloId")
 
-	clo, err := c.courseLearningOutcomeUseCase.GetById(cloId)
+	clo, err := c.CourseLearningOutcomeUseCase.GetById(cloId)
 	if err != nil {
 		return err
 	}
@@ -44,10 +44,10 @@ func (c courseLearningOutcomeController) GetById(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusOK, clo)
 }
 
-func (c courseLearningOutcomeController) GetByCourseId(ctx *fiber.Ctx) error {
+func (c CourseLearningOutcomeController) GetByCourseId(ctx *fiber.Ctx) error {
 	courseId := ctx.Params("courseId")
 
-	clos, err := c.courseLearningOutcomeUseCase.GetByCourseId(courseId)
+	clos, err := c.CourseLearningOutcomeUseCase.GetByCourseId(courseId)
 	if err != nil {
 		return err
 	}
@@ -55,13 +55,13 @@ func (c courseLearningOutcomeController) GetByCourseId(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusOK, clos)
 }
 
-func (c courseLearningOutcomeController) Create(ctx *fiber.Ctx) error {
+func (c CourseLearningOutcomeController) Create(ctx *fiber.Ctx) error {
 	var payload entity.CreateCourseLearningOutcomePayload
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
 		return err
 	}
 
-	err := c.courseLearningOutcomeUseCase.Create(payload)
+	err := c.CourseLearningOutcomeUseCase.Create(payload)
 	if err != nil {
 		return err
 	}
@@ -69,7 +69,7 @@ func (c courseLearningOutcomeController) Create(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusCreated, nil)
 }
 
-func (c courseLearningOutcomeController) CreateLinkSubProgramLearningOutcome(ctx *fiber.Ctx) error {
+func (c CourseLearningOutcomeController) CreateLinkSubProgramLearningOutcome(ctx *fiber.Ctx) error {
 	cloId := ctx.Params("cloId")
 	var payload entity.CreateLinkSubProgramLearningOutcomePayload
 
@@ -77,7 +77,7 @@ func (c courseLearningOutcomeController) CreateLinkSubProgramLearningOutcome(ctx
 		return err
 	}
 
-	err := c.courseLearningOutcomeUseCase.CreateLinkSubProgramLearningOutcome(cloId, payload.SubProgramLearningOutcomeId)
+	err := c.CourseLearningOutcomeUseCase.CreateLinkSubProgramLearningOutcome(cloId, payload.SubProgramLearningOutcomeId)
 	if err != nil {
 		return err
 	}
@@ -85,7 +85,7 @@ func (c courseLearningOutcomeController) CreateLinkSubProgramLearningOutcome(ctx
 	return response.NewSuccessResponse(ctx, fiber.StatusCreated, nil)
 }
 
-func (c courseLearningOutcomeController) Update(ctx *fiber.Ctx) error {
+func (c CourseLearningOutcomeController) Update(ctx *fiber.Ctx) error {
 	var payload entity.UpdateCourseLearningOutcomePayload
 
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
@@ -94,7 +94,7 @@ func (c courseLearningOutcomeController) Update(ctx *fiber.Ctx) error {
 
 	id := ctx.Params("cloId")
 
-	err := c.courseLearningOutcomeUseCase.Update(id, payload)
+	err := c.CourseLearningOutcomeUseCase.Update(id, payload)
 
 	if err != nil {
 		return err
@@ -103,10 +103,10 @@ func (c courseLearningOutcomeController) Update(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusOK, nil)
 }
 
-func (c courseLearningOutcomeController) Delete(ctx *fiber.Ctx) error {
+func (c CourseLearningOutcomeController) Delete(ctx *fiber.Ctx) error {
 	cloId := ctx.Params("cloId")
 
-	err := c.courseLearningOutcomeUseCase.Delete(cloId)
+	err := c.CourseLearningOutcomeUseCase.Delete(cloId)
 	if err != nil {
 		return err
 	}
@@ -114,11 +114,11 @@ func (c courseLearningOutcomeController) Delete(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusOK, nil)
 }
 
-func (c courseLearningOutcomeController) DeleteLinkSubProgramLearningOutcome(ctx *fiber.Ctx) error {
+func (c CourseLearningOutcomeController) DeleteLinkSubProgramLearningOutcome(ctx *fiber.Ctx) error {
 	cloId := ctx.Params("cloId")
 	subPloId := ctx.Params("sploId")
 
-	err := c.courseLearningOutcomeUseCase.DeleteLinkSubProgramLearningOutcome(cloId, subPloId)
+	err := c.CourseLearningOutcomeUseCase.DeleteLinkSubProgramLearningOutcome(cloId, subPloId)
 	if err != nil {
 		return err
 	}

@@ -7,19 +7,19 @@ import (
 	"github.com/team-inu/inu-backyard/internal/validator"
 )
 
-type semesterController struct {
+type SemesterController struct {
 	SemesterUseCase entity.SemesterUseCase
 	Validator       validator.PayloadValidator
 }
 
-func NewSemesterController(validator validator.PayloadValidator, semesterUseCase entity.SemesterUseCase) *semesterController {
-	return &semesterController{
+func NewSemesterController(validator validator.PayloadValidator, semesterUseCase entity.SemesterUseCase) *SemesterController {
+	return &SemesterController{
 		SemesterUseCase: semesterUseCase,
 		Validator:       validator,
 	}
 }
 
-func (c semesterController) GetAll(ctx *fiber.Ctx) error {
+func (c SemesterController) GetAll(ctx *fiber.Ctx) error {
 	semesters, err := c.SemesterUseCase.GetAll()
 	if err != nil {
 		return err
@@ -28,7 +28,7 @@ func (c semesterController) GetAll(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusOK, semesters)
 }
 
-func (c semesterController) GetById(ctx *fiber.Ctx) error {
+func (c SemesterController) GetById(ctx *fiber.Ctx) error {
 	semesterId := ctx.Params("semesterId")
 
 	semester, err := c.SemesterUseCase.GetById(semesterId)
@@ -43,7 +43,7 @@ func (c semesterController) GetById(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusOK, semester)
 }
 
-func (c semesterController) Create(ctx *fiber.Ctx) error {
+func (c SemesterController) Create(ctx *fiber.Ctx) error {
 	var payload entity.CreateSemesterPayload
 
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
@@ -58,7 +58,7 @@ func (c semesterController) Create(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusCreated, nil)
 }
 
-func (c semesterController) Update(ctx *fiber.Ctx) error {
+func (c SemesterController) Update(ctx *fiber.Ctx) error {
 	semesterId := ctx.Params("semesterId")
 	var payload entity.UpdateSemesterPayload
 
@@ -78,7 +78,7 @@ func (c semesterController) Update(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusOK, nil)
 }
 
-func (c semesterController) Delete(ctx *fiber.Ctx) error {
+func (c SemesterController) Delete(ctx *fiber.Ctx) error {
 	semesterId := ctx.Params("semesterId")
 
 	err := c.SemesterUseCase.Delete(semesterId)

@@ -8,29 +8,29 @@ import (
 	"github.com/team-inu/inu-backyard/internal/validator"
 )
 
-type gradeController struct {
-	gradeUseCase entity.GradeUseCase
+type GradeController struct {
+	GradeUseCase entity.GradeUseCase
 	Validator    validator.PayloadValidator
 }
 
-func NewGradeController(validator validator.PayloadValidator, gradeUseCase entity.GradeUseCase) *gradeController {
-	return &gradeController{
-		gradeUseCase: gradeUseCase,
+func NewGradeController(validator validator.PayloadValidator, gradeUseCase entity.GradeUseCase) *GradeController {
+	return &GradeController{
+		GradeUseCase: gradeUseCase,
 		Validator:    validator,
 	}
 }
 
-func (c gradeController) GetAll(ctx *fiber.Ctx) error {
+func (c GradeController) GetAll(ctx *fiber.Ctx) error {
 	studentId := ctx.Query("studentId")
 	if studentId != "" {
-		grade, err := c.gradeUseCase.GetByStudentId(studentId)
+		grade, err := c.GradeUseCase.GetByStudentId(studentId)
 		if err != nil {
 			return err
 		}
 		return response.NewSuccessResponse(ctx, fiber.StatusOK, grade)
 	}
 
-	grades, err := c.gradeUseCase.GetAll()
+	grades, err := c.GradeUseCase.GetAll()
 	if err != nil {
 		return err
 	}
@@ -38,10 +38,10 @@ func (c gradeController) GetAll(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusOK, grades)
 }
 
-func (c gradeController) GetById(ctx *fiber.Ctx) error {
+func (c GradeController) GetById(ctx *fiber.Ctx) error {
 	gradeId := ctx.Params("gradeId")
 
-	grade, err := c.gradeUseCase.GetById(gradeId)
+	grade, err := c.GradeUseCase.GetById(gradeId)
 
 	if err != nil {
 		return err
@@ -54,14 +54,14 @@ func (c gradeController) GetById(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusOK, grade)
 }
 
-func (c gradeController) Create(ctx *fiber.Ctx) error {
+func (c GradeController) Create(ctx *fiber.Ctx) error {
 	var payload request.CreateGradePayload
 
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
 		return err
 	}
 
-	err := c.gradeUseCase.Create(payload.StudentId, payload.Year, payload.Grade)
+	err := c.GradeUseCase.Create(payload.StudentId, payload.Year, payload.Grade)
 
 	if err != nil {
 		return err
@@ -70,14 +70,14 @@ func (c gradeController) Create(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusCreated, nil)
 }
 
-func (c gradeController) CreateMany(ctx *fiber.Ctx) error {
+func (c GradeController) CreateMany(ctx *fiber.Ctx) error {
 	var payload request.CreateManyGradesPayload
 
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
 		return err
 	}
 
-	err := c.gradeUseCase.CreateMany(payload.StudentGrade, payload.Year, payload.SemesterSequence)
+	err := c.GradeUseCase.CreateMany(payload.StudentGrade, payload.Year, payload.SemesterSequence)
 	if err != nil {
 		return err
 	}
@@ -85,7 +85,7 @@ func (c gradeController) CreateMany(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusCreated, nil)
 }
 
-func (c gradeController) Update(ctx *fiber.Ctx) error {
+func (c GradeController) Update(ctx *fiber.Ctx) error {
 	var payload request.UpdateGradePayload
 
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
@@ -94,7 +94,7 @@ func (c gradeController) Update(ctx *fiber.Ctx) error {
 
 	id := ctx.Params("gradeId")
 
-	err := c.gradeUseCase.Update(id, &entity.Grade{
+	err := c.GradeUseCase.Update(id, &entity.Grade{
 		StudentId: payload.StudentId,
 		Grade:     payload.Grade,
 	})
@@ -106,10 +106,10 @@ func (c gradeController) Update(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusOK, nil)
 }
 
-func (c gradeController) Delete(ctx *fiber.Ctx) error {
+func (c GradeController) Delete(ctx *fiber.Ctx) error {
 	id := ctx.Params("gradeId")
 
-	err := c.gradeUseCase.Delete(id)
+	err := c.GradeUseCase.Delete(id)
 
 	if err != nil {
 		return err

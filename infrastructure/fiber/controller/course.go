@@ -9,30 +9,30 @@ import (
 	"github.com/team-inu/inu-backyard/usecase"
 )
 
-type courseController struct {
-	courseUseCase   entity.CourseUseCase
-	importerUseCase usecase.ImporterUseCase
+type CourseController struct {
+	CourseUseCase   entity.CourseUseCase
+	ImporterUseCase usecase.ImporterUseCase
 	Validator       validator.PayloadValidator
 }
 
-func NewCourseController(validator validator.PayloadValidator, courseUseCase entity.CourseUseCase, importerUseCase usecase.ImporterUseCase) *courseController {
-	return &courseController{
-		courseUseCase:   courseUseCase,
-		importerUseCase: importerUseCase,
+func NewCourseController(validator validator.PayloadValidator, courseUseCase entity.CourseUseCase, importerUseCase usecase.ImporterUseCase) *CourseController {
+	return &CourseController{
+		CourseUseCase:   courseUseCase,
+		ImporterUseCase: importerUseCase,
 		Validator:       validator,
 	}
 }
 
-func (c courseController) GetAll(ctx *fiber.Ctx) error {
+func (c CourseController) GetAll(ctx *fiber.Ctx) error {
 	user := middleware.GetUserFromCtx(ctx)
 
 	var courses []entity.Course
 	var err error
 
 	if user.IsRoles([]entity.UserRole{entity.UserRoleHeadOfCurriculum, entity.UserRoleModerator, entity.UserRoleTABEEManager}) {
-		courses, err = c.courseUseCase.GetAll()
+		courses, err = c.CourseUseCase.GetAll()
 	} else {
-		courses, err = c.courseUseCase.GetByUserId(user.Id)
+		courses, err = c.CourseUseCase.GetByUserId(user.Id)
 	}
 
 	if err != nil {
@@ -42,10 +42,10 @@ func (c courseController) GetAll(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusOK, courses)
 }
 
-func (c courseController) GetById(ctx *fiber.Ctx) error {
+func (c CourseController) GetById(ctx *fiber.Ctx) error {
 	courseId := ctx.Params("courseId")
 
-	course, err := c.courseUseCase.GetById(courseId)
+	course, err := c.CourseUseCase.GetById(courseId)
 	if err != nil {
 		return err
 	}
@@ -57,10 +57,10 @@ func (c courseController) GetById(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusOK, course)
 }
 
-func (c courseController) GetByUserId(ctx *fiber.Ctx) error {
+func (c CourseController) GetByUserId(ctx *fiber.Ctx) error {
 	userId := ctx.Params("userId")
 
-	courses, err := c.courseUseCase.GetByUserId(userId)
+	courses, err := c.CourseUseCase.GetByUserId(userId)
 	if err != nil {
 		return err
 	}
@@ -68,7 +68,7 @@ func (c courseController) GetByUserId(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusOK, courses)
 }
 
-func (c courseController) Create(ctx *fiber.Ctx) error {
+func (c CourseController) Create(ctx *fiber.Ctx) error {
 	var payload entity.CreateCoursePayload
 
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
@@ -77,7 +77,7 @@ func (c courseController) Create(ctx *fiber.Ctx) error {
 
 	user := middleware.GetUserFromCtx(ctx)
 
-	err := c.courseUseCase.Create(
+	err := c.CourseUseCase.Create(
 		*user,
 		payload,
 	)
@@ -88,7 +88,7 @@ func (c courseController) Create(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusCreated, nil)
 }
 
-func (c courseController) Update(ctx *fiber.Ctx) error {
+func (c CourseController) Update(ctx *fiber.Ctx) error {
 	var payload entity.UpdateCoursePayload
 
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
@@ -99,7 +99,7 @@ func (c courseController) Update(ctx *fiber.Ctx) error {
 
 	user := middleware.GetUserFromCtx(ctx)
 
-	err := c.courseUseCase.Update(
+	err := c.CourseUseCase.Update(
 		*user,
 		id,
 		payload.Name,
@@ -120,12 +120,12 @@ func (c courseController) Update(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusOK, nil)
 }
 
-func (c courseController) Delete(ctx *fiber.Ctx) error {
+func (c CourseController) Delete(ctx *fiber.Ctx) error {
 	courseId := ctx.Params("courseId")
 
 	user := middleware.GetUserFromCtx(ctx)
 
-	err := c.importerUseCase.UpdateOrCreate(
+	err := c.ImporterUseCase.UpdateOrCreate(
 		courseId,
 		user.Id,
 		make([]string, 0),

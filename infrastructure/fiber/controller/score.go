@@ -9,19 +9,19 @@ import (
 	"github.com/team-inu/inu-backyard/internal/validator"
 )
 
-type scoreController struct {
+type ScoreController struct {
 	ScoreUseCase entity.ScoreUseCase
 	Validator    validator.PayloadValidator
 }
 
-func NewScoreController(validator validator.PayloadValidator, scoreUseCase entity.ScoreUseCase) *scoreController {
-	return &scoreController{
+func NewScoreController(validator validator.PayloadValidator, scoreUseCase entity.ScoreUseCase) *ScoreController {
+	return &ScoreController{
 		ScoreUseCase: scoreUseCase,
 		Validator:    validator,
 	}
 }
 
-func (c scoreController) GetAll(ctx *fiber.Ctx) error {
+func (c ScoreController) GetAll(ctx *fiber.Ctx) error {
 	user := middleware.GetUserFromCtx(ctx)
 
 	var scores []entity.Score
@@ -40,7 +40,7 @@ func (c scoreController) GetAll(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusOK, scores)
 }
 
-func (c scoreController) GetById(ctx *fiber.Ctx) error {
+func (c ScoreController) GetById(ctx *fiber.Ctx) error {
 	scoreId := ctx.Params("scoreId")
 
 	score, err := c.ScoreUseCase.GetById(scoreId)
@@ -55,7 +55,7 @@ func (c scoreController) GetById(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusOK, score)
 }
 
-func (c scoreController) GetByAssignmentId(ctx *fiber.Ctx) error {
+func (c ScoreController) GetByAssignmentId(ctx *fiber.Ctx) error {
 	assignmentId := ctx.Params("assignmentId")
 
 	assignmentScore, err := c.ScoreUseCase.GetByAssignmentId(assignmentId)
@@ -66,7 +66,7 @@ func (c scoreController) GetByAssignmentId(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusOK, assignmentScore)
 }
 
-func (c scoreController) CreateMany(ctx *fiber.Ctx) error {
+func (c ScoreController) CreateMany(ctx *fiber.Ctx) error {
 	var payload request.BulkCreateScoreRequestPayload
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
 		return err
@@ -87,7 +87,7 @@ func (c scoreController) CreateMany(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusCreated, nil)
 }
 
-func (c scoreController) Delete(ctx *fiber.Ctx) error {
+func (c ScoreController) Delete(ctx *fiber.Ctx) error {
 	scoreId := ctx.Params("scoreId")
 
 	_, err := c.ScoreUseCase.GetById(scoreId)
@@ -105,7 +105,7 @@ func (c scoreController) Delete(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusOK, nil)
 }
 
-func (c scoreController) Update(ctx *fiber.Ctx) error {
+func (c ScoreController) Update(ctx *fiber.Ctx) error {
 	scoreId := ctx.Params("scoreId")
 
 	_, err := c.ScoreUseCase.GetById(scoreId)

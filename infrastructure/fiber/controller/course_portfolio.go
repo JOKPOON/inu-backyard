@@ -10,65 +10,65 @@ import (
 	"github.com/team-inu/inu-backyard/internal/validator"
 )
 
-type coursePortfolioController struct {
-	coursePortfolioUseCase entity.CoursePortfolioUseCase
+type CoursePortfolioController struct {
+	CoursePortfolioUseCase entity.CoursePortfolioUseCase
 	Validator              validator.PayloadValidator
 }
 
-func NewCoursePortfolioController(validator validator.PayloadValidator, coursePortfolioUseCase entity.CoursePortfolioUseCase) *coursePortfolioController {
-	return &coursePortfolioController{
-		coursePortfolioUseCase: coursePortfolioUseCase,
+func NewCoursePortfolioController(validator validator.PayloadValidator, coursePortfolioUseCase entity.CoursePortfolioUseCase) *CoursePortfolioController {
+	return &CoursePortfolioController{
+		CoursePortfolioUseCase: coursePortfolioUseCase,
 		Validator:              validator,
 	}
 }
 
-func (c coursePortfolioController) Generate(ctx *fiber.Ctx) error {
+func (c CoursePortfolioController) Generate(ctx *fiber.Ctx) error {
 	courseId := ctx.Params("courseId")
 
-	coursePortfolio, err := c.coursePortfolioUseCase.Generate(courseId)
+	coursePortfolio, err := c.CoursePortfolioUseCase.Generate(courseId)
 	if err != nil {
 		return err
 	}
 	return response.NewSuccessResponse(ctx, fiber.StatusOK, coursePortfolio)
 }
 
-func (c coursePortfolioController) GetCloPassingStudentsByCourseId(ctx *fiber.Ctx) error {
+func (c CoursePortfolioController) GetCloPassingStudentsByCourseId(ctx *fiber.Ctx) error {
 	courseId := ctx.Params("courseId")
 
-	records, err := c.coursePortfolioUseCase.GetCloPassingStudentsByCourseId(courseId)
+	records, err := c.CoursePortfolioUseCase.GetCloPassingStudentsByCourseId(courseId)
 	if err != nil {
 		return err
 	}
 	return response.NewSuccessResponse(ctx, fiber.StatusOK, records)
 }
 
-func (c coursePortfolioController) GetStudentOutcomeStatusByCourseId(ctx *fiber.Ctx) error {
+func (c CoursePortfolioController) GetStudentOutcomeStatusByCourseId(ctx *fiber.Ctx) error {
 	courseId := ctx.Params("courseId")
 
-	records, err := c.coursePortfolioUseCase.GetStudentOutcomesStatusByCourseId(courseId)
+	records, err := c.CoursePortfolioUseCase.GetStudentOutcomesStatusByCourseId(courseId)
 	if err != nil {
 		return err
 	}
 	return response.NewSuccessResponse(ctx, fiber.StatusOK, records)
 }
 
-func (c coursePortfolioController) GetAllProgramLearningOutcomeCourses(ctx *fiber.Ctx) error {
-	records, err := c.coursePortfolioUseCase.GetAllProgramLearningOutcomeCourses()
+func (c CoursePortfolioController) GetAllProgramLearningOutcomeCourses(ctx *fiber.Ctx) error {
+	records, err := c.CoursePortfolioUseCase.GetAllProgramLearningOutcomeCourses()
 	if err != nil {
 		return err
 	}
 	return response.NewSuccessResponse(ctx, fiber.StatusOK, records)
 }
 
-func (c coursePortfolioController) GetAllProgramOutcomeCourses(ctx *fiber.Ctx) error {
-	records, err := c.coursePortfolioUseCase.GetAllProgramOutcomeCourses()
+func (c CoursePortfolioController) GetAllProgramOutcomeCourses(ctx *fiber.Ctx) error {
+	records, err := c.CoursePortfolioUseCase.GetAllProgramOutcomeCourses()
 	if err != nil {
 		return err
 	}
 	return response.NewSuccessResponse(ctx, fiber.StatusOK, records)
 }
 
-func (c coursePortfolioController) Update(ctx *fiber.Ctx) error {
+func (c CoursePortfolioController) Update(ctx *fiber.Ctx) error {
 	var payload request.SaveCoursePortfolioPayload
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
 		return err
@@ -77,7 +77,7 @@ func (c coursePortfolioController) Update(ctx *fiber.Ctx) error {
 	courseId := ctx.Params("courseId")
 
 	fmt.Println(payload)
-	err := c.coursePortfolioUseCase.UpdateCoursePortfolio(courseId, payload.CourseSummary, payload.CourseDevelopment)
+	err := c.CoursePortfolioUseCase.UpdateCoursePortfolio(courseId, payload.CourseSummary, payload.CourseDevelopment)
 	if err != nil {
 		return err
 	}
@@ -85,10 +85,10 @@ func (c coursePortfolioController) Update(ctx *fiber.Ctx) error {
 	return nil
 }
 
-func (c coursePortfolioController) GetOutcomesByStudentId(ctx *fiber.Ctx) error {
+func (c CoursePortfolioController) GetOutcomesByStudentId(ctx *fiber.Ctx) error {
 	studentId := ctx.Params("studentId")
 
-	records, err := c.coursePortfolioUseCase.GetOutcomesByStudentId(studentId)
+	records, err := c.CoursePortfolioUseCase.GetOutcomesByStudentId(studentId)
 	if err != nil {
 		return err
 	}

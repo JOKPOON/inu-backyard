@@ -49,7 +49,7 @@ func (u programLearningOutcomeUseCase) CreateSubPLO(dto []entity.CreateSubProgra
 		ploIds = append(ploIds, subPlo.ProgramLearningOutcomeId)
 	}
 
-	ploIds = slice.DeduplicateValues(ploIds)
+	ploIds = slice.RemoveDuplicates(ploIds)
 	nonExistedPloIds, err := u.FilterNonExisted(ploIds)
 	if err != nil {
 		return errs.New(errs.SameCode, "cannot find non existing plo id while creating sub plo")

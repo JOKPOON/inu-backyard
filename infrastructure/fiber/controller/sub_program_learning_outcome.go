@@ -8,20 +8,20 @@ import (
 	"github.com/team-inu/inu-backyard/internal/validator"
 )
 
-type subProgramLearningOutcomeController struct {
-	programLearningOutcomeUseCase entity.ProgramLearningOutcomeUseCase
+type SubProgramLearningOutcomeController struct {
+	ProgramLearningOutcomeUseCase entity.ProgramLearningOutcomeUseCase
 	Validator                     validator.PayloadValidator
 }
 
-func NewSubProgramLearningOutcomeController(validator validator.PayloadValidator, programLearningOutcomeUseCase entity.ProgramLearningOutcomeUseCase) *subProgramLearningOutcomeController {
-	return &subProgramLearningOutcomeController{
-		programLearningOutcomeUseCase: programLearningOutcomeUseCase,
+func NewSubProgramLearningOutcomeController(validator validator.PayloadValidator, programLearningOutcomeUseCase entity.ProgramLearningOutcomeUseCase) *SubProgramLearningOutcomeController {
+	return &SubProgramLearningOutcomeController{
+		ProgramLearningOutcomeUseCase: programLearningOutcomeUseCase,
 		Validator:                     validator,
 	}
 }
 
-func (c subProgramLearningOutcomeController) GetAll(ctx *fiber.Ctx) error {
-	splos, err := c.programLearningOutcomeUseCase.GetAllSubPlo()
+func (c SubProgramLearningOutcomeController) GetAll(ctx *fiber.Ctx) error {
+	splos, err := c.ProgramLearningOutcomeUseCase.GetAllSubPlo()
 	if err != nil {
 		return err
 	}
@@ -29,10 +29,10 @@ func (c subProgramLearningOutcomeController) GetAll(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusOK, splos)
 }
 
-func (c subProgramLearningOutcomeController) GetById(ctx *fiber.Ctx) error {
+func (c SubProgramLearningOutcomeController) GetById(ctx *fiber.Ctx) error {
 	sploId := ctx.Params("sploId")
 
-	splo, err := c.programLearningOutcomeUseCase.GetSubPLO(sploId)
+	splo, err := c.ProgramLearningOutcomeUseCase.GetSubPLO(sploId)
 	if err != nil {
 		return err
 	}
@@ -44,7 +44,7 @@ func (c subProgramLearningOutcomeController) GetById(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusOK, splo)
 }
 
-func (c subProgramLearningOutcomeController) Create(ctx *fiber.Ctx) error {
+func (c SubProgramLearningOutcomeController) Create(ctx *fiber.Ctx) error {
 	var payload request.CreateSubProgramLearningOutcomePayload
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
 		return err
@@ -55,7 +55,7 @@ func (c subProgramLearningOutcomeController) Create(ctx *fiber.Ctx) error {
 		subPlos = append(subPlos, entity.CreateSubProgramLearningOutcomeDto(subPlo))
 	}
 
-	err := c.programLearningOutcomeUseCase.CreateSubPLO(subPlos)
+	err := c.ProgramLearningOutcomeUseCase.CreateSubPLO(subPlos)
 	if err != nil {
 		return err
 	}
@@ -63,7 +63,7 @@ func (c subProgramLearningOutcomeController) Create(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusCreated, nil)
 }
 
-func (c subProgramLearningOutcomeController) Update(ctx *fiber.Ctx) error {
+func (c SubProgramLearningOutcomeController) Update(ctx *fiber.Ctx) error {
 	var payload request.UpdateSubProgramLearningOutcomePayload
 
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
@@ -72,7 +72,7 @@ func (c subProgramLearningOutcomeController) Update(ctx *fiber.Ctx) error {
 
 	id := ctx.Params("sploId")
 
-	err := c.programLearningOutcomeUseCase.UpdateSubPLO(id, &entity.SubProgramLearningOutcome{
+	err := c.ProgramLearningOutcomeUseCase.UpdateSubPLO(id, &entity.SubProgramLearningOutcome{
 		Code:                     payload.SubProgramLearningOutcomes[0].Code,
 		DescriptionThai:          payload.SubProgramLearningOutcomes[0].DescriptionThai,
 		DescriptionEng:           *payload.SubProgramLearningOutcomes[0].DescriptionEng,
@@ -86,10 +86,10 @@ func (c subProgramLearningOutcomeController) Update(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusOK, nil)
 }
 
-func (c subProgramLearningOutcomeController) Delete(ctx *fiber.Ctx) error {
+func (c SubProgramLearningOutcomeController) Delete(ctx *fiber.Ctx) error {
 	sploId := ctx.Params("sploId")
 
-	err := c.programLearningOutcomeUseCase.DeleteSubPLO(sploId)
+	err := c.ProgramLearningOutcomeUseCase.DeleteSubPLO(sploId)
 	if err != nil {
 		return err
 	}

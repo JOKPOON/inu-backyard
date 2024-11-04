@@ -22,7 +22,7 @@ type ProgramLearningOutcomeRepository interface {
 type ProgramLearningOutcomeUseCase interface {
 	GetAll() ([]ProgramLearningOutcome, error)
 	GetById(id string) (*ProgramLearningOutcome, error)
-	Create(dto []CreateProgramLearningOutcomeDto) error
+	Create(dto []CreateProgramLearningOutcome) error
 	Update(id string, programLearningOutcome *ProgramLearningOutcome) error
 	Delete(id string) error
 	FilterNonExisted(ids []string) ([]string, error)
@@ -74,12 +74,12 @@ type CreateProgramLearningOutcomeDto struct {
 }
 
 type CreateProgramLearningOutcome struct {
-	Code                       string                           `validate:"required" json:"code"`
-	DescriptionThai            string                           `validate:"required" json:"description_thai"`
-	DescriptionEng             string                           `json:"description_eng"`
-	ProgramYear                int                              `validate:"required" json:"program_year"`
-	ProgrammeName              string                           `validate:"required" json:"programme_name"`
-	SubProgramLearningOutcomes []CreateSubProgramLeaningOutcome `validate:"dive" json:"sub_program_learning_outcomes"`
+	Code                       string                            `validate:"required" json:"code"`
+	DescriptionThai            string                            `validate:"required" json:"description_thai"`
+	DescriptionEng             string                            `json:"description_eng"`
+	ProgramYear                int                               `validate:"required" json:"program_year"`
+	ProgrammeName              string                            `validate:"required" json:"programme_name"`
+	SubProgramLearningOutcomes []CreateSubProgramLearningOutcome `validate:"dive" json:"sub_program_learning_outcomes"`
 }
 
 type CreateProgramLearningOutcomePayload struct {
@@ -94,7 +94,7 @@ type UpdateProgramLearningOutcomePayload struct {
 	ProgrammeName   string  `json:"programme_name" validate:"required"`
 }
 
-type CreateSubProgramLeaningOutcome struct {
+type CreateSubProgramLearningOutcome struct {
 	Code                     string `validate:"required" json:"code"`
 	DescriptionThai          string `validate:"required" json:"description_thai"`
 	DescriptionEng           string `json:"description_eng"`
@@ -102,7 +102,7 @@ type CreateSubProgramLeaningOutcome struct {
 }
 
 type CreateSubProgramLearningOutcomePayload struct {
-	SubProgramLearningOutcomes []CreateSubProgramLeaningOutcome `json:"sub_program_learning_outcomes" validate:"required,dive"`
+	SubProgramLearningOutcomes []CreateSubProgramLearningOutcome `json:"sub_program_learning_outcomes" validate:"required,dive"`
 }
 
 type UpdateSubProgramLearningOutcome struct {

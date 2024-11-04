@@ -3,25 +3,24 @@ package controller
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/team-inu/inu-backyard/entity"
-	request "github.com/team-inu/inu-backyard/infrastructure/fiber/request"
 	"github.com/team-inu/inu-backyard/infrastructure/fiber/response"
 	"github.com/team-inu/inu-backyard/internal/validator"
 )
 
-type programLearningOutcomeController struct {
-	programLearningOutcomeUseCase entity.ProgramLearningOutcomeUseCase
+type ProgramLearningOutcomeController struct {
+	ProgramLearningOutcomeUseCase entity.ProgramLearningOutcomeUseCase
 	Validator                     validator.PayloadValidator
 }
 
-func NewProgramLearningOutcomeController(validator validator.PayloadValidator, programLearningOutcomeUseCase entity.ProgramLearningOutcomeUseCase) *programLearningOutcomeController {
-	return &programLearningOutcomeController{
-		programLearningOutcomeUseCase: programLearningOutcomeUseCase,
+func NewProgramLearningOutcomeController(validator validator.PayloadValidator, programLearningOutcomeUseCase entity.ProgramLearningOutcomeUseCase) *ProgramLearningOutcomeController {
+	return &ProgramLearningOutcomeController{
+		ProgramLearningOutcomeUseCase: programLearningOutcomeUseCase,
 		Validator:                     validator,
 	}
 }
 
-func (c programLearningOutcomeController) GetAll(ctx *fiber.Ctx) error {
-	plos, err := c.programLearningOutcomeUseCase.GetAll()
+func (c ProgramLearningOutcomeController) GetAll(ctx *fiber.Ctx) error {
+	plos, err := c.ProgramLearningOutcomeUseCase.GetAll()
 	if err != nil {
 		return err
 	}
@@ -29,10 +28,10 @@ func (c programLearningOutcomeController) GetAll(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusOK, plos)
 }
 
-func (c programLearningOutcomeController) GetById(ctx *fiber.Ctx) error {
+func (c ProgramLearningOutcomeController) GetById(ctx *fiber.Ctx) error {
 	ploId := ctx.Params("ploId")
 
-	plo, err := c.programLearningOutcomeUseCase.GetById(ploId)
+	plo, err := c.ProgramLearningOutcomeUseCase.GetById(ploId)
 	if err != nil {
 		return err
 	}
@@ -44,30 +43,13 @@ func (c programLearningOutcomeController) GetById(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusOK, plo)
 }
 
-func (c programLearningOutcomeController) Create(ctx *fiber.Ctx) error {
-	var payload request.CreateProgramLearningOutcomePayload
+func (c ProgramLearningOutcomeController) Create(ctx *fiber.Ctx) error {
+	var payload entity.CreateProgramLearningOutcomePayload
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
 		return err
 	}
 
-	plos := make([]entity.CreateProgramLearningOutcomeDto, 0, len(payload.ProgramLearningOutcomes))
-	for _, plo := range payload.ProgramLearningOutcomes {
-		subPlos := make([]entity.CreateSubProgramLearningOutcomeDto, 0, len(payload.ProgramLearningOutcomes))
-		for _, subPlo := range plo.SubProgramLearningOutcomes {
-			subPlos = append(subPlos, entity.CreateSubProgramLearningOutcomeDto(subPlo))
-		}
-
-		plos = append(plos, entity.CreateProgramLearningOutcomeDto{
-			Code:                       plo.Code,
-			DescriptionThai:            plo.DescriptionThai,
-			DescriptionEng:             plo.DescriptionEng,
-			ProgramYear:                plo.ProgramYear,
-			ProgrammeName:              plo.ProgrammeName,
-			SubProgramLearningOutcomes: subPlos,
-		})
-	}
-
-	err := c.programLearningOutcomeUseCase.Create(plos)
+	err := c.ProgramLearningOutcomeUseCase.Create(payload.ProgramLearningOutcomes)
 	if err != nil {
 		return err
 	}
@@ -75,8 +57,8 @@ func (c programLearningOutcomeController) Create(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusCreated, nil)
 }
 
-func (c programLearningOutcomeController) Update(ctx *fiber.Ctx) error {
-	var payload request.UpdateProgramLearningOutcomePayload
+func (c ProgramLearningOutcomeController) Update(ctx *fiber.Ctx) error {
+	var payload entity.UpdateProgramLearningOutcomePayload
 
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
 		return err
@@ -84,7 +66,7 @@ func (c programLearningOutcomeController) Update(ctx *fiber.Ctx) error {
 
 	id := ctx.Params("ploId")
 
-	err := c.programLearningOutcomeUseCase.Update(id, &entity.ProgramLearningOutcome{
+	err := c.ProgramLearningOutcomeUseCase.Update(id, &entity.ProgramLearningOutcome{
 		Code:            payload.Code,
 		DescriptionThai: payload.DescriptionThai,
 		DescriptionEng:  *payload.DescriptionEng, // because description eng can be empty string
@@ -99,10 +81,10 @@ func (c programLearningOutcomeController) Update(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusOK, nil)
 }
 
-func (c programLearningOutcomeController) Delete(ctx *fiber.Ctx) error {
+func (c ProgramLearningOutcomeController) Delete(ctx *fiber.Ctx) error {
 	ploId := ctx.Params("ploId")
 
-	err := c.programLearningOutcomeUseCase.Delete(ploId)
+	err := c.ProgramLearningOutcomeUseCase.Delete(ploId)
 	if err != nil {
 		return err
 	}

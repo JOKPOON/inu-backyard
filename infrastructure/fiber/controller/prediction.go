@@ -8,25 +8,25 @@ import (
 	"github.com/team-inu/inu-backyard/internal/validator"
 )
 
-type predictionController struct {
-	predictionUseCase entity.PredictionUseCase
+type PredictionController struct {
+	PredictionUseCase entity.PredictionUseCase
 	Validator         validator.PayloadValidator
 }
 
-func NewPredictionController(validator validator.PayloadValidator, predictionUseCase entity.PredictionUseCase) *predictionController {
-	return &predictionController{
-		predictionUseCase: predictionUseCase,
+func NewPredictionController(validator validator.PayloadValidator, predictionUseCase entity.PredictionUseCase) *PredictionController {
+	return &PredictionController{
+		PredictionUseCase: predictionUseCase,
 		Validator:         validator,
 	}
 }
 
-func (c predictionController) Predict(ctx *fiber.Ctx) error {
+func (c PredictionController) Predict(ctx *fiber.Ctx) error {
 	var payload request.PredictPayload
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
 		return err
 	}
 
-	prediction, err := c.predictionUseCase.CreatePrediction(entity.PredictionRequirements{
+	prediction, err := c.PredictionUseCase.CreatePrediction(entity.PredictionRequirements{
 		ProgrammeName: payload.ProgrammeName,
 		OldGPAX:       payload.GPAX,
 		MathGPA:       payload.MathGPA,

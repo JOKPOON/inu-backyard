@@ -40,13 +40,13 @@ func (u programLearningOutcomeUseCase) GetById(id string) (*entity.ProgramLearni
 	return plo, nil
 }
 
-func (u programLearningOutcomeUseCase) Create(dto []entity.CreateProgramLearningOutcomeDto) error {
-	programmeNames := make([]string, 0, len(dto))
-	for _, plo := range dto {
+func (u programLearningOutcomeUseCase) Create(payload []entity.CreateProgramLearningOutcome) error {
+	programmeNames := make([]string, 0, len(payload))
+	for _, plo := range payload {
 		programmeNames = append(programmeNames, plo.ProgrammeName)
 	}
 
-	programmeNames = slice.DeduplicateValues(programmeNames)
+	programmeNames = slice.RemoveDuplicates(programmeNames)
 	nonExistedProgrammes, err := u.programmeUseCase.FilterNonExisted(programmeNames)
 	if err != nil {
 		return errs.New(errs.SameCode, "cannot validate existed programmes while creating plo")
@@ -54,10 +54,10 @@ func (u programLearningOutcomeUseCase) Create(dto []entity.CreateProgramLearning
 		return errs.New(errs.ErrCreateCLO, "there are non existed programme %v while creating plo", nonExistedProgrammes)
 	}
 
-	plos := make([]entity.ProgramLearningOutcome, 0, len(dto))
+	plos := make([]entity.ProgramLearningOutcome, 0, len(payload))
 	subPlos := make([]entity.SubProgramLearningOutcome, 0)
 
-	for _, plo := range dto {
+	for _, plo := range payload {
 		id := ulid.Make().String()
 
 		plos = append(plos, entity.ProgramLearningOutcome{

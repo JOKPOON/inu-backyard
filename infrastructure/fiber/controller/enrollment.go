@@ -8,19 +8,19 @@ import (
 	"github.com/team-inu/inu-backyard/internal/validator"
 )
 
-type enrollmentController struct {
+type EnrollmentController struct {
 	EnrollmentUseCase entity.EnrollmentUseCase
 	Validator         validator.PayloadValidator
 }
 
-func NewEnrollmentController(validator validator.PayloadValidator, enrollmentUseCase entity.EnrollmentUseCase) *enrollmentController {
-	return &enrollmentController{
+func NewEnrollmentController(validator validator.PayloadValidator, enrollmentUseCase entity.EnrollmentUseCase) *EnrollmentController {
+	return &EnrollmentController{
 		EnrollmentUseCase: enrollmentUseCase,
 		Validator:         validator,
 	}
 }
 
-func (c enrollmentController) GetAll(ctx *fiber.Ctx) error {
+func (c EnrollmentController) GetAll(ctx *fiber.Ctx) error {
 	enrollments, err := c.EnrollmentUseCase.GetAll()
 	if err != nil {
 		return err
@@ -29,7 +29,7 @@ func (c enrollmentController) GetAll(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusOK, enrollments)
 }
 
-func (c enrollmentController) GetById(ctx *fiber.Ctx) error {
+func (c EnrollmentController) GetById(ctx *fiber.Ctx) error {
 	enrollmentId := ctx.Params("enrollmentId")
 
 	enrollment, err := c.EnrollmentUseCase.GetById(enrollmentId)
@@ -45,7 +45,7 @@ func (c enrollmentController) GetById(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusOK, enrollment)
 }
 
-func (c enrollmentController) GetByCourseId(ctx *fiber.Ctx) error {
+func (c EnrollmentController) GetByCourseId(ctx *fiber.Ctx) error {
 	enrollmentId := ctx.Params("courseId")
 
 	enrollments, err := c.EnrollmentUseCase.GetByCourseId(enrollmentId)
@@ -57,7 +57,7 @@ func (c enrollmentController) GetByCourseId(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusOK, enrollments)
 }
 
-func (c enrollmentController) Create(ctx *fiber.Ctx) error {
+func (c EnrollmentController) Create(ctx *fiber.Ctx) error {
 	var payload request.CreateEnrollmentsPayload
 
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
@@ -72,7 +72,7 @@ func (c enrollmentController) Create(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusCreated, nil)
 }
 
-func (c enrollmentController) Update(ctx *fiber.Ctx) error {
+func (c EnrollmentController) Update(ctx *fiber.Ctx) error {
 	enrollmentId := ctx.Params("enrollmentId")
 
 	var payload request.UpdateEnrollmentPayload
@@ -89,7 +89,7 @@ func (c enrollmentController) Update(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusOK, nil)
 }
 
-func (c enrollmentController) Delete(ctx *fiber.Ctx) error {
+func (c EnrollmentController) Delete(ctx *fiber.Ctx) error {
 	enrollmentId := ctx.Params("enrollmentId")
 
 	err := c.EnrollmentUseCase.Delete(enrollmentId)

@@ -7,22 +7,22 @@ import (
 	"github.com/team-inu/inu-backyard/internal/validator"
 )
 
-type userController struct {
-	userUseCase entity.UserUseCase
-	authUseCase entity.AuthUseCase
+type UserController struct {
+	UserUseCase entity.UserUseCase
+	AuthUseCase entity.AuthUseCase
 	Validator   validator.PayloadValidator
 }
 
-func NewUserController(validator validator.PayloadValidator, userUseCase entity.UserUseCase, authUseCase entity.AuthUseCase) *userController {
-	return &userController{
-		userUseCase: userUseCase,
-		authUseCase: authUseCase,
+func NewUserController(validator validator.PayloadValidator, userUseCase entity.UserUseCase, authUseCase entity.AuthUseCase) *UserController {
+	return &UserController{
+		UserUseCase: userUseCase,
+		AuthUseCase: authUseCase,
 		Validator:   validator,
 	}
 }
 
-func (c userController) GetAll(ctx *fiber.Ctx) error {
-	users, err := c.userUseCase.GetAll()
+func (c UserController) GetAll(ctx *fiber.Ctx) error {
+	users, err := c.UserUseCase.GetAll()
 	if err != nil {
 		return err
 	}
@@ -30,10 +30,10 @@ func (c userController) GetAll(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusOK, users)
 }
 
-func (c userController) GetById(ctx *fiber.Ctx) error {
+func (c UserController) GetById(ctx *fiber.Ctx) error {
 	userId := ctx.Params("userId")
 
-	user, err := c.userUseCase.GetById(userId)
+	user, err := c.UserUseCase.GetById(userId)
 	if err != nil {
 		return err
 	}
@@ -45,7 +45,7 @@ func (c userController) GetById(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusOK, user)
 }
 
-func (c userController) Create(ctx *fiber.Ctx) error {
+func (c UserController) Create(ctx *fiber.Ctx) error {
 	var payload entity.CreateUserPayload
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
 		return err
@@ -56,7 +56,7 @@ func (c userController) Create(ctx *fiber.Ctx) error {
 	// 	return response.NewErrorResponse(ctx, fiber.StatusUnauthorized, nil)
 	// }
 
-	err := c.userUseCase.Create(payload)
+	err := c.UserUseCase.Create(payload)
 	if err != nil {
 		return err
 	}
@@ -64,7 +64,7 @@ func (c userController) Create(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusCreated, nil)
 }
 
-func (c userController) CreateMany(ctx *fiber.Ctx) error {
+func (c UserController) CreateMany(ctx *fiber.Ctx) error {
 	var payload entity.CreateBulkUserPayload
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
 		return err
@@ -82,7 +82,7 @@ func (c userController) CreateMany(ctx *fiber.Ctx) error {
 		})
 	}
 
-	err := c.userUseCase.CreateMany(newUsers)
+	err := c.UserUseCase.CreateMany(newUsers)
 	if err != nil {
 		return err
 	}
@@ -90,7 +90,7 @@ func (c userController) CreateMany(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusCreated, nil)
 }
 
-func (c userController) Update(ctx *fiber.Ctx) error {
+func (c UserController) Update(ctx *fiber.Ctx) error {
 	var payload entity.UpdateUserPayload
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
 		return err
@@ -98,12 +98,12 @@ func (c userController) Update(ctx *fiber.Ctx) error {
 
 	targetUserId := ctx.Params("userId")
 
-	err := c.userUseCase.CheckUserRole(ctx, targetUserId, entity.UserRoleHeadOfCurriculum)
+	err := c.UserUseCase.CheckUserRole(ctx, targetUserId, entity.UserRoleHeadOfCurriculum)
 	if err != nil {
 		return err
 	}
 
-	err = c.userUseCase.Update(targetUserId, &entity.User{
+	err = c.UserUseCase.Update(targetUserId, &entity.User{
 		FirstName: payload.FirstName,
 		LastName:  payload.LastName,
 		Email:     payload.Email,
@@ -116,15 +116,15 @@ func (c userController) Update(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusOK, nil)
 }
 
-func (c userController) Delete(ctx *fiber.Ctx) error {
+func (c UserController) Delete(ctx *fiber.Ctx) error {
 	targetUserId := ctx.Params("userId")
 
-	err := c.userUseCase.CheckUserRole(ctx, targetUserId, entity.UserRoleHeadOfCurriculum)
+	err := c.UserUseCase.CheckUserRole(ctx, targetUserId, entity.UserRoleHeadOfCurriculum)
 	if err != nil {
 		return err
 	}
 
-	err = c.userUseCase.Delete(targetUserId)
+	err = c.UserUseCase.Delete(targetUserId)
 	if err != nil {
 		return err
 	}
@@ -132,7 +132,7 @@ func (c userController) Delete(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusOK, nil)
 }
 
-func (c userController) ChangePassword(ctx *fiber.Ctx) error {
+func (c UserController) ChangePassword(ctx *fiber.Ctx) error {
 	var payload entity.ChangePasswordPayload
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
 		return err
@@ -140,12 +140,12 @@ func (c userController) ChangePassword(ctx *fiber.Ctx) error {
 
 	targetUserId := ctx.Params("userId")
 
-	err := c.userUseCase.CheckUserRole(ctx, targetUserId, entity.UserRoleHeadOfCurriculum)
+	err := c.UserUseCase.CheckUserRole(ctx, targetUserId, entity.UserRoleHeadOfCurriculum)
 	if err != nil {
 		return err
 	}
 
-	err = c.authUseCase.ChangePassword(targetUserId, payload.OldPassword, payload.NewPassword)
+	err = c.AuthUseCase.ChangePassword(targetUserId, payload.OldPassword, payload.NewPassword)
 	if err != nil {
 		return err
 	}

@@ -24,21 +24,18 @@ func GetDuplicateValue(values []string) []string {
 	isDuplicateByValue := make(map[string]bool)
 
 	for _, value := range values {
-		_, found := isDuplicateByValue[value]
-
-		if !found {
+		if isDuplicateByValue[value] {
+			duplicatedValues = append(duplicatedValues, value)
+		} else {
 			isDuplicateByValue[value] = true
-			continue
 		}
-
-		duplicatedValues = append(duplicatedValues, value)
 	}
 
 	return duplicatedValues
 }
 
-func DeduplicateValues(values []string) []string {
-	deduplicateValues := []string{}
+func RemoveDuplicates(values []string) []string {
+	uniqueValues := []string{}
 	isDuplicateByValue := make(map[string]bool)
 
 	for _, value := range values {
@@ -46,10 +43,9 @@ func DeduplicateValues(values []string) []string {
 
 		if !found {
 			isDuplicateByValue[value] = true
-			deduplicateValues = append(deduplicateValues, value)
-			continue
+			uniqueValues = append(uniqueValues, value)
 		}
 	}
 
-	return deduplicateValues
+	return uniqueValues
 }
