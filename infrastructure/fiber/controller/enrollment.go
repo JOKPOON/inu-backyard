@@ -3,7 +3,6 @@ package controller
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/team-inu/inu-backyard/entity"
-	request "github.com/team-inu/inu-backyard/infrastructure/fiber/request"
 	"github.com/team-inu/inu-backyard/infrastructure/fiber/response"
 	"github.com/team-inu/inu-backyard/internal/validator"
 )
@@ -33,7 +32,6 @@ func (c EnrollmentController) GetById(ctx *fiber.Ctx) error {
 	enrollmentId := ctx.Params("enrollmentId")
 
 	enrollment, err := c.EnrollmentUseCase.GetById(enrollmentId)
-
 	if err != nil {
 		return err
 	}
@@ -49,7 +47,6 @@ func (c EnrollmentController) GetByCourseId(ctx *fiber.Ctx) error {
 	enrollmentId := ctx.Params("courseId")
 
 	enrollments, err := c.EnrollmentUseCase.GetByCourseId(enrollmentId)
-
 	if err != nil {
 		return err
 	}
@@ -58,13 +55,13 @@ func (c EnrollmentController) GetByCourseId(ctx *fiber.Ctx) error {
 }
 
 func (c EnrollmentController) Create(ctx *fiber.Ctx) error {
-	var payload request.CreateEnrollmentsPayload
+	var payload entity.CreateEnrollmentsPayload
 
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
 		return err
 	}
 
-	err := c.EnrollmentUseCase.CreateMany(payload.CourseId, payload.Status, payload.StudentIds)
+	err := c.EnrollmentUseCase.CreateMany(payload)
 	if err != nil {
 		return err
 	}
@@ -75,7 +72,7 @@ func (c EnrollmentController) Create(ctx *fiber.Ctx) error {
 func (c EnrollmentController) Update(ctx *fiber.Ctx) error {
 	enrollmentId := ctx.Params("enrollmentId")
 
-	var payload request.UpdateEnrollmentPayload
+	var payload entity.UpdateEnrollmentPayload
 
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
 		return err

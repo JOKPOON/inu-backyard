@@ -1,32 +1,5 @@
 package entity
 
-type Score struct {
-	Id           string  `json:"id" gorm:"primaryKey;type:char(255)"`
-	Score        float64 ` json:"score"`
-	StudentId    string  `json:"studentId"`
-	UserId       string  `json:"userId"`
-	AssignmentId string  `json:"assignmentId"`
-
-	Email     string `json:"email" gorm:"->;-:migration"`
-	FirstName string `json:"firstName" gorm:"->;-:migration"`
-	LastName  string `json:"lastName" gorm:"->;-:migration"`
-
-	Student    Student    `json:"-"`
-	User       User       `json:"-"`
-	Assignment Assignment `json:"-"`
-}
-
-type StudentScore struct {
-	StudentId string   `json:"studentId" validate:"required"`
-	Score     *float64 `json:"score" validate:"required"`
-}
-
-type AssignmentScore struct {
-	Scores          []Score `json:"scores"`
-	SubmittedAmount int     `json:"submittedAmount"`
-	EnrolledAmount  int     `json:"enrolledAmount"`
-}
-
 type ScoreRepository interface {
 	GetAll() ([]Score, error)
 	GetById(id string) (*Score, error)
@@ -50,4 +23,46 @@ type ScoreUseCase interface {
 	Update(user User, scoreId string, score float64) error
 	Delete(user User, id string) error
 	FilterSubmittedScoreStudents(assignmentId string, studentIds []string) ([]string, error)
+}
+type Score struct {
+	Id           string  `json:"id" gorm:"primaryKey;type:char(255)"`
+	Score        float64 `json:"score"`
+	StudentId    string  `json:"student_id"`
+	UserId       string  `json:"user_id"`
+	AssignmentId string  `json:"assignment_id"`
+
+	Email     string `json:"email" gorm:"->;-:migration"`
+	FirstName string `json:"first_name" gorm:"->;-:migration"`
+	LastName  string `json:"last_name" gorm:"->;-:migration"`
+
+	Student    Student    `json:"-"`
+	User       User       `json:"-"`
+	Assignment Assignment `json:"-"`
+}
+
+type AssignmentScore struct {
+	Scores          []Score `json:"scores"`
+	SubmittedAmount int     `json:"submitted_amount"`
+	EnrolledAmount  int     `json:"enrolled_amount"`
+}
+
+type CreateScoreRequestPayload struct {
+	StudentId    string  `json:"student_id" validate:"required"`
+	Score        float64 `json:"score" validate:"required"`
+	UserId       string  `json:"user_id" validate:"required"`
+	AssignmentId string  `json:"assignment_id" validate:"required"`
+}
+
+type StudentScore struct {
+	StudentId string   `json:"student_id" validate:"required"`
+	Score     *float64 `json:"score" validate:"required"`
+}
+
+type BulkCreateScoreRequestPayload struct {
+	StudentScores []StudentScore `json:"student_scores" validate:"dive"`
+	AssignmentId  string         `json:"assignment_id" validate:"required"`
+}
+
+type UpdateScoreRequestPayload struct {
+	Score float64 `json:"score" validate:"required"`
 }

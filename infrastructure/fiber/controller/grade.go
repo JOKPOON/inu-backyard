@@ -3,7 +3,6 @@ package controller
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/team-inu/inu-backyard/entity"
-	request "github.com/team-inu/inu-backyard/infrastructure/fiber/request"
 	"github.com/team-inu/inu-backyard/infrastructure/fiber/response"
 	"github.com/team-inu/inu-backyard/internal/validator"
 )
@@ -42,7 +41,6 @@ func (c GradeController) GetById(ctx *fiber.Ctx) error {
 	gradeId := ctx.Params("gradeId")
 
 	grade, err := c.GradeUseCase.GetById(gradeId)
-
 	if err != nil {
 		return err
 	}
@@ -55,14 +53,13 @@ func (c GradeController) GetById(ctx *fiber.Ctx) error {
 }
 
 func (c GradeController) Create(ctx *fiber.Ctx) error {
-	var payload request.CreateGradePayload
+	var payload entity.CreateGradePayload
 
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
 		return err
 	}
 
 	err := c.GradeUseCase.Create(payload.StudentId, payload.Year, payload.Grade)
-
 	if err != nil {
 		return err
 	}
@@ -71,7 +68,7 @@ func (c GradeController) Create(ctx *fiber.Ctx) error {
 }
 
 func (c GradeController) CreateMany(ctx *fiber.Ctx) error {
-	var payload request.CreateManyGradesPayload
+	var payload entity.CreateManyGradesPayload
 
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
 		return err
@@ -86,7 +83,7 @@ func (c GradeController) CreateMany(ctx *fiber.Ctx) error {
 }
 
 func (c GradeController) Update(ctx *fiber.Ctx) error {
-	var payload request.UpdateGradePayload
+	var payload entity.UpdateGradePayload
 
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
 		return err
@@ -98,7 +95,6 @@ func (c GradeController) Update(ctx *fiber.Ctx) error {
 		StudentId: payload.StudentId,
 		Grade:     payload.Grade,
 	})
-
 	if err != nil {
 		return err
 	}

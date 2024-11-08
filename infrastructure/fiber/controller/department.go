@@ -3,7 +3,6 @@ package controller
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/team-inu/inu-backyard/entity"
-	request "github.com/team-inu/inu-backyard/infrastructure/fiber/request"
 	"github.com/team-inu/inu-backyard/infrastructure/fiber/response"
 	"github.com/team-inu/inu-backyard/internal/validator"
 )
@@ -21,7 +20,7 @@ func NewDepartmentController(validator validator.PayloadValidator, departmentUse
 }
 
 func (c DepartmentController) Create(ctx *fiber.Ctx) error {
-	var payload request.CreateDepartmentRequestPayload
+	var payload entity.CreateDepartmentRequestPayload
 
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
 		return err
@@ -31,7 +30,6 @@ func (c DepartmentController) Create(ctx *fiber.Ctx) error {
 		Name:        payload.Name,
 		FacultyName: payload.FacultyName,
 	})
-
 	if err != nil {
 		return err
 	}
@@ -43,13 +41,11 @@ func (c DepartmentController) Delete(ctx *fiber.Ctx) error {
 	departmentName := ctx.Params("departmentName")
 
 	_, err := c.DepartmentUseCase.GetByName(departmentName)
-
 	if err != nil {
 		return err
 	}
 
 	err = c.DepartmentUseCase.Delete(departmentName)
-
 	if err != nil {
 		return err
 	}
@@ -70,7 +66,6 @@ func (c DepartmentController) GetByName(ctx *fiber.Ctx) error {
 	departmentName := ctx.Params("departmentName")
 
 	department, err := c.DepartmentUseCase.GetByName(departmentName)
-
 	if err != nil {
 		return err
 	}
@@ -86,12 +81,11 @@ func (c DepartmentController) Update(ctx *fiber.Ctx) error {
 	departmentName := ctx.Params("departmentName")
 
 	_, err := c.DepartmentUseCase.GetByName(departmentName)
-
 	if err != nil {
 		return err
 	}
 
-	var payload request.UpdateDepartmentRequestPayload
+	var payload entity.UpdateDepartmentRequestPayload
 
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
 		return err
@@ -101,7 +95,6 @@ func (c DepartmentController) Update(ctx *fiber.Ctx) error {
 		Name:        departmentName,
 		FacultyName: payload.FacultyName,
 	}, payload.NewName)
-
 	if err != nil {
 		return err
 	}

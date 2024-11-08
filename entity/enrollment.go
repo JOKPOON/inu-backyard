@@ -7,19 +7,6 @@ const (
 	EnrollmentStatusWithdraw EnrollmentStatus = "WITHDRAW"
 )
 
-type Enrollment struct {
-	Id        string           `json:"id" gorm:"primaryKey;type:char(255)"`
-	CourseId  string           `json:"courseId"`
-	StudentId string           `json:"studentId"`
-	Status    EnrollmentStatus `json:"status" gorm:"type:enum('ENROLL','WITHDRAW')"`
-	Email     string           `json:"email" gorm:"->;-:migration"`
-	FirstName string           `json:"firstName" gorm:"->;-:migration"`
-	LastName  string           `json:"lastName" gorm:"->;-:migration"`
-
-	Course  Course  `json:"-"`
-	Student Student `json:"-"`
-}
-
 type EnrollmentRepository interface {
 	GetAll() ([]Enrollment, error)
 	GetById(id string) (*Enrollment, error)
@@ -38,8 +25,31 @@ type EnrollmentUseCase interface {
 	GetById(id string) (*Enrollment, error)
 	GetByCourseId(courseId string) ([]Enrollment, error)
 	GetByStudentId(studentId string) ([]Enrollment, error)
-	CreateMany(courseId string, status EnrollmentStatus, studentIds []string) error
+	CreateMany(CreateEnrollmentsPayload) error
 	Update(id string, status EnrollmentStatus) error
 	Delete(id string) error
 	FilterJoinedStudent(studentIds []string, courseId string, withStatus *EnrollmentStatus) ([]string, error)
+}
+
+type Enrollment struct {
+	Id        string           `json:"id" gorm:"primaryKey;type:char(255)"`
+	CourseId  string           `json:"course_id"`
+	StudentId string           `json:"student_id"`
+	Status    EnrollmentStatus `json:"status" gorm:"type:enum('ENROLL','WITHDRAW')"`
+	Email     string           `json:"email" gorm:"->;-:migration"`
+	FirstName string           `json:"first_name" gorm:"->;-:migration"`
+	LastName  string           `json:"last_name" gorm:"->;-:migration"`
+
+	Course  Course  `json:"-"`
+	Student Student `json:"-"`
+}
+
+type CreateEnrollmentsPayload struct {
+	CourseId   string           `json:"course_id" validate:"required"`
+	StudentIds []string         `json:"student_ids" validate:"required"`
+	Status     EnrollmentStatus `json:"status" validate:"required"`
+}
+
+type UpdateEnrollmentPayload struct {
+	Status EnrollmentStatus `json:"status" validate:"required"`
 }

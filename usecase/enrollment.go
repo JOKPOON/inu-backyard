@@ -71,27 +71,27 @@ func (u enrollmentUseCase) GetByStudentId(studentId string) ([]entity.Enrollment
 	return enrollment, nil
 }
 
-func (u enrollmentUseCase) CreateMany(courseId string, status entity.EnrollmentStatus, studentIds []string) error {
-	course, err := u.courseUseCase.GetById(courseId)
+func (u enrollmentUseCase) CreateMany(payload entity.CreateEnrollmentsPayload) error {
+	course, err := u.courseUseCase.GetById(payload.CourseId)
 	if err != nil {
-		return errs.New(errs.SameCode, "cannot get course id %s while creating enrollment", courseId, err)
+		return errs.New(errs.SameCode, "cannot get course id %s while creating enrollment", payload.CourseId, err)
 	} else if course == nil {
-		return errs.New(errs.ErrCourseNotFound, "course id %s not found while creating enrollment", courseId)
+		return errs.New(errs.ErrCourseNotFound, "course id %s not found while creating enrollment", payload.CourseId)
 	}
 
-	duplicateStudentIds := slice.GetDuplicateValue(studentIds)
+	duplicateStudentIds := slice.GetDuplicateValue(payload.StudentIds)
 	if len(duplicateStudentIds) != 0 {
 		return errs.New(errs.ErrCreateEnrollment, "duplicate student ids %v", duplicateStudentIds)
 	}
 
-	nonExistedStudentIds, err := u.studentUseCase.FilterNonExisted(studentIds)
+	nonExistedStudentIds, err := u.studentUseCase.FilterNonExisted(payload.StudentIds)
 	if err != nil {
 		return errs.New(errs.SameCode, "cannot get non existed student ids while creating enrollment")
 	} else if len(nonExistedStudentIds) != 0 {
 		return errs.New(errs.ErrCreateEnrollment, "there are non exist student ids %v", nonExistedStudentIds)
 	}
 
-	joinedStudentIds, err := u.FilterJoinedStudent(studentIds, courseId, nil)
+	joinedStudentIds, err := u.FilterJoinedStudent(payload.StudentIds, payload.CourseId, nil)
 	if err != nil {
 		return errs.New(errs.SameCode, "cannot get existed student ids while creating score")
 	} else if len(joinedStudentIds) > 0 {
@@ -100,11 +100,11 @@ func (u enrollmentUseCase) CreateMany(courseId string, status entity.EnrollmentS
 
 	enrollments := []entity.Enrollment{}
 
-	for _, studentId := range studentIds {
+	for _, studentId := range payload.StudentIds {
 		enrollment := entity.Enrollment{
 			Id:        ulid.Make().String(),
-			CourseId:  courseId,
-			Status:    status,
+			CourseId:  payload.CourseId,
+			Status:    payload.Status,
 			StudentId: studentId,
 		}
 

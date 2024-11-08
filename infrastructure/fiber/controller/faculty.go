@@ -3,7 +3,6 @@ package controller
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/team-inu/inu-backyard/entity"
-	request "github.com/team-inu/inu-backyard/infrastructure/fiber/request"
 	"github.com/team-inu/inu-backyard/infrastructure/fiber/response"
 	"github.com/team-inu/inu-backyard/internal/validator"
 )
@@ -30,10 +29,9 @@ func (c FacultyController) GetAll(ctx *fiber.Ctx) error {
 }
 
 func (c FacultyController) GetById(ctx *fiber.Ctx) error {
-	facultyId := ctx.Params("facultyId")
+	facultyId := ctx.Params("facultyName")
 
 	faculty, err := c.FacultyUseCase.GetByName(facultyId)
-
 	if err != nil {
 		return err
 	}
@@ -46,8 +44,7 @@ func (c FacultyController) GetById(ctx *fiber.Ctx) error {
 }
 
 func (c FacultyController) Create(ctx *fiber.Ctx) error {
-	var payload request.CreateFacultyRequestPayload
-
+	var payload entity.CreateFacultyRequestPayload
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
 		return err
 	}
@@ -55,7 +52,6 @@ func (c FacultyController) Create(ctx *fiber.Ctx) error {
 	err := c.FacultyUseCase.Create(&entity.Faculty{
 		Name: payload.Name,
 	})
-
 	if err != nil {
 		return err
 	}
@@ -67,13 +63,11 @@ func (c FacultyController) Update(ctx *fiber.Ctx) error {
 	facultyName := ctx.Params("facultyName")
 
 	_, err := c.FacultyUseCase.GetByName(facultyName)
-
 	if err != nil {
 		return err
 	}
 
-	var payload request.UpdateFacultyRequestPayload
-
+	var payload entity.UpdateFacultyRequestPayload
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
 		return err
 	}
@@ -81,7 +75,6 @@ func (c FacultyController) Update(ctx *fiber.Ctx) error {
 	err = c.FacultyUseCase.Update(&entity.Faculty{
 		Name: facultyName,
 	}, payload.NewName)
-
 	if err != nil {
 		return err
 	}
@@ -93,13 +86,11 @@ func (c FacultyController) Delete(ctx *fiber.Ctx) error {
 	facultyName := ctx.Params("facultyName")
 
 	_, err := c.FacultyUseCase.GetByName(facultyName)
-
 	if err != nil {
 		return err
 	}
 
 	err = c.FacultyUseCase.Delete(facultyName)
-
 	if err != nil {
 		return err
 	}

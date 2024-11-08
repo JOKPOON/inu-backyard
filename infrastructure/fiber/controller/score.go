@@ -4,7 +4,6 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/team-inu/inu-backyard/entity"
 	"github.com/team-inu/inu-backyard/infrastructure/fiber/middleware"
-	request "github.com/team-inu/inu-backyard/infrastructure/fiber/request"
 	"github.com/team-inu/inu-backyard/infrastructure/fiber/response"
 	"github.com/team-inu/inu-backyard/internal/validator"
 )
@@ -67,7 +66,7 @@ func (c ScoreController) GetByAssignmentId(ctx *fiber.Ctx) error {
 }
 
 func (c ScoreController) CreateMany(ctx *fiber.Ctx) error {
-	var payload request.BulkCreateScoreRequestPayload
+	var payload entity.BulkCreateScoreRequestPayload
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
 		return err
 	}
@@ -112,7 +111,7 @@ func (c ScoreController) Update(ctx *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	var payload request.UpdateScoreRequestPayload
+	var payload entity.UpdateScoreRequestPayload
 
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
 		return err

@@ -52,7 +52,7 @@ func (u studentUseCase) GetByParams(params *entity.Student, limit int, offset in
 	return students, nil
 }
 
-func (u studentUseCase) CreateMany(students []entity.Student) error {
+func (u studentUseCase) CreateMany(students []entity.CreateStudentPayload) error {
 	departmentNames := []string{}
 	programmeNames := []string{}
 	studentIds := []string{}
@@ -90,7 +90,28 @@ func (u studentUseCase) CreateMany(students []entity.Student) error {
 		return errs.New(errs.ErrCreateEnrollment, "there are non exist programme %v", nonExistedProgrammeNames)
 	}
 
-	err = u.studentRepo.CreateMany(students)
+	studentsToCreate := make([]entity.Student, 0, len(students))
+	for _, student := range students {
+		studentsToCreate = append(studentsToCreate, entity.Student{
+			Id:             student.Id,
+			FirstName:      student.FirstName,
+			LastName:       student.LastName,
+			Email:          student.Email,
+			ProgrammeName:  student.ProgrammeName,
+			DepartmentName: student.DepartmentName,
+			GPAX:           *student.GPAX,
+			MathGPA:        *student.MathGPA,
+			EngGPA:         *student.EngGPA,
+			SciGPA:         *student.SciGPA,
+			School:         student.School,
+			City:           student.City,
+			Year:           student.Year,
+			Admission:      student.Admission,
+			Remark:         student.Remark,
+		})
+	}
+
+	err = u.studentRepo.CreateMany(studentsToCreate)
 	if err != nil {
 		return errs.New(errs.ErrCreateStudent, "cannot create students", err)
 	}
@@ -98,7 +119,7 @@ func (u studentUseCase) CreateMany(students []entity.Student) error {
 	return nil
 }
 
-func (u studentUseCase) Update(id string, student *entity.Student) error {
+func (u studentUseCase) Update(id string, student *entity.UpdateStudentPayload) error {
 	existStudent, err := u.GetById(id)
 	if err != nil {
 		return errs.New(errs.SameCode, "cannot get student id %s to update", id, err)
@@ -106,7 +127,25 @@ func (u studentUseCase) Update(id string, student *entity.Student) error {
 		return errs.New(errs.ErrSubPLONotFound, "cannot get student id %s to update", id)
 	}
 
-	err = u.studentRepo.Update(id, student)
+	err = u.studentRepo.Update(id,
+		&entity.Student{
+			Id:             student.Id,
+			FirstName:      student.FirstName,
+			LastName:       student.LastName,
+			Email:          student.Email,
+			ProgrammeName:  student.ProgrammeName,
+			DepartmentName: student.DepartmentName,
+			GPAX:           *student.GPAX,
+			MathGPA:        *student.MathGPA,
+			EngGPA:         *student.EngGPA,
+			SciGPA:         *student.SciGPA,
+			School:         student.School,
+			City:           student.City,
+			Year:           student.Year,
+			Admission:      student.Admission,
+			Remark:         *student.Remark,
+		},
+	)
 
 	if err != nil {
 		return errs.New(errs.ErrUpdateStudent, "cannot update student by id %s", student.Id, err)

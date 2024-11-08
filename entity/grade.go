@@ -1,20 +1,5 @@
 package entity
 
-type Grade struct {
-	Id         string  `json:"id" gorm:"primaryKey;type:char(255)"`
-	StudentId  string  `json:"studentId"`
-	SemesterId string  `json:"semesterId"`
-	Grade      float64 `json:"grade"`
-
-	Semester *Semester `json:"semester,omitempty"`
-	Student  *Student  `json:"student,omitempty"`
-}
-
-type StudentGrade struct {
-	StudentId string
-	Grade     float64
-}
-
 type GradeRepository interface {
 	GetAll() ([]Grade, error)
 	GetById(id string) (*Grade, error)
@@ -35,4 +20,36 @@ type GradeUseCase interface {
 	CreateMany(studentGrades []StudentGrade, year int, semesterSequence string) error
 	Update(id string, grade *Grade) error
 	Delete(id string) error
+}
+
+type Grade struct {
+	Id         string  `json:"id" gorm:"primaryKey;type:char(255)"`
+	StudentId  string  `json:"student_id"`
+	SemesterId string  `json:"semester_id"`
+	Grade      float64 `json:"grade"`
+
+	Semester *Semester `json:"semester,omitempty"`
+	Student  *Student  `json:"student,omitempty"`
+}
+
+type CreateGradePayload struct {
+	StudentId string  `json:"student_id" validate:"required"`
+	Year      string  `json:"year" validate:"required"`
+	Grade     float64 `json:"grade" validate:"required"`
+}
+
+type StudentGrade struct {
+	StudentId string  `json:"student_id"`
+	Grade     float64 `json:"grade"`
+}
+
+type CreateManyGradesPayload struct {
+	StudentGrade     []StudentGrade `json:"student_grade" validate:"dive"`
+	Year             int            `json:"year" validate:"required"`
+	SemesterSequence string         `json:"semester_sequence" validate:"required"`
+}
+
+type UpdateGradePayload struct {
+	StudentId string  `json:"student_id"`
+	Grade     float64 `json:"grade"`
 }
