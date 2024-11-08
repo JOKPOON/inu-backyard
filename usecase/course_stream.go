@@ -21,27 +21,27 @@ func NewCourseStreamUseCase(
 	}
 }
 
-func (u *courseStreamUseCase) Create(fromCourseId string, targetCourseId string, streamType entity.CourseStreamType, comment string) error {
-	fromCourse, err := u.courseUseCase.GetById(fromCourseId)
+func (u *courseStreamUseCase) Create(payload entity.CreateCourseStreamPayload) error {
+	fromCourse, err := u.courseUseCase.GetById(payload.FromCourseId)
 	if err != nil {
-		return errs.New(errs.SameCode, "cannot validate from course id %s while creating stream course", targetCourseId, err)
+		return errs.New(errs.SameCode, "cannot validate from course id %s while creating stream course", payload.TargetCourseId, err)
 	} else if fromCourse == nil {
-		return errs.New(errs.ErrCreateCourseStream, "from course id: %s not found", fromCourseId)
+		return errs.New(errs.ErrCreateCourseStream, "from course id: %s not found", payload.FromCourseId)
 	}
 
-	targetCourse, err := u.courseUseCase.GetById(targetCourseId)
+	targetCourse, err := u.courseUseCase.GetById(payload.TargetCourseId)
 	if err != nil {
-		return errs.New(errs.SameCode, "cannot validate target course id %s while creating stream course", targetCourseId, err)
+		return errs.New(errs.SameCode, "cannot validate target course id %s while creating stream course", payload.TargetCourseId, err)
 	} else if targetCourse == nil {
-		return errs.New(errs.ErrCreateCourseStream, "target course id: %s not found", targetCourseId)
+		return errs.New(errs.ErrCreateCourseStream, "target course id: %s not found", payload.TargetCourseId)
 	}
 
 	courseStream := entity.CourseStream{
 		Id:             ulid.Make().String(),
-		FromCourseId:   fromCourseId,
-		TargetCourseId: targetCourseId,
-		StreamType:     streamType,
-		Comment:        comment,
+		FromCourseId:   payload.FromCourseId,
+		TargetCourseId: payload.TargetCourseId,
+		StreamType:     payload.StreamType,
+		Comment:        payload.Comment,
 	}
 
 	err = u.courseStreamRepository.Create(&courseStream)

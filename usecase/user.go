@@ -79,6 +79,7 @@ func (u userUseCase) Create(payload entity.CreateUserPayload) error {
 	user := &entity.User{
 		Id:        ulid.Make().String(),
 		FirstName: payload.FirstName,
+		Email:     payload.Email,
 		LastName:  payload.LastName,
 		Password:  hashPassword,
 	}

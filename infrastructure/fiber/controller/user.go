@@ -98,12 +98,12 @@ func (c UserController) Update(ctx *fiber.Ctx) error {
 
 	targetUserId := ctx.Params("userId")
 
-	err := c.UserUseCase.CheckUserRole(ctx, targetUserId, entity.UserRoleHeadOfCurriculum)
-	if err != nil {
-		return err
-	}
+	// err := c.UserUseCase.CheckUserRole(ctx, targetUserId, entity.UserRoleHeadOfCurriculum)
+	// if err != nil {
+	// 	return response.NewErrorResponse(ctx, fiber.StatusUnauthorized, nil)
+	// }
 
-	err = c.UserUseCase.Update(targetUserId, &entity.User{
+	err := c.UserUseCase.Update(targetUserId, &entity.User{
 		FirstName: payload.FirstName,
 		LastName:  payload.LastName,
 		Email:     payload.Email,

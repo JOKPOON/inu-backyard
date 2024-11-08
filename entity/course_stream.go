@@ -1,22 +1,13 @@
 package entity
 
+import errs "github.com/team-inu/inu-backyard/entity/error"
+
 type CourseStreamType string
 
 const (
 	UpCourseStreamType   CourseStreamType = "UPSTREAM"
 	DownCourseStreamType CourseStreamType = "DOWNSTREAM"
 )
-
-type CourseStream struct {
-	Id             string           `json:"id"`
-	StreamType     CourseStreamType `json:"streamType"`
-	Comment        string           `json:"comment"`
-	FromCourseId   string           `json:"fromCourseId"`
-	TargetCourseId string           `json:"targetCourseId"`
-
-	FromCourse   Course `json:"fromCourse" gorm:"foreignKey:FromCourseId"`
-	TargetCourse Course `json:"targetCourse" gorm:"foreignKey:TargetCourseId"`
-}
 
 type CourseStreamRepository interface {
 	Get(id string) (*CourseStream, error)
@@ -30,7 +21,42 @@ type CourseStreamsUseCase interface {
 	Get(id string) (*CourseStream, error)
 	GetByFromCourseId(courseId string) ([]CourseStream, error)
 	GetByTargetCourseId(courseId string) ([]CourseStream, error)
-	Create(fromCourseId string, targetCourseId string, streamType CourseStreamType, comment string) error
+	Create(CreateCourseStreamPayload) error
 	Update(id string, comment string) error
 	Delete(id string) error
+}
+
+type CourseStream struct {
+	Id             string           `json:"id"`
+	StreamType     CourseStreamType `json:"stream_type"`
+	Comment        string           `json:"comment"`
+	FromCourseId   string           `json:"from_course_id"`
+	TargetCourseId string           `json:"target_course_id"`
+
+	FromCourse   Course `json:"from_course" gorm:"foreignKey:FromCourseId"`
+	TargetCourse Course `json:"target_course" gorm:"foreignKey:TargetCourseId"`
+}
+
+type CreateCourseStreamPayload struct {
+	FromCourseId   string           `json:"from_course_id" validate:"required"`
+	TargetCourseId string           `json:"target_course_id" validate:"required"`
+	StreamType     CourseStreamType `json:"stream_type" validate:"required"`
+	Comment        string           `json:"comment" validate:"required"`
+}
+
+type GetCourseStreamPayload struct {
+	FromCourseId   string `json:"from_course_id"`
+	TargetCourseId string `json:"target_course_id"`
+}
+
+func (p GetCourseStreamPayload) Validate() *errs.DomainError {
+	if p.TargetCourseId != "" && p.FromCourseId != "" {
+		return errs.New(errs.ErrPayloadValidator, "targetCourseId OR fromCourseId only one")
+	}
+
+	if p.TargetCourseId == "" && p.FromCourseId == "" {
+		return errs.New(errs.ErrPayloadValidator, "must have query at least targetCourseId OR fromCourseId only one")
+	}
+
+	return nil
 }

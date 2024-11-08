@@ -3,7 +3,6 @@ package controller
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/team-inu/inu-backyard/entity"
-	request "github.com/team-inu/inu-backyard/infrastructure/fiber/request"
 	"github.com/team-inu/inu-backyard/infrastructure/fiber/response"
 	"github.com/team-inu/inu-backyard/internal/validator"
 )
@@ -22,7 +21,7 @@ func NewCourseStreamController(validator validator.PayloadValidator, courseStrea
 
 // 555
 func (c CourseStreamController) Get(ctx *fiber.Ctx) error {
-	var payload request.GetCourseStreamRequestPayload
+	var payload entity.GetCourseStreamPayload
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
 		return err
 	}
@@ -65,16 +64,13 @@ func (c CourseStreamController) Delete(ctx *fiber.Ctx) error {
 }
 
 func (c CourseStreamController) Create(ctx *fiber.Ctx) error {
-	var payload request.CreateCourseStreamRequestPayload
+	var payload entity.CreateCourseStreamPayload
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
 		return err
 	}
 
 	err := c.CourseStreamUseCase.Create(
-		payload.FromCourseId,
-		payload.TargetCourseId,
-		payload.StreamType,
-		payload.Comment,
+		payload,
 	)
 
 	if err != nil {
