@@ -78,20 +78,16 @@ func NewFiberServer(
 }
 
 func (f *fiberServer) Run() {
-	err := f.initRepository()
-	if err != nil {
-		panic(err)
-	}
-
+	f.initRepository()
 	f.initUseCase()
 
-	err = f.initController()
+	err := f.initController()
 	if err != nil {
 		panic(err)
 	}
 }
 
-func (f *fiberServer) initRepository() (err error) {
+func (f *fiberServer) initRepository() {
 	f.studentRepository = repository.NewStudentRepositoryGorm(f.gorm)
 	f.courseRepository = repository.NewCourseRepositoryGorm(f.gorm)
 	f.courseLearningOutcomeRepository = repository.NewCourseLearningOutcomeRepositoryGorm(f.gorm)
@@ -110,56 +106,32 @@ func (f *fiberServer) initRepository() (err error) {
 	f.coursePortfolioRepository = repository.NewCoursePortfolioRepositoryGorm(f.gorm)
 	f.courseStreamRepository = repository.NewCourseStreamRepository(f.gorm)
 	f.importerRepository = repository.NewImporterRepositoryGorm(f.gorm)
-
-	return nil
 }
 
 func (f *fiberServer) initUseCase() {
-	programmeUseCase := usecase.NewProgrammeUseCase(f.programmeRepository)
-	facultyUseCase := usecase.NewFacultyUseCase(f.facultyRepository)
-	departmentUseCase := usecase.NewDepartmentUseCase(f.departmentRepository)
-	studentUseCase := usecase.NewStudentUseCase(f.studentRepository, departmentUseCase, programmeUseCase)
-	programLearningOutcomeUseCase := usecase.NewProgramLearningOutcomeUseCase(f.programLearningOutcomeRepository, programmeUseCase)
-	userUseCase := usecase.NewUserUseCase(f.userRepository)
-	semesterUseCase := usecase.NewSemesterUseCase(f.semesterRepository)
-	courseUseCase := usecase.NewCourseUseCase(f.courseRepository, semesterUseCase, userUseCase)
-	enrollmentUseCase := usecase.NewEnrollmentUseCase(f.enrollmentRepository, studentUseCase, courseUseCase)
-	gradeUseCase := usecase.NewGradeUseCase(f.gradeRepository, studentUseCase, semesterUseCase)
-	sessionUseCase := usecase.NewSessionUseCase(f.sessionRepository, f.config.Client.Auth)
-	authUseCase := usecase.NewAuthUseCase(sessionUseCase, userUseCase)
-	programOutcomeUseCase := usecase.NewProgramOutcomeUseCase(f.programOutcomeRepository, semesterUseCase)
-	courseLearningOutcomeUseCase := usecase.NewCourseLearningOutcomeUseCase(f.courseLearningOutcomeRepository, courseUseCase, programOutcomeUseCase, programLearningOutcomeUseCase)
-	assignmentUseCase := usecase.NewAssignmentUseCase(f.assignmentRepository, courseLearningOutcomeUseCase, courseUseCase)
-	scoreUseCase := usecase.NewScoreUseCase(f.scoreRepository, enrollmentUseCase, assignmentUseCase, courseUseCase, userUseCase, studentUseCase)
-	courseStreamUseCase := usecase.NewCourseStreamUseCase(f.courseStreamRepository, courseUseCase)
-	coursePortfolioUseCase := usecase.NewCoursePortfolioUseCase(f.coursePortfolioRepository, courseUseCase, userUseCase, enrollmentUseCase, assignmentUseCase, scoreUseCase, studentUseCase, courseLearningOutcomeUseCase, courseStreamUseCase)
-	importerUseCase := usecase.NewImporterUseCase(f.importerRepository, courseUseCase, enrollmentUseCase, assignmentUseCase, programOutcomeUseCase, programLearningOutcomeUseCase, courseLearningOutcomeUseCase, userUseCase)
-	predictionUseCase := usecase.NewPredictionUseCase(f.config)
-
-	f.assignmentUseCase = assignmentUseCase
-	f.authUseCase = authUseCase
-	f.courseLearningOutcomeUseCase = courseLearningOutcomeUseCase
-	f.courseUseCase = courseUseCase
-	f.departmentUseCase = departmentUseCase
-	f.enrollmentUseCase = enrollmentUseCase
-	f.facultyUseCase = facultyUseCase
-	f.gradeUseCase = gradeUseCase
-	f.userUseCase = userUseCase
-	f.programLearningOutcomeUseCase = programLearningOutcomeUseCase
-	f.programOutcomeUseCase = programOutcomeUseCase
-	f.programmeUseCase = programmeUseCase
-	f.scoreUseCase = scoreUseCase
-	f.semesterUseCase = semesterUseCase
-	f.sessionUseCase = sessionUseCase
-	f.studentUseCase = studentUseCase
-	f.coursePortfolioUseCase = coursePortfolioUseCase
-	f.predictionUseCase = predictionUseCase
-	f.courseStreamUseCase = courseStreamUseCase
-	f.importerUseCase = importerUseCase
+	f.programmeUseCase = usecase.NewProgrammeUseCase(f.programmeRepository)
+	f.facultyUseCase = usecase.NewFacultyUseCase(f.facultyRepository)
+	f.departmentUseCase = usecase.NewDepartmentUseCase(f.departmentRepository)
+	f.studentUseCase = usecase.NewStudentUseCase(f.studentRepository, f.departmentUseCase, f.programmeUseCase)
+	f.programLearningOutcomeUseCase = usecase.NewProgramLearningOutcomeUseCase(f.programLearningOutcomeRepository, f.programmeUseCase)
+	f.userUseCase = usecase.NewUserUseCase(f.userRepository)
+	f.semesterUseCase = usecase.NewSemesterUseCase(f.semesterRepository)
+	f.courseUseCase = usecase.NewCourseUseCase(f.courseRepository, f.semesterUseCase, f.userUseCase)
+	f.enrollmentUseCase = usecase.NewEnrollmentUseCase(f.enrollmentRepository, f.studentUseCase, f.courseUseCase)
+	f.gradeUseCase = usecase.NewGradeUseCase(f.gradeRepository, f.studentUseCase, f.semesterUseCase)
+	f.sessionUseCase = usecase.NewSessionUseCase(f.sessionRepository, f.config.Client.Auth)
+	f.authUseCase = usecase.NewAuthUseCase(f.sessionUseCase, f.userUseCase)
+	f.programOutcomeUseCase = usecase.NewProgramOutcomeUseCase(f.programOutcomeRepository, f.semesterUseCase)
+	f.courseLearningOutcomeUseCase = usecase.NewCourseLearningOutcomeUseCase(f.courseLearningOutcomeRepository, f.courseUseCase, f.programOutcomeUseCase, f.programLearningOutcomeUseCase)
+	f.assignmentUseCase = usecase.NewAssignmentUseCase(f.assignmentRepository, f.courseLearningOutcomeUseCase, f.courseUseCase)
+	f.scoreUseCase = usecase.NewScoreUseCase(f.scoreRepository, f.enrollmentUseCase, f.assignmentUseCase, f.courseUseCase, f.userUseCase, f.studentUseCase)
+	f.courseStreamUseCase = usecase.NewCourseStreamUseCase(f.courseStreamRepository, f.courseUseCase)
+	f.coursePortfolioUseCase = usecase.NewCoursePortfolioUseCase(f.coursePortfolioRepository, f.courseUseCase, f.userUseCase, f.enrollmentUseCase, f.assignmentUseCase, f.scoreUseCase, f.studentUseCase, f.courseLearningOutcomeUseCase, f.courseStreamUseCase)
+	f.importerUseCase = usecase.NewImporterUseCase(f.importerRepository, f.courseUseCase, f.enrollmentUseCase, f.assignmentUseCase, f.programOutcomeUseCase, f.programLearningOutcomeUseCase, f.courseLearningOutcomeUseCase, f.userUseCase)
+	f.predictionUseCase = usecase.NewPredictionUseCase(f.config)
 }
 
 func (f *fiberServer) initController() error {
-
 	app := fiber.New(fiber.Config{
 		AppName:      "inu-backyard",
 		ErrorHandler: errorHandler(f.logger),
@@ -399,6 +371,5 @@ func (f *fiberServer) initController() error {
 	})
 
 	err := app.Listen(":3001")
-
 	return err
 }
