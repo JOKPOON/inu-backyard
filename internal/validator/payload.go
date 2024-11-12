@@ -6,6 +6,7 @@ import (
 	"log"
 	"mime/multipart"
 	"reflect"
+	"strings"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
@@ -42,6 +43,7 @@ func (v *payloadValidator) ValidateAuth(ctx *fiber.Ctx) (string, error) {
 func (v *payloadValidator) Validate(payload interface{}, ctx *fiber.Ctx) (bool, error) {
 	if len(ctx.Body()) != 0 {
 		if err := ctx.BodyParser(payload); err != nil {
+			log.Println(err)
 			return false, errs.New(errs.ErrBodyParser, err.Error())
 		}
 	}
@@ -55,19 +57,20 @@ func (v *payloadValidator) Validate(payload interface{}, ctx *fiber.Ctx) (bool, 
 		return false, errs.New(errs.ErrBodyParser, err.Error())
 	}
 
-	if errors := v.validateStruct(payload); errors != nil {
-		return false, errs.NewPayloadError(errors)
+	if validationErrors := v.validateStruct(payload); validationErrors != nil {
+		return false, errs.NewPayloadError(validationErrors)
 	}
 	return true, nil
 }
 
 func (v *payloadValidator) validateStruct(payload interface{}) []errs.ValidationErrorDetail {
 	var errDetails []errs.ValidationErrorDetail
-
 	if errors := v.validator.Struct(payload); errors != nil {
 		for _, err := range errors.(validator.ValidationErrors) {
+			jsonFieldName := getJSONFieldName(payload, err.Field())
+
 			detail := &errs.ValidationErrorDetail{
-				Field: err.Field(),
+				Field: jsonFieldName,
 				Type:  err.Tag(),
 			}
 			errDetails = append(errDetails, *detail)
@@ -76,12 +79,28 @@ func (v *payloadValidator) validateStruct(payload interface{}) []errs.Validation
 	return errDetails
 }
 
+func getJSONFieldName(payload interface{}, fieldName string) string {
+	val := reflect.ValueOf(payload)
+	field, ok := val.Type().Elem().FieldByName(fieldName)
+	if !ok {
+		return fieldName
+	}
+
+	// Get the `json` tag
+	jsonTag := field.Tag.Get("json")
+	if jsonTag == "" {
+		return fieldName
+	}
+
+	return strings.Split(jsonTag, ",")[0]
+}
+
 func fileParser(payload interface{}, ctx *fiber.Ctx) error {
 	v := reflect.ValueOf(payload)
 	if v.Kind() != reflect.Ptr || v.Elem().Kind() != reflect.Struct {
 		return errors.New("interface must be a pointer to struct")
 	}
-	v = v.Elem() // Unwrap interfae or pointer
+	v = v.Elem() // Unwrap interface or pointer
 
 	var form *multipart.Form
 

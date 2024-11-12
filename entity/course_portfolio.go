@@ -2,49 +2,77 @@ package entity
 
 import "gorm.io/datatypes"
 
+type CoursePortfolioRepository interface {
+	EvaluatePassingAssignmentPercentage(courseId string) ([]AssignmentPercentage, error)
+	EvaluatePassingPoPercentage(courseId string) ([]PoPercentage, error)
+	EvaluatePassingCloPercentage(courseId string) ([]CloPercentage, error)
+	EvaluatePassingCloStudents(courseId string) ([]CloPassingStudentGorm, error)
+	EvaluatePassingPloStudents(courseId string) ([]PloPassingStudentGorm, error)
+	EvaluatePassingPoStudents(courseId string) ([]PoPassingStudentGorm, error)
+	EvaluateAllPloCourses() ([]PloCoursesGorm, error)
+	EvaluateAllPoCourses() ([]PoCoursesGorm, error)
+	EvaluateProgramLearningOutcomesByStudentId(studentId string) ([]StudentPlosGorm, error)
+	EvaluateProgramOutcomesByStudentId(studentId string) ([]StudentPosGorm, error)
+
+	UpdateCoursePortfolio(courseId string, data datatypes.JSON) error
+}
+
+type CoursePortfolioUseCase interface {
+	Generate(courseId string) (*CoursePortfolio, error)
+	CalculateGradeDistribution(courseId string) (*GradeDistribution, error)
+	EvaluateTabeeOutcomes(courseId string) ([]TabeeOutcome, error)
+	GetCloPassingStudentsByCourseId(courseId string) ([]CloPassingStudent, error)
+	GetStudentOutcomesStatusByCourseId(courseId string) ([]StudentOutcomeStatus, error)
+	GetAllProgramLearningOutcomeCourses() ([]PloCourses, error)
+	GetAllProgramOutcomeCourses() ([]PoCourses, error)
+	GetOutcomesByStudentId(studentId string) ([]StudentOutcomes, error)
+
+	UpdateCoursePortfolio(courseId string, summary CourseSummary, development CourseDevelopment) error
+}
+
 // [1] Info
 type CourseInfo struct {
-	Name      string   `json:"courseName"`
-	Code      string   `json:"courseCode"`
+	Name      string   `json:"course_name"`
+	Code      string   `json:"course_code"`
 	Lecturers []string `json:"lecturers"`
 	Programme string   `json:"programme"`
 }
 
 // [2] Summary
 type CourseSummary struct {
-	TeachingMethods []string `json:"teachingMethods"`
-	OnlineTools     string   `json:"onlineTools"`
+	TeachingMethods []string `json:"teaching_methods"`
+	OnlineTools     string   `json:"online_tools"`
 	Objectives      []string `json:"objectives"`
 }
 
 // [3.1] Tabee Outcome
 type Assessment struct {
-	AssessmentTask        string  `json:"assessmentTask"`
-	PassingCriteria       float64 `json:"passingCriteria"`
-	StudentPassPercentage float64 `json:"studentPassPercentage"`
+	AssessmentTask        string  `json:"assessment_task"`
+	PassingCriteria       float64 `json:"passing_criteria"`
+	StudentPassPercentage float64 `json:"student_pass_percentage"`
 }
 
 type CourseOutcome struct {
 	Name                                string       `json:"name"`
 	Code                                string       `json:"code"`
-	ExpectedPassingAssignmentPercentage float64      `json:"expectedPassingAssignmentPercentage"`
-	PassingCloPercentage                float64      `json:"passingCloPercentage"`
+	ExpectedPassingAssignmentPercentage float64      `json:"expected_passing_assignment_percentage"`
+	PassingCloPercentage                float64      `json:"passing_clo_percentage"`
 	Assessments                         []Assessment `json:"assessments"`
 }
 
 type TabeeOutcome struct {
 	Name                  string          `json:"name"`
 	Code                  string          `json:"code"`
-	CourseOutcomes        []CourseOutcome `json:"courseOutcomes"`
-	MinimumPercentage     float64         `json:"minimumPercentage"`
-	ExpectedCloPercentage float64         `json:"expectedCloPercentage"`
+	CourseOutcomes        []CourseOutcome `json:"course_outcomes"`
+	MinimumPercentage     float64         `json:"minimum_percentage"`
+	ExpectedCloPercentage float64         `json:"expected_clo_percentage"`
 	Plos                  []NestedOutcome `json:"plos"`
 }
 
 // [3.2] Grade Distribution
 type GradeFrequency struct {
 	Name       string  `json:"name"`
-	GradeScore float64 `json:"gradeScore"`
+	GradeScore float64 `json:"grade_score"`
 	Frequency  int     `json:"frequency"`
 }
 
@@ -54,10 +82,10 @@ type ScoreFrequency struct {
 }
 
 type GradeDistribution struct {
-	StudentAmount    int              `json:"studentAmount"`
-	GPA              float64          `json:"GPA"`
-	GradeFrequencies []GradeFrequency `json:"gradeFrequencies"`
-	ScoreFrequencies []ScoreFrequency `json:"scoreFrequencies"`
+	StudentAmount    int              `json:"student_amount"`
+	GPA              float64          `json:"gpa"`
+	GradeFrequencies []GradeFrequency `json:"grade_frequencies"`
+	ScoreFrequencies []ScoreFrequency `json:"score_frequencies"`
 }
 
 type Outcome struct {
@@ -77,29 +105,29 @@ type CourseResult struct {
 	Clos []Outcome       `json:"clos"`
 	Pos  []Outcome       `json:"pos"`
 
-	TabeeOutcomes     []TabeeOutcome    `json:"tabeeOutcomes"`
-	GradeDistribution GradeDistribution `json:"gradeDistribution"`
+	TabeeOutcomes     []TabeeOutcome    `json:"tabee_outcomes"`
+	GradeDistribution GradeDistribution `json:"grade_distribution"`
 }
 
 // [4.1] SubjectComments
 type Subject struct {
-	CourseName string `json:"courseName"`
+	CourseName string `json:"course_name"`
 	Comment    string `json:"comments"`
 }
 
 type SubjectComments struct {
-	UpstreamSubjects   []Subject `json:"upstreamSubjects"`
-	DownstreamSubjects []Subject `json:"downstreamSubjects"`
+	UpstreamSubjects   []Subject `json:"upstream_subjects"`
+	DownstreamSubjects []Subject `json:"downstream_subjects"`
 	Other              string    `json:"other"`
 }
 
 // [4] Development
 type CourseDevelopment struct {
 	Plans           []string        `json:"plans"`
-	DoAndChecks     []string        `json:"doAndChecks"`
+	DoAndChecks     []string        `json:"do_and_checks"`
 	Acts            []string        `json:"acts"`
-	SubjectComments SubjectComments `json:"subjectComments"`
-	OtherComment    string          `json:"otherComment"`
+	SubjectComments SubjectComments `json:"subject_comments"`
+	OtherComment    string          `json:"other_comment"`
 }
 
 // Course Portfolio
@@ -130,14 +158,14 @@ type CloPercentage struct {
 }
 
 type StudentData struct {
-	FirstName string `json:"firstName"`
-	LastName  string `json:"lastName"`
-	StudentId string `json:"studentId"`
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	StudentId string `json:"student_id"`
 	Pass      bool   `json:"pass"`
 }
 
 type CloPassingStudent struct {
-	CourseLearningOutcomeId string        `json:"courseLearningOutcomeId"`
+	CourseLearningOutcomeId string        `json:"course_learning_outcome_id"`
 	Students                []StudentData `json:"students"`
 }
 
@@ -153,7 +181,7 @@ type CloPassingStudentGorm struct {
 
 type CloData struct {
 	Pass                    bool   `json:"pass"`
-	CourseLearningOutcomeId string `json:"courseLearningOutcomeId"`
+	CourseLearningOutcomeId string `json:"course_learning_outcome_id"`
 	Code                    string `json:"code"`
 	Description             string `json:"description"`
 }
@@ -161,8 +189,8 @@ type CloData struct {
 type PloData struct {
 	Id              string `json:"id"`
 	Code            string `json:"code"`
-	DescriptionThai string `json:"descriptionThai"`
-	ProgramYear     int    `json:"programYear"`
+	DescriptionThai string `json:"description_thai"`
+	ProgramYear     int    `json:"program_year"`
 	Pass            bool   `json:"pass"`
 }
 
@@ -191,23 +219,23 @@ type PoPassingStudentGorm struct {
 }
 
 type StudentOutcomeStatus struct {
-	StudentId               string    `json:"studentId"`
-	ProgramLearningOutcomes []PloData `json:"programLearningOutcomes"`
-	ProgramOutcomes         []PoData  `json:"programOutcomes"`
-	CourseLearningOutcomes  []CloData `json:"courseLearningOutcomes"`
+	StudentId               string    `json:"student_id"`
+	ProgramLearningOutcomes []PloData `json:"program_learning_outcomes"`
+	ProgramOutcomes         []PoData  `json:"program_outcomes"`
+	CourseLearningOutcomes  []CloData `json:"course_learning_outcomes"`
 }
 
 type CourseData struct {
 	Id                string  `json:"id"`
 	Code              string  `json:"code"`
 	Name              string  `json:"name"`
-	PassingPercentage float64 `json:"passingPercentage"`
+	PassingPercentage float64 `json:"passing_percentage"`
 	Year              int     `json:"year"`
-	SemesterSequence  string  `json:"semesterSequence"`
+	SemesterSequence  string  `json:"semester_sequence"`
 }
 
 type PloCourses struct {
-	ProgramLearningOutcomeId string       `json:"programLearningOutcomeId"`
+	ProgramLearningOutcomeId string       `json:"program_learning_outcome_id"`
 	Courses                  []CourseData `json:"courses"`
 }
 
@@ -222,7 +250,7 @@ type PloCoursesGorm struct {
 }
 
 type PoCourses struct {
-	ProgramOutcomeId string       `json:"programOutcomeId"`
+	ProgramOutcomeId string       `json:"program_outcome_id"`
 	Courses          []CourseData `json:"courses"`
 }
 
@@ -242,28 +270,28 @@ type StudentCourseData struct {
 	Name             string `json:"name"`
 	Pass             bool   `json:"pass"`
 	Year             int    `json:"year"`
-	SemesterSequence string `json:"semesterSequence"`
+	SemesterSequence string `json:"semester_sequence"`
 }
 
 type StudentPloData struct {
-	ProgramLearningOutcomeId string              `json:"programLearningOutcomeId"`
+	ProgramLearningOutcomeId string              `json:"program_learning_outcome_id"`
 	Code                     string              `json:"code"`
-	DescriptionThai          string              `json:"descriptionThai"`
-	ProgramYear              int                 `json:"programYear"`
+	DescriptionThai          string              `json:"description_thai"`
+	ProgramYear              int                 `json:"program_year"`
 	Courses                  []StudentCourseData `json:"courses"`
 }
 
 type StudentPoData struct {
-	ProgramOutcomeId string              `json:"programOutcomeId"`
+	ProgramOutcomeId string              `json:"program_outcome_id"`
 	Code             string              `json:"code"`
 	Name             string              `json:"name"`
 	Courses          []StudentCourseData `json:"courses"`
 }
 
 type StudentOutcomes struct {
-	StudentId               string           `json:"studentId"`
-	ProgramLearningOutcomes []StudentPloData `json:"programLearningOutcomes"`
-	ProgramOutcomes         []StudentPoData  `json:"programOutcomes"`
+	StudentId               string           `json:"student_id"`
+	ProgramLearningOutcomes []StudentPloData `json:"program_learning_outcomes"`
+	ProgramOutcomes         []StudentPoData  `json:"program_outcomes"`
 }
 
 type StudentPlosGorm struct {
@@ -300,48 +328,20 @@ type StudentPosGorm struct {
 // }
 
 // type CourseSummmaryForm struct {
-// 	TeachingMethods []NameObject `json:"teachingMethod"`
-// 	OnlineTool      string       `json:"onlineTool"`
+// 	TeachingMethods []NameObject `json:"teaching_method"`
+// 	OnlineTool      string       `json:"online_tool"`
 // 	Objectives      []NameObject `json:"objectives"`
 // }
 
 // type CourseDevelopmentForm struct {
 // 	Plans           []NameObject    `json:"plans"`
-// 	DoAndChecks     []NameObject    `json:"doAndChecks"`
+// 	DoAndChecks     []NameObject    `json:"do_and_checks"`
 // 	Acts            []NameObject    `json:"acts"`
-// 	SubjectComments SubjectComments `json:"subjectComments"`
-// 	OtherComment    string          `json:"otherComment"`
+// 	SubjectComments SubjectComments `json:"subject_comments"`
+// 	OtherComment    string          `json:"other_comment"`
 // }
 
 type PortfolioData struct {
 	Summary     CourseSummary     `json:"summary"`
 	Development CourseDevelopment `json:"development"`
-}
-
-type CoursePortfolioRepository interface {
-	EvaluatePassingAssignmentPercentage(courseId string) ([]AssignmentPercentage, error)
-	EvaluatePassingPoPercentage(courseId string) ([]PoPercentage, error)
-	EvaluatePassingCloPercentage(courseId string) ([]CloPercentage, error)
-	EvaluatePassingCloStudents(courseId string) ([]CloPassingStudentGorm, error)
-	EvaluatePassingPloStudents(courseId string) ([]PloPassingStudentGorm, error)
-	EvaluatePassingPoStudents(courseId string) ([]PoPassingStudentGorm, error)
-	EvaluateAllPloCourses() ([]PloCoursesGorm, error)
-	EvaluateAllPoCourses() ([]PoCoursesGorm, error)
-	EvaluateProgramLearningOutcomesByStudentId(studentId string) ([]StudentPlosGorm, error)
-	EvaluateProgramOutcomesByStudentId(studentId string) ([]StudentPosGorm, error)
-
-	UpdateCoursePortfolio(courseId string, data datatypes.JSON) error
-}
-
-type CoursePortfolioUseCase interface {
-	Generate(courseId string) (*CoursePortfolio, error)
-	CalculateGradeDistribution(courseId string) (*GradeDistribution, error)
-	EvaluateTabeeOutcomes(courseId string) ([]TabeeOutcome, error)
-	GetCloPassingStudentsByCourseId(courseId string) ([]CloPassingStudent, error)
-	GetStudentOutcomesStatusByCourseId(courseId string) ([]StudentOutcomeStatus, error)
-	GetAllProgramLearningOutcomeCourses() ([]PloCourses, error)
-	GetAllProgramOutcomeCourses() ([]PoCourses, error)
-	GetOutcomesByStudentId(studentId string) ([]StudentOutcomes, error)
-
-	UpdateCoursePortfolio(courseId string, summary CourseSummary, development CourseDevelopment) error
 }

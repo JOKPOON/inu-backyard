@@ -2,15 +2,33 @@ package entity
 
 import "gorm.io/datatypes"
 
+type CourseRepository interface {
+	GetAll() ([]Course, error)
+	GetById(id string) (*Course, error)
+	GetByUserId(userId string) ([]Course, error)
+	Create(course *Course) error
+	Update(id string, course *Course) error
+	Delete(id string) error
+}
+
+type CourseUseCase interface {
+	GetAll() ([]Course, error)
+	GetById(id string) (*Course, error)
+	GetByUserId(userId string) ([]Course, error)
+	Create(user User, payload CreateCoursePayload) error
+	Update(user User, id string, payload UpdateCoursePayload) error
+	Delete(user User, id string) error
+}
+
 type CriteriaGrade struct {
-	A  float64 `json:"criteriaGradeA" gorm:"column:criteria_grade_a" validate:"required"`
-	BP float64 `json:"criteriaGradeBP" gorm:"column:criteria_grade_bp" validate:"required"`
-	B  float64 `json:"criteriaGradeB" gorm:"column:criteria_grade_b" validate:"required"`
-	CP float64 `json:"criteriaGradeCP" gorm:"column:criteria_grade_cp" validate:"required"`
-	C  float64 `json:"criteriaGradeC" gorm:"column:criteria_grade_c" validate:"required"`
-	DP float64 `json:"criteriaGradeDP" gorm:"column:criteria_grade_dp" validate:"required"`
-	D  float64 `json:"criteriaGradeD" gorm:"column:criteria_grade_d" validate:"required"`
-	F  float64 `json:"criteriaGradeF" gorm:"column:criteria_grade_f" validate:"required"`
+	A  float64 `json:"criteria_grade_a" gorm:"column:criteria_grade_a" validate:"required"`
+	BP float64 `json:"criteria_grade_bp" gorm:"column:criteria_grade_bp" validate:"required"`
+	B  float64 `json:"criteria_grade_b" gorm:"column:criteria_grade_b" validate:"required"`
+	CP float64 `json:"criteria_grade_cp" gorm:"column:criteria_grade_cp" validate:"required"`
+	C  float64 `json:"criteria_grade_c" gorm:"column:criteria_grade_c" validate:"required"`
+	DP float64 `json:"criteria_grade_dp" gorm:"column:criteria_grade_dp" validate:"required"`
+	D  float64 `json:"criteria_grade_d" gorm:"column:criteria_grade_d" validate:"required"`
+	F  float64 `json:"criteria_grade_f" gorm:"column:criteria_grade_f" validate:"required"`
 }
 
 func (c CriteriaGrade) IsValid() bool {
@@ -64,20 +82,20 @@ func (c CriteriaGrade) GradeToGPA(grade string) float64 {
 }
 
 type Course struct {
-	Id                           string  `json:"id" gorm:"primaryKey;type:char(255)"`
-	Name                         string  `json:"name"`
-	Code                         string  `json:"code"`
-	Curriculum                   string  `json:"curriculum"`
-	Description                  string  `json:"description"`
-	ExpectedPassingCloPercentage float64 `json:"expectedPassingCloPercentage"`
-	IsPortfolioCompleted         *bool   `json:"isPortfolioCompleted" gorm:"default:false"`
-	PortfolioData                datatypes.JSON
-	AcademicYear                 int `json:"academicYear"`
-	GraduateYear                 int `json:"graduateYear"`
-	ProgramYear                  int `json:"programYear"`
+	Id                           string         `json:"id" gorm:"primaryKey;type:char(255)"`
+	Name                         string         `json:"name"`
+	Code                         string         `json:"code"`
+	Curriculum                   string         `json:"curriculum"`
+	Description                  string         `json:"description"`
+	ExpectedPassingCloPercentage float64        `json:"expected_passing_clo_percentage"`
+	IsPortfolioCompleted         *bool          `json:"is_portfolio_completed" gorm:"default:false"`
+	PortfolioData                datatypes.JSON `json:"portfolio_data" gorm:"type:json"`
+	AcademicYear                 int            `json:"academic_year"`
+	GraduateYear                 int            `json:"graduate_year"`
+	ProgramYear                  int            `json:"program_year"`
 
-	SemesterId string `json:"semesterId"`
-	UserId     string `json:"userId"`
+	SemesterId string `json:"semester_id"`
+	UserId     string `json:"user_id"`
 	CriteriaGrade
 
 	Semester Semester `json:"semester"`
@@ -85,16 +103,16 @@ type Course struct {
 }
 
 type CreateCoursePayload struct {
-	SemesterId                   string  `json:"semesterId" validate:"required"`
-	UserId                       string  `json:"userId" validate:"required"`
+	SemesterId                   string  `json:"semester_id" validate:"required"`
+	UserId                       string  `json:"user_id" validate:"required"`
 	Name                         string  `json:"name" validate:"required"`
 	Code                         string  `json:"code" validate:"required"`
 	Curriculum                   string  `json:"curriculum" validate:"required"`
 	Description                  string  `json:"description" validate:"required"`
-	ExpectedPassingCloPercentage float64 `json:"expectedPassingCloPercentage" validate:"required"`
-	AcademicYear                 int     `json:"academicYear" validate:"required"`
-	GraduateYear                 int     `json:"graduateYear" validate:"required"`
-	ProgramYear                  int     `json:"programYear" validate:"required"`
+	ExpectedPassingCloPercentage float64 `json:"expected_passing_clo_percentage" validate:"required"`
+	AcademicYear                 int     `json:"academic_year" validate:"required"`
+	GraduateYear                 int     `json:"graduate_year" validate:"required"`
+	ProgramYear                  int     `json:"program_year" validate:"required"`
 	CriteriaGrade
 }
 
@@ -103,27 +121,10 @@ type UpdateCoursePayload struct {
 	Code                         string  `json:"code" validate:"required"`
 	Curriculum                   string  `json:"curriculum" validate:"required"`
 	Description                  string  `json:"description" validate:"required"`
-	ExpectedPassingCloPercentage float64 `json:"expectedPassingCloPercentage" validate:"required"`
-	AcademicYear                 int     `json:"academicYear" validate:"required"`
-	GraduateYear                 int     `json:"graduateYear" validate:"required"`
-	ProgramYear                  int     `json:"programYear" validate:"required"`
-	IsPortfolioCompleted         *bool   `json:"isPortfolioCompleted" validate:"required"`
+	ExpectedPassingCloPercentage float64 `json:"expected_passing_clo_percentage" validate:"required"`
+	AcademicYear                 int     `json:"academic_year" validate:"required"`
+	GraduateYear                 int     `json:"graduate_year" validate:"required"`
+	ProgramYear                  int     `json:"program_year" validate:"required"`
+	IsPortfolioCompleted         *bool   `json:"is_portfolio_completed" validate:"required"`
 	CriteriaGrade
-}
-
-type CourseRepository interface {
-	GetAll() ([]Course, error)
-	GetById(id string) (*Course, error)
-	GetByUserId(userId string) ([]Course, error)
-	Create(course *Course) error
-	Update(id string, course *Course) error
-	Delete(id string) error
-}
-type CourseUseCase interface {
-	GetAll() ([]Course, error)
-	GetById(id string) (*Course, error)
-	GetByUserId(userId string) ([]Course, error)
-	Create(user User, payload CreateCoursePayload) error
-	Update(user User, id string, name string, code string, curriculum string, description string, expectedPassingCloPercentage float64, academicYear int, graduateYear int, programYear int, criteriaGrade CriteriaGrade, isPortfolioCompleted bool) error
-	Delete(user User, id string) error
 }

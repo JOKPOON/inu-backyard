@@ -102,16 +102,7 @@ func (c CourseController) Update(ctx *fiber.Ctx) error {
 	err := c.CourseUseCase.Update(
 		*user,
 		id,
-		payload.Name,
-		payload.Code,
-		payload.Curriculum,
-		payload.Description,
-		payload.ExpectedPassingCloPercentage,
-		payload.AcademicYear,
-		payload.GraduateYear,
-		payload.ProgramYear,
-		payload.CriteriaGrade,
-		*payload.IsPortfolioCompleted,
+		payload,
 	)
 	if err != nil {
 		return err

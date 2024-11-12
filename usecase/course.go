@@ -100,7 +100,7 @@ func (u courseUseCase) Create(user entity.User, payload entity.CreateCoursePaylo
 	return nil
 }
 
-func (u courseUseCase) Update(user entity.User, id string, name string, code string, curriculum string, description string, expectedPassingCloPercentage float64, academicYear int, graduateYear int, programYear int, criteriaGrade entity.CriteriaGrade, isPortfolioCompleted bool) error {
+func (u courseUseCase) Update(user entity.User, id string, payload entity.UpdateCoursePayload) error {
 	existCourse, err := u.GetById(id)
 	if err != nil {
 		return errs.New(errs.SameCode, "cannot get course id %s to update", id, err)
@@ -112,21 +112,21 @@ func (u courseUseCase) Update(user entity.User, id string, name string, code str
 		return errs.New(errs.ErrCreateCourse, "No permission to edit this course")
 	}
 
-	if !criteriaGrade.IsValid() {
+	if !payload.CriteriaGrade.IsValid() {
 		return errs.New(errs.ErrCreateCourse, "invalid criteria grade")
 	}
 
 	err = u.courseRepo.Update(id, &entity.Course{
-		Name:                         name,
-		Code:                         code,
-		Curriculum:                   curriculum,
-		Description:                  description,
-		CriteriaGrade:                criteriaGrade,
-		ExpectedPassingCloPercentage: expectedPassingCloPercentage,
-		AcademicYear:                 academicYear,
-		GraduateYear:                 graduateYear,
-		ProgramYear:                  programYear,
-		IsPortfolioCompleted:         &isPortfolioCompleted,
+		Name:                         payload.Name,
+		Code:                         payload.Code,
+		Curriculum:                   payload.Curriculum,
+		Description:                  payload.Description,
+		CriteriaGrade:                payload.CriteriaGrade,
+		ExpectedPassingCloPercentage: payload.ExpectedPassingCloPercentage,
+		AcademicYear:                 payload.AcademicYear,
+		GraduateYear:                 payload.GraduateYear,
+		ProgramYear:                  payload.ProgramYear,
+		IsPortfolioCompleted:         payload.IsPortfolioCompleted,
 	})
 	if err != nil {
 		return errs.New(errs.ErrUpdateCourse, "cannot update course by id %s", id, err)

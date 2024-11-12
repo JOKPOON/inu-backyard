@@ -3,6 +3,7 @@
     "/[\\u0E00-\\u0E7F]+/"
   ],
   "cSpell.words": [
+    "datatypes",
     "foreignkey",
     "gofiber",
     "Gorm",
@@ -14,6 +15,7 @@
     "splos",
     "sqlx",
     "stretchr",
+    "subplo",
     "TABEE",
     "usecase",
     "varchar",
