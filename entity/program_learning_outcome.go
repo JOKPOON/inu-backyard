@@ -79,7 +79,7 @@ type CreateProgramLearningOutcome struct {
 	DescriptionEng             string                            `json:"description_eng"`
 	ProgramYear                int                               `validate:"required" json:"program_year"`
 	ProgrammeName              string                            `validate:"required" json:"programme_name"`
-	SubProgramLearningOutcomes []CreateSubProgramLearningOutcome `validate:"dive" json:"sub_program_learning_outcomes"`
+	SubProgramLearningOutcomes []CreateSubProgramLearningOutcome `json:"sub_program_learning_outcomes"`
 }
 
 type CreateProgramLearningOutcomePayload struct {

@@ -11,6 +11,7 @@ const (
 	UserRoleModerator        UserRole = "MODERATOR"
 	UserRoleHeadOfCurriculum UserRole = "HEAD_OF_CURRICULUM"
 	UserRoleTABEEManager     UserRole = "TABEE_MANAGER"
+	UserRoleABETManager      UserRole = "ABET_MANAGER"
 )
 
 func (u User) IsRoles(expectedRoles []UserRole) bool {

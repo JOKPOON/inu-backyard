@@ -345,3 +345,8 @@ type PortfolioData struct {
 	Summary     CourseSummary     `json:"summary"`
 	Development CourseDevelopment `json:"development"`
 }
+
+type SaveCoursePortfolioPayload struct {
+	CourseSummary     CourseSummary     `json:"summary" validate:"required"`
+	CourseDevelopment CourseDevelopment `json:"development" validate:"required"`
+}

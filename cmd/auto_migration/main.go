@@ -12,7 +12,7 @@ func main() {
 	gormDB, err := database.NewGorm(&database.GormConfig{
 		User:         "root",
 		Password:     "root",
-		Host:         "mysql",
+		Host:         "8.219.79.242",
 		DatabaseName: "inu_backyard",
 		Port:         "3306",
 	})

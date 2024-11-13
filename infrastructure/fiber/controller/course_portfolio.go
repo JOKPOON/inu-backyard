@@ -5,7 +5,6 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/team-inu/inu-backyard/entity"
-	request "github.com/team-inu/inu-backyard/infrastructure/fiber/request"
 	"github.com/team-inu/inu-backyard/infrastructure/fiber/response"
 	"github.com/team-inu/inu-backyard/internal/validator"
 )
@@ -69,7 +68,7 @@ func (c CoursePortfolioController) GetAllProgramOutcomeCourses(ctx *fiber.Ctx) e
 }
 
 func (c CoursePortfolioController) Update(ctx *fiber.Ctx) error {
-	var payload request.SaveCoursePortfolioPayload
+	var payload entity.SaveCoursePortfolioPayload
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
 		return err
 	}
