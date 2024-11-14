@@ -17,7 +17,7 @@ func NewCourseLearningOutcomeRepositoryGorm(gorm *gorm.DB) entity.CourseLearning
 
 func (r courseLearningOutcomeRepositoryGorm) GetAll() ([]entity.CourseLearningOutcome, error) {
 	var clos []entity.CourseLearningOutcome
-	err := r.gorm.Find(&clos).Error
+	err := r.gorm.Preload("SubProgramLearningOutcomes").Find(&clos).Error
 
 	if err == gorm.ErrRecordNotFound {
 		return nil, nil
