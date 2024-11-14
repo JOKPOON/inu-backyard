@@ -4,9 +4,8 @@ services:
   app:
     container_name: inu_server
     image: ghcr.io/jokpoon/inu-backyard:latest
-    ports:          # Replaced expose with ports to access outside the container
+    ports:
       - 3001:3001
-      - 443:443
     depends_on:
       mysql:
         condition: service_healthy
