@@ -1,6 +1,8 @@
 package usecase
 
 import (
+	"strings"
+
 	"github.com/team-inu/inu-backyard/entity"
 	errs "github.com/team-inu/inu-backyard/entity/error"
 	slice "github.com/team-inu/inu-backyard/internal/utils/slice"
@@ -15,6 +17,9 @@ func NewDepartmentUseCase(departmentRepository entity.DepartmentRepository) enti
 }
 
 func (u DepartmentUseCase) Create(department *entity.Department) error {
+	department.FacultyName = strings.ToLower(department.FacultyName)
+	department.Name = strings.ToLower(department.Name)
+
 	err := u.DepartmentRepo.Create(department)
 
 	if err != nil {

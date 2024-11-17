@@ -60,6 +60,8 @@ func (v *payloadValidator) Validate(payload interface{}, ctx *fiber.Ctx) (bool, 
 	if validationErrors := v.validateStruct(payload); validationErrors != nil {
 		return false, errs.NewPayloadError(validationErrors)
 	}
+
+	ToLower(payload)
 	return true, nil
 }
 
@@ -151,4 +153,34 @@ func fileParser(payload interface{}, ctx *fiber.Ctx) error {
 		}
 	}
 	return nil
+}
+
+func ToLower(payload interface{}) {
+	v := reflect.ValueOf(payload)
+	if v.Kind() != reflect.Ptr || v.Elem().Kind() != reflect.Struct {
+		panic("input must be a pointer to a struct")
+	}
+
+	v = v.Elem()
+
+	for i := 0; i < v.NumField(); i++ {
+		field := v.Field(i)
+
+		if !field.CanSet() {
+			continue
+		}
+
+		switch field.Kind() {
+		case reflect.String:
+			field.SetString(strings.ToLower(field.String()))
+		case reflect.Slice:
+			if field.Type().Elem().Kind() == reflect.Struct {
+				for j := 0; j < field.Len(); j++ {
+					ToLower(field.Index(j).Addr().Interface())
+				}
+			}
+		case reflect.Struct:
+			ToLower(field.Addr().Interface())
+		}
+	}
 }

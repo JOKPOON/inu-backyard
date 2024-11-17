@@ -49,6 +49,10 @@ type Student struct {
 	Department *Department `json:"department,omitempty"`
 }
 
+type CreateBulkStudentsPayload struct {
+	Students []CreateStudentPayload `json:"students" validate:"dive"`
+}
+
 type CreateStudentPayload struct {
 	Id        string   `json:"id" validate:"required"`
 	FirstName string   `json:"first_name" validate:"required"`
@@ -72,10 +76,6 @@ type GetStudentsByParamsPayload struct {
 	Year           string `json:"year"`
 	ProgrammeName  string `json:"programme_name"`
 	DepartmentName string `json:"department_name"`
-}
-
-type CreateBulkStudentsPayload struct {
-	Students []CreateStudentPayload `json:"students" validate:"dive"`
 }
 
 type UpdateStudentPayload struct {
