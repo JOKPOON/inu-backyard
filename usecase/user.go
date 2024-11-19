@@ -82,6 +82,7 @@ func (u userUseCase) Create(payload entity.CreateUserPayload) error {
 		Email:     payload.Email,
 		LastName:  payload.LastName,
 		Password:  hashPassword,
+		Role:      payload.Role,
 	}
 
 	err = u.userRepo.Create(user)

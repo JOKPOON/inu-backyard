@@ -61,7 +61,6 @@ func (v *payloadValidator) Validate(payload interface{}, ctx *fiber.Ctx) (bool, 
 		return false, errs.NewPayloadError(validationErrors)
 	}
 
-	ToLower(payload)
 	return true, nil
 }
 
