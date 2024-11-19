@@ -2,6 +2,7 @@ package entity
 
 type AssignmentRepository interface {
 	GetAll() ([]Assignment, error)
+	GetAllGroup() ([]AssignmentGroup, error)
 	GetById(id string) (*Assignment, error)
 	GetByCourseId(courseId string) ([]Assignment, error)
 	GetByGroupId(groupId string) ([]Assignment, error)
@@ -23,6 +24,7 @@ type AssignmentRepository interface {
 
 type AssignmentUseCase interface {
 	GetAll() ([]Assignment, error)
+	GetAllGroup() ([]AssignmentGroup, error)
 	GetById(id string) (*Assignment, error)
 	GetByCourseId(courseId string) ([]Assignment, error)
 	GetByGroupId(assignmentGroupId string) ([]Assignment, error)

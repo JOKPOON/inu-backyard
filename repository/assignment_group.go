@@ -1,11 +1,23 @@
 package repository
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/team-inu/inu-backyard/entity"
 	"gorm.io/gorm"
 )
+
+func (r assignmentRepositoryGorm) GetAllGroup() ([]entity.AssignmentGroup, error) {
+	var assignmentGroup []entity.AssignmentGroup
+
+	err := r.gorm.Find(&assignmentGroup).Error
+	if err != nil {
+		return nil, errors.New("cannot get assignment group")
+	}
+
+	return assignmentGroup, nil
+}
 
 func (r assignmentRepositoryGorm) GetGroupByQuery(query entity.AssignmentGroup, withAssignment bool) ([]entity.AssignmentGroup, error) {
 	var assignmentGroup []entity.AssignmentGroup

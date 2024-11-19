@@ -298,6 +298,7 @@ func (f *fiberServer) initController() error {
 	assignment.Get("/:assignmentId/scores", scoreController.GetByAssignmentId)
 
 	assignmentGroup := api.Group("/assignment-groups", authMiddleware)
+	assignmentGroup.Get("/", assignmentController.GetAllGroup)
 	assignmentGroup.Post("/", assignmentController.CreateGroup)
 	assignmentGroup.Patch("/:assignmentGroupId", assignmentController.UpdateGroup)
 	assignmentGroup.Delete("/:assignmentGroupId", assignmentController.DeleteGroup)

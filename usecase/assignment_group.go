@@ -6,6 +6,15 @@ import (
 	errs "github.com/team-inu/inu-backyard/entity/error"
 )
 
+func (u assignmentUseCase) GetAllGroup() ([]entity.AssignmentGroup, error) {
+	assignmentGroup, err := u.assignmentRepo.GetAllGroup()
+	if err != nil {
+		return nil, errs.New(errs.SameCode, "cannot get assignment group", assignmentGroup, err)
+	}
+
+	return assignmentGroup, nil
+}
+
 func (u assignmentUseCase) GetGroupByGroupId(assignmentGroupId string) (*entity.AssignmentGroup, error) {
 	assignmentGroup, err := u.assignmentRepo.GetGroupByGroupId(assignmentGroupId)
 	if err != nil {

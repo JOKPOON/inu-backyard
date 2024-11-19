@@ -7,6 +7,15 @@ import (
 	"github.com/team-inu/inu-backyard/infrastructure/fiber/response"
 )
 
+func (c AssignmentController) GetAllGroup(ctx *fiber.Ctx) error {
+	assignmentGroups, err := c.AssignmentUseCase.GetAllGroup()
+	if err != nil {
+		return err
+	}
+
+	return response.NewSuccessResponse(ctx, fiber.StatusOK, assignmentGroups)
+}
+
 func (c AssignmentController) GetGroupByCourseId(ctx *fiber.Ctx) error {
 	courseId := ctx.Params("courseId")
 
