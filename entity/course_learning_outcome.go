@@ -35,6 +35,7 @@ type CourseLearningOutcome struct {
 	CourseId                            string  `json:"course_id"`
 
 	SubProgramLearningOutcomes []*SubProgramLearningOutcome `gorm:"many2many:clo_subplo" json:"sub_program_learning_outcomes"`
+	SubStudentOutcomes         []*SubStudentOutcome         `gorm:"many2many:clo_subso" json:"-"`
 	Assignments                []*Assignment                `gorm:"many2many:clo_assignment" json:"-"`
 	ProgramOutcome             ProgramOutcome               `json:"-"`
 	Course                     Course                       `json:"-"`
