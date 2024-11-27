@@ -81,10 +81,10 @@ func (r courseLearningOutcomeRepositoryGorm) Create(courseLearningOutcome *entit
 	return r.gorm.Create(&courseLearningOutcome).Error
 }
 
-func (r courseLearningOutcomeRepositoryGorm) CreateLinkSubProgramLearningOutcome(id string, subProgramLearningOutcomeId []string) error {
+func (r courseLearningOutcomeRepositoryGorm) CreateLinkSubProgramLearningOutcome(id string, subProgramLearningOutcomeIds []string) error {
 
 	var query string
-	for _, sploId := range subProgramLearningOutcomeId {
+	for _, sploId := range subProgramLearningOutcomeIds {
 		query += fmt.Sprintf("('%s', '%s'),", id, sploId)
 	}
 
@@ -94,6 +94,25 @@ func (r courseLearningOutcomeRepositoryGorm) CreateLinkSubProgramLearningOutcome
 
 	if err != nil {
 		return fmt.Errorf("cannot create link between CLO and SPLO: %w", err)
+	}
+	go cacheOutcomes(r.gorm, TabeeSelectorAllPloCourses)
+	go cacheOutcomes(r.gorm, TabeeSelectorAllPoCourses)
+
+	return nil
+}
+
+func (r courseLearningOutcomeRepositoryGorm) CreateLinkSubStudentOutcome(id string, subStudentOutcomeIds []string) error {
+	var query string
+	for _, ssoId := range subStudentOutcomeIds {
+		query += fmt.Sprintf("('%s', '%s'),", id, ssoId)
+	}
+
+	query = query[:len(query)-1]
+
+	err := r.gorm.Exec(fmt.Sprintf("INSERT INTO `clo_subso` (course_learning_outcome_id, sub_student_outcome_id) VALUES %s", query)).Error
+
+	if err != nil {
+		return fmt.Errorf("cannot create link between CLO and SSO: %w", err)
 	}
 	go cacheOutcomes(r.gorm, TabeeSelectorAllPloCourses)
 	go cacheOutcomes(r.gorm, TabeeSelectorAllPoCourses)
@@ -134,6 +153,18 @@ func (r courseLearningOutcomeRepositoryGorm) DeleteLinkSubProgramLearningOutcome
 
 	if err != nil {
 		return fmt.Errorf("cannot delete link between CLO and SPLO: %w", err)
+	}
+	go cacheOutcomes(r.gorm, TabeeSelectorAllPloCourses)
+	go cacheOutcomes(r.gorm, TabeeSelectorAllPoCourses)
+
+	return nil
+}
+
+func (r courseLearningOutcomeRepositoryGorm) DeleteLinkSubStudentOutcome(id string, subStudentOutcomeId string) error {
+	err := r.gorm.Exec("DELETE FROM `clo_subso` WHERE course_learning_outcome_id =? AND sub_student_outcome_id =?", id, subStudentOutcomeId).Error
+
+	if err != nil {
+		return fmt.Errorf("cannot delete link between CLO and SSO: %w", err)
 	}
 	go cacheOutcomes(r.gorm, TabeeSelectorAllPloCourses)
 	go cacheOutcomes(r.gorm, TabeeSelectorAllPoCourses)

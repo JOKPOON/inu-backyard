@@ -25,6 +25,7 @@ type fiberServer struct {
 	studentRepository                entity.StudentRepository
 	courseRepository                 entity.CourseRepository
 	courseLearningOutcomeRepository  entity.CourseLearningOutcomeRepository
+	studentOutcomeRepository         entity.StudentOutcomeRepository
 	programLearningOutcomeRepository entity.ProgramLearningOutcomeRepository
 	programOutcomeRepository         entity.ProgramOutcomeRepository
 	facultyRepository                entity.FacultyRepository
@@ -44,6 +45,7 @@ type fiberServer struct {
 	studentUseCase                entity.StudentUseCase
 	courseUseCase                 entity.CourseUseCase
 	courseLearningOutcomeUseCase  entity.CourseLearningOutcomeUseCase
+	studentOutcomeUseCase         entity.StudentOutcomeUseCase
 	programLearningOutcomeUseCase entity.ProgramLearningOutcomeUseCase
 	programOutcomeUseCase         entity.ProgramOutcomeUseCase
 	facultyUseCase                entity.FacultyUseCase
@@ -91,6 +93,7 @@ func (f *fiberServer) initRepository() {
 	f.studentRepository = repository.NewStudentRepositoryGorm(f.gorm)
 	f.courseRepository = repository.NewCourseRepositoryGorm(f.gorm)
 	f.courseLearningOutcomeRepository = repository.NewCourseLearningOutcomeRepositoryGorm(f.gorm)
+	f.studentOutcomeRepository = repository.NewStudentOutcomeRepositoryGorm(f.gorm)
 	f.programLearningOutcomeRepository = repository.NewProgramLearningOutcomeRepositoryGorm(f.gorm)
 	f.programOutcomeRepository = repository.NewProgramOutcomeRepositoryGorm(f.gorm)
 	f.facultyRepository = repository.NewFacultyRepositoryGorm(f.gorm)
@@ -113,6 +116,7 @@ func (f *fiberServer) initUseCase() {
 	f.facultyUseCase = usecase.NewFacultyUseCase(f.facultyRepository)
 	f.departmentUseCase = usecase.NewDepartmentUseCase(f.departmentRepository)
 	f.studentUseCase = usecase.NewStudentUseCase(f.studentRepository, f.departmentUseCase, f.programmeUseCase)
+
 	f.programLearningOutcomeUseCase = usecase.NewProgramLearningOutcomeUseCase(f.programLearningOutcomeRepository, f.programmeUseCase)
 	f.userUseCase = usecase.NewUserUseCase(f.userRepository)
 	f.semesterUseCase = usecase.NewSemesterUseCase(f.semesterRepository)
@@ -122,7 +126,9 @@ func (f *fiberServer) initUseCase() {
 	f.sessionUseCase = usecase.NewSessionUseCase(f.sessionRepository, f.config.Client.Auth)
 	f.authUseCase = usecase.NewAuthUseCase(f.sessionUseCase, f.userUseCase)
 	f.programOutcomeUseCase = usecase.NewProgramOutcomeUseCase(f.programOutcomeRepository, f.semesterUseCase)
+	f.studentOutcomeUseCase = usecase.NewStudentOutcomeUseCase(f.studentOutcomeRepository, f.programmeUseCase)
 	f.courseLearningOutcomeUseCase = usecase.NewCourseLearningOutcomeUseCase(f.courseLearningOutcomeRepository, f.courseUseCase, f.programOutcomeUseCase, f.programLearningOutcomeUseCase)
+
 	f.assignmentUseCase = usecase.NewAssignmentUseCase(f.assignmentRepository, f.courseLearningOutcomeUseCase, f.courseUseCase)
 	f.scoreUseCase = usecase.NewScoreUseCase(f.scoreRepository, f.enrollmentUseCase, f.assignmentUseCase, f.courseUseCase, f.userUseCase, f.studentUseCase)
 	f.courseStreamUseCase = usecase.NewCourseStreamUseCase(f.courseStreamRepository, f.courseUseCase)
@@ -149,6 +155,7 @@ func (f *fiberServer) initController() error {
 	studentController := controller.NewStudentController(validator, f.studentUseCase)
 	courseController := controller.NewCourseController(validator, f.courseUseCase, f.importerUseCase)
 	courseLearningOutcomeController := controller.NewCourseLearningOutcomeController(validator, f.courseLearningOutcomeUseCase)
+	studentOutcomeController := controller.NewStudentOutcomeController(validator, f.studentOutcomeUseCase)
 	programLearningOutcomeController := controller.NewProgramLearningOutcomeController(validator, f.programLearningOutcomeUseCase)
 	subProgramLearningOutcomeController := controller.NewSubProgramLearningOutcomeController(validator, f.programLearningOutcomeUseCase)
 	programOutcomeController := controller.NewProgramOutcomeController(validator, f.programOutcomeUseCase)
@@ -217,6 +224,15 @@ func (f *fiberServer) initController() error {
 
 	sploByClo.Post("/", courseLearningOutcomeController.CreateLinkSubProgramLearningOutcome)
 	sploByClo.Delete("/:sploId", courseLearningOutcomeController.DeleteLinkSubProgramLearningOutcome)
+
+	// student outcome route
+	so := api.Group("/sos", authMiddleware)
+
+	so.Get("/", studentOutcomeController.GetAll)
+	so.Post("/", studentOutcomeController.Create)
+	so.Get("/:soId", studentOutcomeController.GetById)
+	so.Patch("/:soId", studentOutcomeController.Update)
+	so.Delete("/:soId", studentOutcomeController.Delete)
 
 	// program learning outcome route
 	plo := api.Group("/plos", authMiddleware)

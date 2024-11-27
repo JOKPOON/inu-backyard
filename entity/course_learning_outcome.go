@@ -5,10 +5,12 @@ type CourseLearningOutcomeRepository interface {
 	GetById(id string) (*CourseLearningOutcome, error)
 	GetByCourseId(courseId string) ([]CourseLearningOutcomeWithPO, error)
 	Create(courseLearningOutcome *CourseLearningOutcome) error
-	CreateLinkSubProgramLearningOutcome(id string, subProgramLearningOutcomeId []string) error
+	CreateLinkSubProgramLearningOutcome(id string, subProgramLearningOutcomeIds []string) error
+	CreateLinkSubStudentOutcome(id string, subStudentOutcomeIds []string) error
 	Update(id string, courseLearningOutcome *CourseLearningOutcome) error
 	Delete(id string) error
 	DeleteLinkSubProgramLearningOutcome(id string, subProgramLearningOutcomeId string) error
+	DeleteLinkSubStudentOutcome(id string, subStudentOutcomeId string) error
 	FilterExisted(ids []string) ([]string, error)
 }
 
@@ -17,10 +19,12 @@ type CourseLearningOutcomeUseCase interface {
 	GetById(id string) (*CourseLearningOutcome, error)
 	GetByCourseId(courseId string) ([]CourseLearningOutcomeWithPO, error)
 	Create(dto CreateCourseLearningOutcomePayload) error
-	CreateLinkSubProgramLearningOutcome(id string, subProgramLearningOutcomeId []string) error
+	CreateLinkSubProgramLearningOutcome(id string, subProgramLearningOutcomeIds []string) error
+	CreateLinkSubStudentOutcome(id string, subStudentOutcomeIds []string) error
 	Update(id string, dto UpdateCourseLearningOutcomePayload) error
 	Delete(id string) error
 	DeleteLinkSubProgramLearningOutcome(id string, subProgramLearningOutcomeId string) error
+	DeleteLinkSubStudentOutcome(id string, subStudentOutcomeId string) error
 	FilterNonExisted(ids []string) ([]string, error)
 }
 
@@ -81,6 +85,7 @@ type CreateCourseLearningOutcomePayload struct {
 	ProgramOutcomeId                    string   `json:"program_outcome_id" validate:"required"`
 	CourseId                            string   `json:"course_id" validate:"required"`
 	SubProgramLearningOutcomeIds        []string `json:"sub_program_learning_outcome_ids" validate:"required"`
+	SubStudentOutcomeIds                []string `json:"sub_student_outcome_ids" validate:"required"`
 }
 
 type UpdateCourseLearningOutcomePayload struct {
@@ -93,5 +98,9 @@ type UpdateCourseLearningOutcomePayload struct {
 }
 
 type CreateLinkSubProgramLearningOutcomePayload struct {
-	SubProgramLearningOutcomeId []string `json:"sub_program_learning_outcome_id" validate:"required"`
+	SubProgramLearningOutcomeIds []string `json:"sub_program_learning_outcome_ids" validate:"required"`
+}
+
+type CreateLinkSubStudentOutcomePayload struct {
+	SubStudentOutcomeIds []string `json:"sub_student_outcome_ids" validate:"required"`
 }

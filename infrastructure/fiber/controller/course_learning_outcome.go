@@ -77,7 +77,23 @@ func (c CourseLearningOutcomeController) CreateLinkSubProgramLearningOutcome(ctx
 		return err
 	}
 
-	err := c.CourseLearningOutcomeUseCase.CreateLinkSubProgramLearningOutcome(cloId, payload.SubProgramLearningOutcomeId)
+	err := c.CourseLearningOutcomeUseCase.CreateLinkSubProgramLearningOutcome(cloId, payload.SubProgramLearningOutcomeIds)
+	if err != nil {
+		return err
+	}
+
+	return response.NewSuccessResponse(ctx, fiber.StatusCreated, nil)
+}
+
+func (c CourseLearningOutcomeController) CreateLinkSubStudentOutcomePayload(ctx *fiber.Ctx) error {
+	cloId := ctx.Params("cloId")
+	var payload entity.CreateLinkSubStudentOutcomePayload
+
+	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
+		return err
+	}
+
+	err := c.CourseLearningOutcomeUseCase.CreateLinkSubStudentOutcome(cloId, payload.SubStudentOutcomeIds)
 	if err != nil {
 		return err
 	}

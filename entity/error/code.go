@@ -32,12 +32,19 @@ const (
 	ErrDeleteCLO    = 20303
 	ErrQueryCLO     = 20304
 	ErrUnLinkSubPLO = 20305
+	ErrUnlinkSubSO  = 20306
 
 	ErrPLONotFound = 20400
 	ErrCreatePLO   = 20401
 	ErrUpdatePLO   = 20402
 	ErrDeletePLO   = 20403
 	ErrQueryPLO    = 20404
+
+	ErrSONotFound = 20405
+	ErrCreateSO   = 20406
+	ErrUpdateSO   = 20407
+	ErrDeleteSO   = 20408
+	ErrQuerySO    = 20409
 
 	ErrPONotFound = 20500
 	ErrCreatePO   = 20501
@@ -50,6 +57,12 @@ const (
 	ErrUpdateSubPLO   = 20602
 	ErrDeleteSubPLO   = 20603
 	ErrQuerySubPLO    = 20604
+
+	ErrSubSONotFound = 20600
+	ErrCreateSubSO   = 20601
+	ErrUpdateSubSO   = 20602
+	ErrDeleteSubSO   = 20603
+	ErrQuerySubSO    = 20604
 
 	ErrFacultyNotFound = 20700
 	ErrCreateFaculty   = 20701
