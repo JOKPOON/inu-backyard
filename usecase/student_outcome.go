@@ -67,7 +67,7 @@ func (u StudentOutcomeUsecase) Create(payload []entity.CreateStudentOutcome) err
 	}
 
 	if len(ssos) > 0 {
-		err = u.studentOutcomeRepo.CreateSubSO(ssos)
+		err = u.studentOutcomeRepo.CreateManySubSO(ssos)
 		if err != nil {
 			return err
 		}

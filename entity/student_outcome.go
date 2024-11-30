@@ -4,12 +4,17 @@ type StudentOutcomeRepository interface {
 	GetAll() ([]StudentOutcome, error)
 	GetById(id string) (*StudentOutcome, error)
 	Create(studentOutcome *StudentOutcome) error
-	CreateSubSO(subStudentOutcome []*SubStudentOutcome) error
 	CreateMany(studentOutcome []*StudentOutcome) error
 	Update(id string, studentOutcome *StudentOutcome) error
 	Delete(id string) error
 	FilterExisted(ids []string) ([]string, error)
 
+	GetAllSubSO() ([]SubStudentOutcome, error)
+	GetSubSOById(id string) (*SubStudentOutcome, error)
+	UpdateSubSO(id string, payload *SubStudentOutcome) error
+	DeleteSubSO(id string) error
+	CreateSubSO(subStudentOutcome *SubStudentOutcome) error
+	CreateManySubSO(subStudentOutcome []*SubStudentOutcome) error
 	FilterExistedSubSO(ids []string) ([]string, error)
 }
 
@@ -21,6 +26,11 @@ type StudentOutcomeUseCase interface {
 	Delete(id string) error
 	FilterNonExisted(ids []string) ([]string, error)
 
+	GetAllSubSO() ([]SubStudentOutcome, error)
+	GetSubSOById(id string) (*SubStudentOutcome, error)
+	UpdateSubSO(id string, payload *UpdateSubStudentOutcomePayload) error
+	DeleteSubSO(id string) error
+	CreateSubSO(payload []CreateSubStudentOutcome) error
 	FilterNonExistedSubSO(ids []string) ([]string, error)
 }
 
@@ -54,7 +64,7 @@ type CreateSubStudentOutcome struct {
 }
 
 type CreateSubStudentOutcomePayload struct {
-	StudentOutcomes []CreateSubStudentOutcome `json:"sub_student_outcomes" validate:"required,dive"`
+	SubStudentOutcomes []CreateSubStudentOutcome `json:"sub_student_outcomes" validate:"required,dive"`
 }
 
 type CreateStudentOutcome struct {
@@ -76,4 +86,11 @@ type UpdateStudentOutcomePayload struct {
 	DescriptionEng  string `json:"description_eng" validate:"required"`
 	ProgramYear     int    `json:"program_year" validate:"required"`
 	ProgrammeName   string `json:"programme_name" validate:"required"`
+}
+
+type UpdateSubStudentOutcomePayload struct {
+	Code             string `validate:"required" json:"code"`
+	DescriptionThai  string `validate:"required" json:"description_thai"`
+	DescriptionEng   string `json:"description_eng"`
+	StudentOutcomeId string `json:"student_outcome_id"`
 }

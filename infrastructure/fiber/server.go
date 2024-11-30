@@ -158,6 +158,7 @@ func (f *fiberServer) initController() error {
 	studentOutcomeController := controller.NewStudentOutcomeController(validator, f.studentOutcomeUseCase)
 	programLearningOutcomeController := controller.NewProgramLearningOutcomeController(validator, f.programLearningOutcomeUseCase)
 	subProgramLearningOutcomeController := controller.NewSubProgramLearningOutcomeController(validator, f.programLearningOutcomeUseCase)
+	subStudentOutcomeController := controller.NewSubStudentOutcomeController(validator, f.studentOutcomeUseCase)
 	programOutcomeController := controller.NewProgramOutcomeController(validator, f.programOutcomeUseCase)
 	facultyController := controller.NewFacultyController(validator, f.facultyUseCase)
 	departmentController := controller.NewDepartmentController(validator, f.departmentUseCase)
@@ -233,6 +234,15 @@ func (f *fiberServer) initController() error {
 	so.Get("/:soId", studentOutcomeController.GetById)
 	so.Patch("/:soId", studentOutcomeController.Update)
 	so.Delete("/:soId", studentOutcomeController.Delete)
+
+	// sub student outcome route
+	sso := api.Group("ssos", authMiddleware)
+
+	sso.Get("/", subStudentOutcomeController.GetAll)
+	sso.Get("/:ssoId", subStudentOutcomeController.GetById)
+	sso.Post("/", subStudentOutcomeController.Create)
+	sso.Patch("/:ssoId", subStudentOutcomeController.Update)
+	sso.Delete("/:ssoId", subStudentOutcomeController.Delete)
 
 	// program learning outcome route
 	plo := api.Group("/plos", authMiddleware)

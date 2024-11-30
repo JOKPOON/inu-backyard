@@ -7,6 +7,42 @@ import (
 	slice "github.com/team-inu/inu-backyard/internal/utils/slice"
 )
 
+func (u StudentOutcomeUsecase) GetAllSubSO() ([]entity.SubStudentOutcome, error) {
+	ssos, err := u.studentOutcomeRepo.GetAllSubSO()
+	if err != nil {
+		return nil, errs.New(errs.ErrQuerySubPLO, "cannot get all sub sos", err)
+	}
+
+	return ssos, nil
+}
+
+// func (u StudentOutcomeUsecase) GetSubPloByPloId(ploId string) ([]entity.SubStudentOutcome, error) {
+// 	splos, err := u.programLearningOutcomeRepo.GetSubPloByPloId(ploId)
+// 	if err != nil {
+// 		return nil, errs.New(errs.ErrQuerySubPLO, "cannot get sub plos by plo id", err)
+// 	}
+
+// 	return splos, nil
+// }
+
+// func (u StudentOutcomeUsecase) GetSubPloByCode(code string, programme string, year int) (*entity.SubStudentOutcome, error) {
+// 	splos, err := u.programLearningOutcomeRepo.GetSubPloByCode(code, programme, year)
+// 	if err != nil {
+// 		return nil, errs.New(errs.ErrQuerySubPLO, "cannot get sub plos by plo code", err)
+// 	}
+
+// 	return splos, nil
+// }
+
+func (u StudentOutcomeUsecase) GetSubSOById(id string) (*entity.SubStudentOutcome, error) {
+	sso, err := u.studentOutcomeRepo.GetSubSOById(id)
+	if err != nil {
+		return nil, errs.New(errs.ErrQuerySubPLO, "cannot get sub so by id %s", id, err)
+	}
+
+	return sso, nil
+}
+
 func (u StudentOutcomeUsecase) CreateSubSO(payload []entity.CreateSubStudentOutcome) error {
 	soIds := []string{}
 	for _, sso := range payload {
@@ -32,9 +68,53 @@ func (u StudentOutcomeUsecase) CreateSubSO(payload []entity.CreateSubStudentOutc
 		})
 	}
 
-	err = u.studentOutcomeRepo.CreateSubSO(subSos)
+	err = u.studentOutcomeRepo.CreateManySubSO(subSos)
 	if err != nil {
-		return errs.New(errs.ErrCreateSubPLO, "cannot create sub plo", err)
+		return errs.New(errs.ErrCreateSubPLO, "cannot create sub so", err)
+	}
+
+	return nil
+}
+
+func (u StudentOutcomeUsecase) UpdateSubSO(id string, subStudentOutcome *entity.UpdateSubStudentOutcomePayload) error {
+	existSubSO, err := u.GetSubSOById(id)
+	if err != nil {
+		return errs.New(errs.SameCode, "cannot get subSO id %s to update", id, err)
+	} else if existSubSO == nil {
+		return errs.New(errs.ErrSubPLONotFound, "cannot get subSO id %s to update", id)
+	}
+
+	nonExistedSoIds, err := u.FilterNonExisted([]string{subStudentOutcome.StudentOutcomeId})
+	if err != nil {
+		return errs.New(errs.SameCode, "cannot find non existing so id while updating sub so")
+	} else if len(nonExistedSoIds) > 0 {
+		return errs.New(errs.ErrCreateSubPLO, "so ids not existed while updating sub so %v", nonExistedSoIds)
+	}
+
+	err = u.studentOutcomeRepo.UpdateSubSO(id, &entity.SubStudentOutcome{
+		Code:             subStudentOutcome.Code,
+		DescriptionThai:  subStudentOutcome.DescriptionThai,
+		DescriptionEng:   subStudentOutcome.DescriptionEng,
+		StudentOutcomeId: subStudentOutcome.StudentOutcomeId,
+	})
+	if err != nil {
+		return errs.New(errs.ErrUpdateSubPLO, "cannot update subSO by id %s", id, err)
+	}
+
+	return nil
+}
+
+func (u StudentOutcomeUsecase) DeleteSubSO(id string) error {
+	existSubSO, err := u.GetSubSOById(id)
+	if err != nil {
+		return errs.New(errs.SameCode, "cannot get subSO id %s to delete", id, err)
+	} else if existSubSO == nil {
+		return errs.New(errs.ErrSubPLONotFound, "cannot get subSO id %s to delete", id)
+	}
+
+	err = u.studentOutcomeRepo.DeleteSubSO(id)
+	if err != nil {
+		return errs.New(errs.ErrDeleteSubPLO, "cannot delete sub so", err)
 	}
 
 	return nil
