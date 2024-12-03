@@ -52,8 +52,6 @@ type SubStudentOutcome struct {
 	DescriptionThai  string `validate:"required" json:"description_thai"`
 	DescriptionEng   string `json:"description_eng"`
 	StudentOutcomeId string `json:"student_outcome_id" gorm:"type:char(255)"`
-
-	StudentOutcome StudentOutcome `gorm:"foreignKey:StudentOutcomeId" json:"student_outcome"`
 }
 
 type CreateSubStudentOutcome struct {

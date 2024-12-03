@@ -127,7 +127,7 @@ func (f *fiberServer) initUseCase() {
 	f.authUseCase = usecase.NewAuthUseCase(f.sessionUseCase, f.userUseCase)
 	f.programOutcomeUseCase = usecase.NewProgramOutcomeUseCase(f.programOutcomeRepository, f.semesterUseCase)
 	f.studentOutcomeUseCase = usecase.NewStudentOutcomeUseCase(f.studentOutcomeRepository, f.programmeUseCase)
-	f.courseLearningOutcomeUseCase = usecase.NewCourseLearningOutcomeUseCase(f.courseLearningOutcomeRepository, f.courseUseCase, f.programOutcomeUseCase, f.programLearningOutcomeUseCase)
+	f.courseLearningOutcomeUseCase = usecase.NewCourseLearningOutcomeUseCase(f.courseLearningOutcomeRepository, f.courseUseCase, f.programOutcomeUseCase, f.programLearningOutcomeUseCase, f.studentOutcomeUseCase)
 
 	f.assignmentUseCase = usecase.NewAssignmentUseCase(f.assignmentRepository, f.courseLearningOutcomeUseCase, f.courseUseCase)
 	f.scoreUseCase = usecase.NewScoreUseCase(f.scoreRepository, f.enrollmentUseCase, f.assignmentUseCase, f.courseUseCase, f.userUseCase, f.studentUseCase)
@@ -225,6 +225,12 @@ func (f *fiberServer) initController() error {
 
 	sploByClo.Post("/", courseLearningOutcomeController.CreateLinkSubProgramLearningOutcome)
 	sploByClo.Delete("/:sploId", courseLearningOutcomeController.DeleteLinkSubProgramLearningOutcome)
+
+	// sub student outcome by course learning outcome route
+	ssoByClo := clo.Group("/:cloId/ssos", authMiddleware)
+
+	ssoByClo.Post("/", courseLearningOutcomeController.CreateLinkSubStudentOutcome)
+	ssoByClo.Delete("/:ssoId", courseLearningOutcomeController.DeleteLinkSubStudentOutcome)
 
 	// student outcome route
 	so := api.Group("/sos", authMiddleware)

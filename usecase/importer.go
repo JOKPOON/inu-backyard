@@ -200,7 +200,7 @@ func (u ImporterUseCase) UpdateOrCreate(
 			ExpectedPassingAssignmentPercentage: clo.ExpectedPassingAssignmentPercentage,
 			ExpectedPassingStudentPercentage:    clo.ExpectedPassingStudentPercentage,
 			CourseId:                            courseId,
-			ProgramOutcome:                      *programOutcome,
+			ProgramOutcomeId:                    programOutcome.Id,
 			SubProgramLearningOutcomes:          subPlos,
 		})
 	}

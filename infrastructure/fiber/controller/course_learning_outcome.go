@@ -85,7 +85,7 @@ func (c CourseLearningOutcomeController) CreateLinkSubProgramLearningOutcome(ctx
 	return response.NewSuccessResponse(ctx, fiber.StatusCreated, nil)
 }
 
-func (c CourseLearningOutcomeController) CreateLinkSubStudentOutcomePayload(ctx *fiber.Ctx) error {
+func (c CourseLearningOutcomeController) CreateLinkSubStudentOutcome(ctx *fiber.Ctx) error {
 	cloId := ctx.Params("cloId")
 	var payload entity.CreateLinkSubStudentOutcomePayload
 
@@ -135,6 +135,18 @@ func (c CourseLearningOutcomeController) DeleteLinkSubProgramLearningOutcome(ctx
 	subPloId := ctx.Params("sploId")
 
 	err := c.CourseLearningOutcomeUseCase.DeleteLinkSubProgramLearningOutcome(cloId, subPloId)
+	if err != nil {
+		return err
+	}
+
+	return response.NewSuccessResponse(ctx, fiber.StatusOK, nil)
+}
+
+func (c CourseLearningOutcomeController) DeleteLinkSubStudentOutcome(ctx *fiber.Ctx) error {
+	cloId := ctx.Params("cloId")
+	subSoId := ctx.Params("ssoId")
+
+	err := c.CourseLearningOutcomeUseCase.DeleteLinkSubStudentOutcome(cloId, subSoId)
 	if err != nil {
 		return err
 	}

@@ -20,12 +20,14 @@ func NewCourseLearningOutcomeUseCase(
 	courseUseCase entity.CourseUseCase,
 	programOutcomeUseCase entity.ProgramOutcomeUseCase,
 	programLearningOutcomeUseCase entity.ProgramLearningOutcomeUseCase,
+	studentOutcomeUseCase entity.StudentOutcomeUseCase,
 ) entity.CourseLearningOutcomeUseCase {
 	return &courseLearningOutcomeUseCase{
 		courseLearningOutcomeRepo:     courseLearningOutcomeRepo,
 		courseUseCase:                 courseUseCase,
 		programOutcomeUseCase:         programOutcomeUseCase,
 		programLearningOutcomeUseCase: programLearningOutcomeUseCase,
+		studentOutcomeUseCase:         studentOutcomeUseCase,
 	}
 }
 
@@ -64,8 +66,8 @@ func (u courseLearningOutcomeUseCase) GetByCourseId(courseId string) ([]entity.C
 }
 
 func (u courseLearningOutcomeUseCase) Create(payload entity.CreateCourseLearningOutcomePayload) error {
-	if len(payload.SubProgramLearningOutcomeIds) == 0 {
-		return errs.New(errs.ErrCreateCLO, "sub program learning outcome must not be empty when creating clo")
+	if payload.ExpectedPassingAssignmentPercentage > 100 || payload.ExpectedPassingAssignmentPercentage < 0 {
+		return errs.New(errs.ErrCreateCLO, "expected passing assignment percentage must be between 0 and 100")
 	}
 
 	course, err := u.courseUseCase.GetById(payload.CourseId)
@@ -75,24 +77,44 @@ func (u courseLearningOutcomeUseCase) Create(payload entity.CreateCourseLearning
 		return errs.New(errs.ErrCourseNotFound, "course id %s not found while creating clo", payload.CourseId)
 	}
 
-	po, err := u.programOutcomeUseCase.GetById(payload.ProgramOutcomeId)
-	if err != nil {
-		return errs.New(errs.SameCode, "cannot get program outcome id %s while creating clo", payload.ProgramOutcomeId, err)
-	} else if po == nil {
-		return errs.New(errs.ErrCourseNotFound, "program outcome id %s not found while creating clo", payload.ProgramOutcomeId)
+	if payload.ProgramOutcomeId != "" {
+		po, err := u.programOutcomeUseCase.GetById(payload.ProgramOutcomeId)
+		if err != nil {
+			return errs.New(errs.SameCode, "cannot get program outcome id %s while creating clo", payload.ProgramOutcomeId, err)
+		} else if po == nil {
+			return errs.New(errs.ErrCourseNotFound, "program outcome id %s not found while creating clo", payload.ProgramOutcomeId)
+		}
 	}
 
-	nonExistedSubPloIds, err := u.programLearningOutcomeUseCase.FilterNonExistedSubPLO(payload.SubProgramLearningOutcomeIds)
-	if err != nil {
-		return errs.New(errs.SameCode, "cannot get non existed sub plo ids while creating clo")
-	} else if len(nonExistedSubPloIds) != 0 {
-		return errs.New(errs.ErrCreateEnrollment, "there are non exist sub plo %v", nonExistedSubPloIds)
+	if len(payload.SubProgramLearningOutcomeIds) > 0 {
+		nonExistedSubPloIds, err := u.programLearningOutcomeUseCase.FilterNonExistedSubPLO(payload.SubProgramLearningOutcomeIds)
+		if err != nil {
+			return errs.New(errs.SameCode, "cannot get non existed sub plo ids while creating clo")
+		} else if len(nonExistedSubPloIds) != 0 {
+			return errs.New(errs.ErrCreateEnrollment, "there are non exist sub plo %v", nonExistedSubPloIds)
+		}
+	}
+
+	if len(payload.SubStudentOutcomeIds) > 0 {
+		nonExistedSubSoIds, err := u.studentOutcomeUseCase.FilterNonExistedSubSO(payload.SubStudentOutcomeIds)
+		if err != nil {
+			return errs.New(errs.SameCode, "cannot get non existed sub so ids while creating clo")
+		} else if len(nonExistedSubSoIds) != 0 {
+			return errs.New(errs.ErrCreateEnrollment, "there are non exist sub so %v", nonExistedSubSoIds)
+		}
 	}
 
 	subPlos := []*entity.SubProgramLearningOutcome{}
 	for _, ploId := range payload.SubProgramLearningOutcomeIds {
 		subPlos = append(subPlos, &entity.SubProgramLearningOutcome{
 			Id: ploId,
+		})
+	}
+
+	subSos := []*entity.SubStudentOutcome{}
+	for _, soId := range payload.SubStudentOutcomeIds {
+		subSos = append(subSos, &entity.SubStudentOutcome{
+			Id: soId,
 		})
 	}
 
@@ -103,9 +125,10 @@ func (u courseLearningOutcomeUseCase) Create(payload entity.CreateCourseLearning
 		Status:                              payload.Status,
 		ExpectedPassingAssignmentPercentage: payload.ExpectedPassingAssignmentPercentage,
 		ExpectedPassingStudentPercentage:    payload.ExpectedPassingStudentPercentage,
-		ProgramOutcomeId:                    payload.ProgramOutcomeId,
 		CourseId:                            payload.CourseId,
+		ProgramOutcomeId:                    payload.ProgramOutcomeId,
 		SubProgramLearningOutcomes:          subPlos,
+		SubStudentOutcomes:                  subSos,
 	}
 
 	err = u.courseLearningOutcomeRepo.Create(&clo)

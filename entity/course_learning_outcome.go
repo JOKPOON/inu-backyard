@@ -35,13 +35,12 @@ type CourseLearningOutcome struct {
 	ExpectedPassingAssignmentPercentage float64 `json:"expected_passing_assignment_percentage"`
 	ExpectedPassingStudentPercentage    float64 `json:"expected_passing_student_percentage"`
 	Status                              string  `json:"status"`
-	ProgramOutcomeId                    string  `json:"program_outcome_id"`
 	CourseId                            string  `json:"course_id"`
+	ProgramOutcomeId                    string  `json:"program_outcome_id"`
 
 	SubProgramLearningOutcomes []*SubProgramLearningOutcome `gorm:"many2many:clo_subplo" json:"sub_program_learning_outcomes"`
-	SubStudentOutcomes         []*SubStudentOutcome         `gorm:"many2many:clo_subso" json:"-"`
+	SubStudentOutcomes         []*SubStudentOutcome         `gorm:"many2many:clo_subso" json:"sub_student_outcomes"`
 	Assignments                []*Assignment                `gorm:"many2many:clo_assignment" json:"-"`
-	ProgramOutcome             ProgramOutcome               `json:"-"`
 	Course                     Course                       `json:"-"`
 }
 
@@ -82,19 +81,19 @@ type CreateCourseLearningOutcomePayload struct {
 	ExpectedPassingAssignmentPercentage float64  `json:"expected_passing_assignment_percentage" validate:"required"`
 	ExpectedPassingStudentPercentage    float64  `json:"expected_passing_student_percentage" validate:"required"`
 	Status                              string   `json:"status" validate:"required"`
-	ProgramOutcomeId                    string   `json:"program_outcome_id" validate:"required"`
 	CourseId                            string   `json:"course_id" validate:"required"`
-	SubProgramLearningOutcomeIds        []string `json:"sub_program_learning_outcome_ids" validate:"required"`
-	SubStudentOutcomeIds                []string `json:"sub_student_outcome_ids" validate:"required"`
+	ProgramOutcomeId                    string   `json:"program_outcome_id"`
+	SubProgramLearningOutcomeIds        []string `json:"sub_program_learning_outcome_ids"`
+	SubStudentOutcomeIds                []string `json:"sub_student_outcome_ids"`
 }
 
 type UpdateCourseLearningOutcomePayload struct {
 	Code                                string  `json:"code"`
 	Description                         string  `json:"description"`
-	ExpectedPassingAssignmentPercentage float64 `json:"expected_passing_assignment_percentage" validate:"required"`
-	ExpectedPassingStudentPercentage    float64 `json:"expected_passing_student_percentage" validate:"required"`
-	Status                              string  `json:"status" validate:"required"`
-	ProgramOutcomeId                    string  `json:"program_outcome_id" validate:"required"`
+	ExpectedPassingAssignmentPercentage float64 `json:"expected_passing_assignment_percentage"`
+	ExpectedPassingStudentPercentage    float64 `json:"expected_passing_student_percentage"`
+	Status                              string  `json:"status"`
+	ProgramOutcomeId                    string  `json:"program_outcome_id"`
 }
 
 type CreateLinkSubProgramLearningOutcomePayload struct {
