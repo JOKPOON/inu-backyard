@@ -81,16 +81,16 @@ type CreateStudentOutcomePayload struct {
 }
 
 type UpdateStudentOutcomePayload struct {
-	Code            string `json:"code" validate:"required"`
-	DescriptionThai string `json:"description_thai" validate:"required"`
-	DescriptionEng  string `json:"description_eng" validate:"required"`
-	ProgramYear     int    `json:"program_year" validate:"required"`
-	ProgrammeName   string `json:"programme_name" validate:"required"`
+	Code            string `json:"code"`
+	DescriptionThai string `json:"description_thai"`
+	DescriptionEng  string `json:"description_eng"`
+	ProgramYear     int    `json:"program_year"`
+	ProgrammeName   string `json:"programme_name"`
 }
 
 type UpdateSubStudentOutcomePayload struct {
-	Code             string `validate:"required" json:"code"`
-	DescriptionThai  string `validate:"required" json:"description_thai"`
+	Code             string `json:"code"`
+	DescriptionThai  string `json:"description_thai"`
 	DescriptionEng   string `json:"description_eng"`
 	StudentOutcomeId string `json:"student_outcome_id"`
 }

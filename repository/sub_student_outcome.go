@@ -41,9 +41,6 @@ func (r StudentOutcomeRepositoryGorm) UpdateSubSO(id string, subSO *entity.SubSt
 	if tx.Error != nil {
 		return fmt.Errorf("cannot update subSO: %w", tx.Error)
 	}
-	if tx.RowsAffected == 0 {
-		return fmt.Errorf("subSO not found")
-	}
 
 	//TODO: abet
 	go cacheOutcomes(r.gorm, TabeeSelectorAllPloCourses)
@@ -58,9 +55,6 @@ func (r StudentOutcomeRepositoryGorm) DeleteSubSO(id string) error {
 	if tx.Error != nil {
 		return fmt.Errorf("cannot delete subSO: %w", tx.Error)
 	}
-	if tx.RowsAffected == 0 {
-		return fmt.Errorf("subSO not found")
-	}
 
 	//TODO: abet
 	go cacheOutcomes(r.gorm, TabeeSelectorAllPloCourses)
@@ -74,6 +68,7 @@ func (r StudentOutcomeRepositoryGorm) CreateSubSO(subStudentOutcome *entity.SubS
 	if err != nil {
 		return fmt.Errorf("cannot create subStudentOutcome: %w", err)
 	}
+
 	go cacheOutcomes(r.gorm, TabeeSelectorAllPloCourses)
 	go cacheOutcomes(r.gorm, TabeeSelectorAllPoCourses)
 

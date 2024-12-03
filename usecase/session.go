@@ -88,7 +88,8 @@ func (u sessionUseCase) Create(
 		Name:     u.config.Session.CookieName,
 		SameSite: "None",
 		Value:    signedId,
-		HTTPOnly: true,
+		HTTPOnly: false,
+		Secure:   false,
 		Expires:  expiredAt,
 	}
 	return cookie, nil

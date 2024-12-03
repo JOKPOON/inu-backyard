@@ -98,7 +98,7 @@ func (u StudentOutcomeUsecase) UpdateSubSO(id string, subStudentOutcome *entity.
 		StudentOutcomeId: subStudentOutcome.StudentOutcomeId,
 	})
 	if err != nil {
-		return errs.New(errs.ErrUpdateSubPLO, "cannot update subSO by id %s", id, err)
+		return errs.New(errs.ErrUpdateSubPLO, err.Error(), err)
 	}
 
 	return nil
