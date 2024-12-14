@@ -22,7 +22,10 @@ func NewUserController(validator validator.PayloadValidator, userUseCase entity.
 }
 
 func (c UserController) GetAll(ctx *fiber.Ctx) error {
-	users, err := c.UserUseCase.GetAll()
+	pageIndex := ctx.Query("pageIndex")
+	pageSize := ctx.Query("pageSize")
+
+	users, err := c.UserUseCase.GetAll(pageIndex, pageSize)
 	if err != nil {
 		return err
 	}
@@ -74,11 +77,15 @@ func (c UserController) CreateMany(ctx *fiber.Ctx) error {
 
 	for _, user := range payload.Users {
 		newUsers = append(newUsers, entity.User{
-			FirstName: user.FirstName,
-			LastName:  user.LastName,
-			Email:     user.Email,
-			Role:      user.Role,
-			Password:  user.Password,
+			FirstNameTH:        user.FirstNameTH,
+			LastNameTH:         user.LastNameTH,
+			FirstNameEN:        user.FirstNameEN,
+			LastNameEN:         user.LastNameEN,
+			Email:              user.Email,
+			AcademicPositionTH: user.AcademicPositionTH,
+			AcademicPositionEN: user.AcademicPositionEN,
+			Role:               user.Role,
+			Password:           user.Password,
 		})
 	}
 
@@ -104,10 +111,14 @@ func (c UserController) Update(ctx *fiber.Ctx) error {
 	// }
 
 	err := c.UserUseCase.Update(targetUserId, &entity.User{
-		FirstName: payload.FirstName,
-		LastName:  payload.LastName,
-		Email:     payload.Email,
-		Role:      payload.Role,
+		FirstNameTH:        payload.FirstNameTH,
+		LastNameTH:         payload.LastNameTH,
+		FirstNameEN:        payload.FirstNameEN,
+		LastNameEN:         payload.LastNameEN,
+		AcademicPositionTH: payload.AcademicPositionTH,
+		AcademicPositionEN: payload.AcademicPositionEN,
+		Email:              payload.Email,
+		Role:               payload.Role,
 	})
 	if err != nil {
 		return err

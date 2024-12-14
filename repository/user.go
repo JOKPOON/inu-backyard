@@ -2,6 +2,7 @@ package repository
 
 import (
 	"fmt"
+	"math"
 
 	"github.com/team-inu/inu-backyard/entity"
 	"gorm.io/gorm"
@@ -15,17 +16,29 @@ func NewUserRepositoryGorm(gorm *gorm.DB) entity.UserRepository {
 	return &userRepositoryGorm{gorm: gorm}
 }
 
-func (r userRepositoryGorm) GetAll() ([]entity.User, error) {
+func (r userRepositoryGorm) GetAll(offset int, limit int) (*entity.Pagination, error) {
 	var users []entity.User
+	var pagination entity.Pagination
 
-	err := r.gorm.Find(&users).Error
+	err := r.gorm.Model(&entity.User{}).Count(&pagination.Total).Error
+	if err != nil {
+		return nil, fmt.Errorf("cannot count users: %w", err)
+	}
+
+	pagination.TotalPage = int(math.Ceil(float64(pagination.Total) / float64(limit)))
+
+	err = r.gorm.Offset(offset).Limit(limit).Find(&users).Error
 	if err == gorm.ErrRecordNotFound {
 		return nil, nil
 	} else if err != nil {
-		return nil, fmt.Errorf("cannot query to get users: %w", err)
+		return nil, fmt.Errorf("cannot query to get all users: %w", err)
 	}
 
-	return users, nil
+	pagination.Size = limit
+	pagination.Page = offset/limit + 1
+	pagination.Data = users
+
+	return &pagination, nil
 }
 
 func (r userRepositoryGorm) GetBySessionId(sessionId string) (*entity.User, error) {

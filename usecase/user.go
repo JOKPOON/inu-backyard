@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 	"github.com/oklog/ulid/v2"
 	"github.com/team-inu/inu-backyard/entity"
 	errs "github.com/team-inu/inu-backyard/entity/error"
@@ -24,8 +25,10 @@ func NewUserUseCase(userRepo entity.UserRepository) entity.UserUseCase {
 	return &userUseCase{userRepo: userRepo}
 }
 
-func (u userUseCase) GetAll() ([]entity.User, error) {
-	users, err := u.userRepo.GetAll()
+func (u userUseCase) GetAll(pageIndex string, pageSize string) (*entity.Pagination, error) {
+	offset, limit, err := utils.ValidatePagination(pageIndex, pageSize)
+
+	users, err := u.userRepo.GetAll(offset, limit)
 	if err != nil {
 		return nil, errs.New(errs.ErrQueryUser, "cannot get all users", err)
 	}
@@ -71,18 +74,30 @@ func (u userUseCase) GetByParams(params *entity.User, limit int, offset int) ([]
 }
 
 func (u userUseCase) Create(payload entity.CreateUserPayload) error {
+	if payload.Password == "" {
+		payload.Password = uuid.New().String()
+	}
+
 	hashPassword, err := utils.HashPassword(payload.Password)
 	if err != nil {
 
 	}
 
 	user := &entity.User{
-		Id:        ulid.Make().String(),
-		FirstName: payload.FirstName,
-		Email:     payload.Email,
-		LastName:  payload.LastName,
-		Password:  hashPassword,
-		Role:      payload.Role,
+		Id:                 ulid.Make().String(),
+		Email:              payload.Email,
+		FirstNameTH:        payload.FirstNameTH,
+		LastNameTH:         payload.LastNameTH,
+		FirstNameEN:        payload.FirstNameEN,
+		LastNameEN:         payload.LastNameEN,
+		AcademicPositionTH: payload.AcademicPositionTH,
+		AcademicPositionEN: payload.AcademicPositionEN,
+		Password:           hashPassword,
+		Role:               payload.Role,
+	}
+	fmt.Println(user.Role)
+	if !user.IsRoles(entity.Roles) {
+		return errs.New(errs.ErrCreateUser, "cannot create user", fmt.Errorf("role %s is not valid", user.Role))
 	}
 
 	err = u.userRepo.Create(user)

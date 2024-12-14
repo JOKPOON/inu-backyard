@@ -131,7 +131,7 @@ func (u coursePortfolioUseCase) Generate(courseId string) (*entity.CoursePortfol
 	courseInfo := entity.CourseInfo{
 		Name:      course.Name,
 		Code:      course.Code,
-		Lecturers: []string{fmt.Sprintf("%s %s", lecturer.FirstName, lecturer.LastName)},
+		Lecturers: []string{fmt.Sprintf("%s %s", lecturer.FirstNameTH, lecturer.LastNameTH)},
 		Programme: course.Curriculum,
 	}
 

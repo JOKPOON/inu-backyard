@@ -74,10 +74,10 @@ func TestUserRepository(t *testing.T) {
 
 	t.Run("TestCreateUser", func(t *testing.T) {
 		user := &entity.User{
-			Id:        "1",
-			Email:     "test@example.com",
-			FirstName: "Test",
-			LastName:  "User",
+			Id:          "1",
+			Email:       "test@example.com",
+			FirstNameTH: "Test",
+			LastNameTH:  "User",
 		}
 
 		err := repo.Create(user)
@@ -87,16 +87,16 @@ func TestUserRepository(t *testing.T) {
 		db.First(&result, "id = ?", user.Id)
 
 		assert.Equal(t, user.Email, result.Email, "Expected user email to match")
-		assert.Equal(t, user.FirstName, result.FirstName, "Expected user first name to match")
-		assert.Equal(t, user.LastName, result.LastName, "Expected user last name to match")
+		assert.Equal(t, user.FirstNameTH, result.FirstNameTH, "Expected user first name to match")
+		assert.Equal(t, user.LastNameTH, result.LastNameTH, "Expected user last name to match")
 	})
 
 	t.Run("TestGetById", func(t *testing.T) {
 		user := &entity.User{
-			Id:        "2",
-			Email:     "test2@example.com",
-			FirstName: "Test2",
-			LastName:  "User",
+			Id:          "2",
+			Email:       "test2@example.com",
+			FirstNameTH: "Test2",
+			LastNameTH:  "User",
 		}
 		db.Create(user)
 
@@ -114,17 +114,17 @@ func TestUserRepository(t *testing.T) {
 
 	t.Run("TestUpdateUser", func(t *testing.T) {
 		user := &entity.User{
-			Id:        "4",
-			Email:     "update@example.com",
-			FirstName: "Update",
-			LastName:  "User",
+			Id:          "4",
+			Email:       "update@example.com",
+			FirstNameTH: "Update",
+			LastNameTH:  "User",
 		}
 		db.Create(user)
 
 		updatedUser := &entity.User{
-			Email:     "updated@example.com",
-			FirstName: "Updated",
-			LastName:  "User",
+			Email:       "updated@example.com",
+			FirstNameTH: "Updated",
+			LastNameTH:  "User",
 		}
 		err := repo.Update("4", updatedUser)
 		assert.Nil(t, err, "Expected no error while updating user, got %v", err)
@@ -133,16 +133,16 @@ func TestUserRepository(t *testing.T) {
 		db.First(&result, "id = ?", "4")
 
 		assert.Equal(t, "updated@example.com", result.Email, "Expected updated email to match")
-		assert.Equal(t, "Updated", result.FirstName, "Expected updated first name to match")
-		assert.Equal(t, "User", result.LastName, "Expected updated last name to match")
+		assert.Equal(t, "Updated", result.FirstNameTH, "Expected updated first name to match")
+		assert.Equal(t, "User", result.LastNameTH, "Expected updated last name to match")
 	})
 
 	t.Run("TestDeleteUser", func(t *testing.T) {
 		user := &entity.User{
-			Id:        "5",
-			Email:     "delete@example.com",
-			FirstName: "Delete",
-			LastName:  "User",
+			Id:          "5",
+			Email:       "delete@example.com",
+			FirstNameTH: "Delete",
+			LastNameTH:  "User",
 		}
 		db.Create(user)
 

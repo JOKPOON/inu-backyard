@@ -10,9 +10,19 @@ const (
 	UserRoleLecturer         UserRole = "LECTURER"
 	UserRoleModerator        UserRole = "MODERATOR"
 	UserRoleHeadOfCurriculum UserRole = "HEAD_OF_CURRICULUM"
+	UserRoleAUNQAManager     UserRole = "AUN-QA_MANAGER"
 	UserRoleTABEEManager     UserRole = "TABEE_MANAGER"
 	UserRoleABETManager      UserRole = "ABET_MANAGER"
 )
+
+var Roles = []UserRole{
+	UserRoleLecturer,
+	UserRoleModerator,
+	UserRoleHeadOfCurriculum,
+	UserRoleAUNQAManager,
+	UserRoleTABEEManager,
+	UserRoleABETManager,
+}
 
 func (u User) IsRoles(expectedRoles []UserRole) bool {
 	for _, expectedRole := range expectedRoles {
@@ -25,7 +35,7 @@ func (u User) IsRoles(expectedRoles []UserRole) bool {
 }
 
 type UserRepository interface {
-	GetAll() ([]User, error)
+	GetAll(offset int, limit int) (*Pagination, error)
 	GetById(id string) (*User, error)
 	GetByParams(params *User, limit int, offset int) ([]User, error)
 	GetByEmail(email string) (*User, error)
@@ -37,7 +47,7 @@ type UserRepository interface {
 }
 
 type UserUseCase interface {
-	GetAll() ([]User, error)
+	GetAll(index string, size string) (*Pagination, error)
 	GetById(id string) (*User, error)
 	GetByParams(params *User, limit int, offset int) ([]User, error)
 	GetByEmail(email string) (*User, error)
@@ -51,27 +61,39 @@ type UserUseCase interface {
 }
 
 type User struct {
-	Id        string   `json:"id" gorm:"primaryKey;type:char(255)"`
-	Email     string   `json:"email" gorm:"unique"`
-	Password  string   `json:"password"`
-	FirstName string   `json:"first_name"`
-	LastName  string   `json:"last_name"`
-	Role      UserRole `json:"role" gorm:"default:'LECTURER'"`
+	Id                 string   `json:"id" gorm:"primaryKey;type:char(255)"`
+	Email              string   `json:"email" gorm:"unique"`
+	Password           string   `json:"password"`
+	FirstNameTH        string   `json:"first_name_th"`
+	LastNameTH         string   `json:"last_name_th"`
+	FirstNameEN        string   `json:"first_name_en"`
+	LastNameEN         string   `json:"last_name_en"`
+	AcademicPositionTH string   `json:"academic_position_th"`
+	AcademicPositionEN string   `json:"academic_position_en"`
+	Role               UserRole `json:"role" gorm:"default:'LECTURER'"`
 }
 
 type CreateUserPayload struct {
-	FirstName string   `json:"first_name" validate:"required"`
-	LastName  string   `json:"last_name" validate:"required"`
-	Role      UserRole `json:"role" validate:"required"`
-	Email     string   `json:"email" validate:"required,email"`
-	Password  string   `json:"password" validate:"required"`
+	FirstNameTH        string   `json:"first_name_th" validate:"required"`
+	LastNameTH         string   `json:"last_name_th" validate:"required"`
+	FirstNameEN        string   `json:"first_name_en" validate:"required"`
+	LastNameEN         string   `json:"last_name_en" validate:"required"`
+	Role               UserRole `json:"role" validate:"required"`
+	AcademicPositionTH string   `json:"academic_position_th"`
+	AcademicPositionEN string   `json:"academic_position_en"`
+	Email              string   `json:"email" validate:"required,email"`
+	Password           string   `json:"password"`
 }
 
 type UpdateUserPayload struct {
-	FirstName string   `json:"first_name"`
-	LastName  string   `json:"last_name"`
-	Email     string   `json:"email" `
-	Role      UserRole `json:"role" `
+	FirstNameTH        string   `json:"first_name_th"`
+	LastNameTH         string   `json:"last_name_th"`
+	FirstNameEN        string   `json:"first_name_en"`
+	LastNameEN         string   `json:"last_name_en"`
+	Email              string   `json:"email"`
+	AcademicPositionTH string   `json:"academic_position_th"`
+	AcademicPositionEN string   `json:"academic_position_en"`
+	Role               UserRole `json:"role" `
 }
 
 type ChangePasswordPayload struct {
@@ -81,4 +103,12 @@ type ChangePasswordPayload struct {
 
 type CreateBulkUserPayload struct {
 	Users []CreateUserPayload `json:"users" validate:"dive"`
+}
+
+type Pagination struct {
+	Size      int         `json:"size"`
+	Page      int         `json:"page"`
+	TotalPage int         `json:"total_page"`
+	Total     int64       `json:"total"`
+	Data      interface{} `json:"data"`
 }
