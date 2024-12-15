@@ -92,3 +92,41 @@ func (c AuthController) SignOut(ctx *fiber.Ctx) error {
 		"signout_at": time.Now(),
 	})
 }
+
+func (c AuthController) ForgotPassword(ctx *fiber.Ctx) error {
+	var payload entity.ForgotPasswordPayload
+	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
+		return err
+	}
+
+	err := c.AuthUseCase.ForgotPassword(payload.Email)
+	if err != nil {
+		return err
+	}
+
+	return response.NewSuccessResponse(ctx, fiber.StatusOK, nil)
+}
+
+func (c AuthController) ResetPassword(ctx *fiber.Ctx) error {
+	var payload entity.ResetPasswordPayload
+	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
+		return err
+	}
+
+	err := c.AuthUseCase.ResetPassword(payload.Email, payload.Token, payload.NewPassword)
+	if err != nil {
+		return err
+	}
+
+	return response.NewSuccessResponse(ctx, fiber.StatusOK, nil)
+}
+
+func (c AuthController) GetSessionData(ctx *fiber.Ctx) error {
+	email := ctx.Params("email")
+	session, err := c.AuthUseCase.GetSession(email)
+	if err != nil {
+		return err
+	}
+
+	return response.NewSuccessResponse(ctx, fiber.StatusOK, session)
+}

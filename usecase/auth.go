@@ -8,6 +8,7 @@ import (
 )
 
 type authUseCase struct {
+	mailUseCase    entity.MailUseCase
 	sessionUseCase entity.SessionUseCase
 	userUserCase   entity.UserUseCase
 }
@@ -15,10 +16,12 @@ type authUseCase struct {
 func NewAuthUseCase(
 	sessionUseCase entity.SessionUseCase,
 	userUseCase entity.UserUseCase,
+	mailUseCase entity.MailUseCase,
 ) entity.AuthUseCase {
 	return &authUseCase{
 		sessionUseCase: sessionUseCase,
 		userUserCase:   userUseCase,
+		mailUseCase:    mailUseCase,
 	}
 }
 
@@ -91,4 +94,65 @@ func (u authUseCase) ChangePassword(userId string, oldPassword string, newPasswo
 	})
 
 	return nil
+}
+
+func (u authUseCase) ForgotPassword(email string) error {
+	user, err := u.userUserCase.GetByEmail(email)
+	if err != nil {
+		return errs.New(errs.SameCode, "cannot get user data to sign in", err)
+	} else if user == nil {
+		return errs.New(errs.ErrUserNotFound, "cannot find target user")
+	}
+
+	err = u.mailUseCase.SendForgotPasswordEmail(email)
+	if err != nil {
+		return errs.New(errs.SameCode, "cannot send forgot password email", err)
+	}
+
+	return nil
+}
+
+func (u authUseCase) ResetPassword(email string, token string, newPassword string) error {
+	user, err := u.userUserCase.GetByEmail(email)
+	if err != nil {
+		return errs.New(errs.SameCode, "cannot get user id by token", err)
+	}
+
+	err = u.mailUseCase.ValidateResetPasswordToken(email, token)
+	if err != nil {
+		return errs.New(errs.SameCode, "cannot validate reset password token", err)
+	}
+
+	newHashedPassword, err := utils.HashPassword(newPassword)
+	if err != nil {
+		return err
+	}
+
+	err = u.userUserCase.Update(user.Id, &entity.User{
+		Password: newHashedPassword,
+	})
+	if err != nil {
+		return errs.New(errs.SameCode, "cannot update user password", err)
+	}
+
+	err = u.mailUseCase.DeleteToken(email)
+	if err != nil {
+		return errs.New(errs.SameCode, "cannot delete token", err)
+	}
+
+	return nil
+}
+
+func (u authUseCase) GetSession(email string) (string, error) {
+	_, err := u.userUserCase.GetByEmail(email)
+	if err != nil {
+		return "", errs.New(errs.SameCode, "cannot get user data to sign in", err)
+	}
+
+	session, err := u.mailUseCase.GetToken(email)
+	if err != nil {
+		return "", errs.New(errs.SameCode, "cannot get session data", err)
+	}
+
+	return session, nil
 }

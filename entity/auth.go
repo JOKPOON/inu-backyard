@@ -7,6 +7,9 @@ type AuthUseCase interface {
 	SignIn(payload SignInPayload, ipAddress string, userAgent string) (*fiber.Cookie, error)
 	SignOut(header string) (*fiber.Cookie, error)
 	ChangePassword(userId string, oldPassword string, newPassword string) error
+	ForgotPassword(email string) error
+	ResetPassword(email string, token string, newPassword string) error
+	GetSession(email string) (string, error)
 }
 
 type SignInPayload struct {

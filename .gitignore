@@ -26,3 +26,7 @@ dist
 tmp
 
 config.yml
+
+.env
+
+session.txt

@@ -109,6 +109,16 @@ type ChangePasswordPayload struct {
 	NewPassword string `json:"new_password" validate:"required"`
 }
 
+type ForgotPasswordPayload struct {
+	Email string `json:"email" validate:"required,email"`
+}
+
+type ResetPasswordPayload struct {
+	Email       string `json:"email" validate:"required,email"`
+	Token       string `json:"token" validate:"required"`
+	NewPassword string `json:"new_password" validate:"required"`
+}
+
 type CreateBulkUserPayload struct {
 	Users []CreateUserPayload `json:"users" validate:"dive"`
 }

@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"math/rand"
 	"strconv"
 
 	errs "github.com/team-inu/inu-backyard/entity/error"
@@ -39,4 +40,13 @@ func ValidatePagination(pageIndex string, pageSize string) (int, int, error) {
 	offset := (page - 1) * size
 
 	return offset, size, nil
+}
+
+func GenerateRandomInt(length int) string {
+	const charset = "0123456789"
+	b := make([]byte, length)
+	for i := range b {
+		b[i] = charset[rand.Intn(len(charset))]
+	}
+	return string(b)
 }

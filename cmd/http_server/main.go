@@ -6,6 +6,7 @@ import (
 	"github.com/team-inu/inu-backyard/infrastructure/fiber"
 	"github.com/team-inu/inu-backyard/internal/config"
 	"github.com/team-inu/inu-backyard/internal/logger"
+	"github.com/team-inu/inu-backyard/internal/utils/session"
 )
 
 func main() {
@@ -23,11 +24,14 @@ func main() {
 
 	turnstile := captcha.NewTurnstile(fiberConfig.Client.Auth.Turnstile.SecretKey)
 
+	session := session.NewSession()
+
 	fiberServer := fiber.NewFiberServer(
 		fiberConfig,
 		gormDB,
 		turnstile,
 		zapLogger,
+		session,
 	)
 
 	fiberServer.Run()

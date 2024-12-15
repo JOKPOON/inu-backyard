@@ -9,6 +9,7 @@ import (
 	"github.com/team-inu/inu-backyard/infrastructure/fiber/controller"
 	"github.com/team-inu/inu-backyard/infrastructure/fiber/middleware"
 	"github.com/team-inu/inu-backyard/internal/config"
+	"github.com/team-inu/inu-backyard/internal/utils/session"
 	"github.com/team-inu/inu-backyard/internal/validator"
 	"github.com/team-inu/inu-backyard/repository"
 	"github.com/team-inu/inu-backyard/usecase"
@@ -21,6 +22,7 @@ type fiberServer struct {
 	gorm      *gorm.DB
 	turnstile *captcha.Turnstile
 	logger    *zap.Logger
+	session   session.SessionM
 
 	studentRepository                entity.StudentRepository
 	courseRepository                 entity.CourseRepository
@@ -41,6 +43,7 @@ type fiberServer struct {
 	coursePortfolioRepository        entity.CoursePortfolioRepository
 	courseStreamRepository           entity.CourseStreamRepository
 	importerRepository               repository.ImporterRepositoryGorm
+	mailRepository                   entity.MailRepository
 
 	studentUseCase                entity.StudentUseCase
 	courseUseCase                 entity.CourseUseCase
@@ -63,6 +66,8 @@ type fiberServer struct {
 	predictionUseCase             entity.PredictionUseCase
 	courseStreamUseCase           entity.CourseStreamsUseCase
 	importerUseCase               usecase.ImporterUseCase
+
+	mailUseCase entity.MailUseCase
 }
 
 func NewFiberServer(
@@ -70,12 +75,14 @@ func NewFiberServer(
 	gorm *gorm.DB,
 	turnstile *captcha.Turnstile,
 	logger *zap.Logger,
+	session session.SessionM,
 ) *fiberServer {
 	return &fiberServer{
 		config:    config,
 		gorm:      gorm,
 		turnstile: turnstile,
 		logger:    logger,
+		session:   session,
 	}
 }
 
@@ -109,6 +116,7 @@ func (f *fiberServer) initRepository() {
 	f.coursePortfolioRepository = repository.NewCoursePortfolioRepositoryGorm(f.gorm)
 	f.courseStreamRepository = repository.NewCourseStreamRepository(f.gorm)
 	f.importerRepository = repository.NewImporterRepositoryGorm(f.gorm)
+	f.mailRepository = repository.NewMailRepository(f.session)
 }
 
 func (f *fiberServer) initUseCase() {
@@ -124,7 +132,8 @@ func (f *fiberServer) initUseCase() {
 	f.enrollmentUseCase = usecase.NewEnrollmentUseCase(f.enrollmentRepository, f.studentUseCase, f.courseUseCase)
 	f.gradeUseCase = usecase.NewGradeUseCase(f.gradeRepository, f.studentUseCase, f.semesterUseCase)
 	f.sessionUseCase = usecase.NewSessionUseCase(f.sessionRepository, f.config.Client.Auth)
-	f.authUseCase = usecase.NewAuthUseCase(f.sessionUseCase, f.userUseCase)
+	f.mailUseCase = usecase.NewMailUseCase(f.mailRepository)
+	f.authUseCase = usecase.NewAuthUseCase(f.sessionUseCase, f.userUseCase, f.mailUseCase)
 	f.programOutcomeUseCase = usecase.NewProgramOutcomeUseCase(f.programOutcomeRepository, f.semesterUseCase)
 	f.studentOutcomeUseCase = usecase.NewStudentOutcomeUseCase(f.studentOutcomeRepository, f.programmeUseCase)
 	f.courseLearningOutcomeUseCase = usecase.NewCourseLearningOutcomeUseCase(f.courseLearningOutcomeRepository, f.courseUseCase, f.programOutcomeUseCase, f.programLearningOutcomeUseCase, f.studentOutcomeUseCase)
@@ -396,6 +405,10 @@ func (f *fiberServer) initController() error {
 	auth.Post("/login", authController.SignIn)
 	auth.Get("/logout", authMiddleware, authController.SignOut)
 	auth.Get("/me", authMiddleware, authController.Me)
+
+	auth.Post("/forgot-password", authController.ForgotPassword)
+	auth.Post("/reset-password", authController.ResetPassword)
+	auth.Get("/:email", authController.GetSessionData)
 
 	app.Get("/metrics", monitor.New())
 
