@@ -7,7 +7,6 @@ require (
 	github.com/gofiber/contrib/fiberzap/v2 v2.0.0
 	github.com/gofiber/fiber/v2 v2.52.1
 	github.com/google/uuid v1.6.0
-	github.com/joho/godotenv v1.5.1
 	github.com/oklog/ulid/v2 v2.1.0
 	github.com/spf13/viper v1.16.0
 	github.com/stretchr/testify v1.8.4

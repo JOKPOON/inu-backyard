@@ -84,7 +84,8 @@ func (c UserController) CreateMany(ctx *fiber.Ctx) error {
 			AcademicPositionTH: user.AcademicPositionTH,
 			AcademicPositionEN: user.AcademicPositionEN,
 			Role:               user.Role,
-			Degree:             user.Degree,
+			DegreeTH:           user.DegreeTH,
+			DegreeEN:           user.DegreeEN,
 			Password:           user.Password,
 		})
 	}
@@ -119,6 +120,8 @@ func (c UserController) Update(ctx *fiber.Ctx) error {
 		AcademicPositionEN: payload.AcademicPositionEN,
 		Email:              payload.Email,
 		Role:               payload.Role,
+		DegreeTH:           payload.DegreeTH,
+		DegreeEN:           payload.DegreeEN,
 	})
 	if err != nil {
 		return err

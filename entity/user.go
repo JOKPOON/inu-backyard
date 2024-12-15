@@ -76,7 +76,8 @@ type User struct {
 	AcademicPositionTH string   `json:"academic_position_th"`
 	AcademicPositionEN string   `json:"academic_position_en"`
 	Role               UserRole `json:"role" gorm:"default:'LECTURER'"`
-	Degree             string   `json:"degree"`
+	DegreeTH           string   `json:"degree_th"`
+	DegreeEN           string   `json:"degree_en"`
 }
 
 type CreateUserPayload struct {
@@ -89,7 +90,8 @@ type CreateUserPayload struct {
 	AcademicPositionEN string   `json:"academic_position_en"`
 	Email              string   `json:"email" validate:"required,email"`
 	Password           string   `json:"password"`
-	Degree             string   `json:"degree"`
+	DegreeTH           string   `json:"degree_th" validate:"required"`
+	DegreeEN           string   `json:"degree_en" validate:"required"`
 }
 
 type UpdateUserPayload struct {
@@ -101,7 +103,8 @@ type UpdateUserPayload struct {
 	AcademicPositionTH string   `json:"academic_position_th"`
 	AcademicPositionEN string   `json:"academic_position_en"`
 	Role               UserRole `json:"role" `
-	Degree             string   `json:"degree"`
+	DegreeTH           string   `json:"degree_th"`
+	DegreeEN           string   `json:"degree_en"`
 }
 
 type ChangePasswordPayload struct {

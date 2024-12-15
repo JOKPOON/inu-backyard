@@ -86,6 +86,13 @@ func (u userUseCase) Create(payload entity.CreateUserPayload) error {
 		return errs.New(errs.ErrCreateUser, "cannot create user", err)
 	}
 
+	existedUser, err := u.GetByEmail(payload.Email)
+	if err != nil {
+		return errs.New(errs.SameCode, "cannot get user by email %s to create", payload.Email, err)
+	} else if existedUser != nil {
+		return errs.New(errs.ErrCreateUser, "email already exists")
+	}
+
 	user := &entity.User{
 		Id:                 ulid.Make().String(),
 		Email:              payload.Email,
@@ -97,9 +104,10 @@ func (u userUseCase) Create(payload entity.CreateUserPayload) error {
 		AcademicPositionEN: payload.AcademicPositionEN,
 		Password:           hashPassword,
 		Role:               payload.Role,
-		Degree:             payload.Degree,
+		DegreeTH:           payload.DegreeTH,
+		DegreeEN:           payload.DegreeEN,
 	}
-	fmt.Println(user.Role)
+
 	if !user.IsRoles(entity.Roles) {
 		return errs.New(errs.ErrCreateUser, "cannot create user", fmt.Errorf("role %s is not valid", user.Role))
 	}

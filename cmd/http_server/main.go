@@ -23,7 +23,6 @@ func MustGetenv(key string) string {
 
 func main() {
 	fmt.Println("Starting server...")
-	fmt.Println(MustGetenv("SMTP_HOST"))
 
 	var fiberConfig config.FiberServerConfig
 
