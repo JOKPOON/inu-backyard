@@ -6,7 +6,6 @@ import (
 	"log"
 	"os"
 
-	"github.com/joho/godotenv"
 	gomail "gopkg.in/mail.v2"
 )
 
@@ -119,11 +118,6 @@ func MustGetenv(key string) string {
 }
 
 func MailConfig() *gomail.Dialer {
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
-
 	dialer := gomail.NewDialer(
 		MustGetenv("SMTP_HOST"),
 		587,

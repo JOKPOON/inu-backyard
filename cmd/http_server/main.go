@@ -1,6 +1,11 @@
 package main
 
 import (
+	"fmt"
+	"log"
+	"os"
+
+	"github.com/joho/godotenv"
 	"github.com/team-inu/inu-backyard/infrastructure/captcha"
 	"github.com/team-inu/inu-backyard/infrastructure/database"
 	"github.com/team-inu/inu-backyard/infrastructure/fiber"
@@ -9,7 +14,23 @@ import (
 	"github.com/team-inu/inu-backyard/internal/utils/session"
 )
 
+func MustGetenv(key string) string {
+	v := os.Getenv(key)
+	if v == "" {
+		log.Fatalf("Environment variable %s is not set", key)
+	}
+	return v
+}
+
 func main() {
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
+	fmt.Println("Starting server...")
+	fmt.Println(MustGetenv("SMTP_HOST"))
+
 	var fiberConfig config.FiberServerConfig
 
 	config.SetConfig(&fiberConfig)
