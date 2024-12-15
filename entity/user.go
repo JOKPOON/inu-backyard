@@ -1,6 +1,8 @@
 package entity
 
 import (
+	"strings"
+
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -26,8 +28,11 @@ var Roles = []UserRole{
 
 func (u User) IsRoles(expectedRoles []UserRole) bool {
 	for _, expectedRole := range expectedRoles {
-		if u.Role == expectedRole {
-			return true
+		role := strings.Split(string(u.Role), ",")
+		for _, r := range role {
+			if r == string(expectedRole) {
+				return true
+			}
 		}
 	}
 
@@ -71,6 +76,7 @@ type User struct {
 	AcademicPositionTH string   `json:"academic_position_th"`
 	AcademicPositionEN string   `json:"academic_position_en"`
 	Role               UserRole `json:"role" gorm:"default:'LECTURER'"`
+	Degree             string   `json:"degree"`
 }
 
 type CreateUserPayload struct {
@@ -83,6 +89,7 @@ type CreateUserPayload struct {
 	AcademicPositionEN string   `json:"academic_position_en"`
 	Email              string   `json:"email" validate:"required,email"`
 	Password           string   `json:"password"`
+	Degree             string   `json:"degree"`
 }
 
 type UpdateUserPayload struct {
@@ -94,6 +101,7 @@ type UpdateUserPayload struct {
 	AcademicPositionTH string   `json:"academic_position_th"`
 	AcademicPositionEN string   `json:"academic_position_en"`
 	Role               UserRole `json:"role" `
+	Degree             string   `json:"degree"`
 }
 
 type ChangePasswordPayload struct {

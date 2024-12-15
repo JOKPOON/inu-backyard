@@ -27,6 +27,9 @@ func NewUserUseCase(userRepo entity.UserRepository) entity.UserUseCase {
 
 func (u userUseCase) GetAll(pageIndex string, pageSize string) (*entity.Pagination, error) {
 	offset, limit, err := utils.ValidatePagination(pageIndex, pageSize)
+	if err != nil {
+		return nil, errs.New(errs.ErrQueryUser, "cannot get all users", err)
+	}
 
 	users, err := u.userRepo.GetAll(offset, limit)
 	if err != nil {
@@ -80,7 +83,7 @@ func (u userUseCase) Create(payload entity.CreateUserPayload) error {
 
 	hashPassword, err := utils.HashPassword(payload.Password)
 	if err != nil {
-
+		return errs.New(errs.ErrCreateUser, "cannot create user", err)
 	}
 
 	user := &entity.User{
@@ -94,6 +97,7 @@ func (u userUseCase) Create(payload entity.CreateUserPayload) error {
 		AcademicPositionEN: payload.AcademicPositionEN,
 		Password:           hashPassword,
 		Role:               payload.Role,
+		Degree:             payload.Degree,
 	}
 	fmt.Println(user.Role)
 	if !user.IsRoles(entity.Roles) {
@@ -176,8 +180,15 @@ func (u userUseCase) Delete(id string) error {
 
 func (r userUseCase) CheckUserRole(ctx *fiber.Ctx, userId string, role entity.UserRole) error {
 	user := middleware.GetUserFromCtx(ctx)
+
+	if user == nil {
+		return errs.New(errs.ErrUserNotFound, "cannot get user from context")
+	}
+
+	fmt.Println(user.Role)
+
 	if !user.IsRoles([]entity.UserRole{role}) {
-		return fmt.Errorf("user %s is not %s", userId, role)
+		return errs.New(errs.ErrUserNotFound, "user id %s is not the same as the user id in the context", userId)
 	}
 
 	return nil

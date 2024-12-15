@@ -74,7 +74,6 @@ func (c UserController) CreateMany(ctx *fiber.Ctx) error {
 	}
 
 	newUsers := make([]entity.User, 0, len(payload.Users))
-
 	for _, user := range payload.Users {
 		newUsers = append(newUsers, entity.User{
 			FirstNameTH:        user.FirstNameTH,
@@ -85,6 +84,7 @@ func (c UserController) CreateMany(ctx *fiber.Ctx) error {
 			AcademicPositionTH: user.AcademicPositionTH,
 			AcademicPositionEN: user.AcademicPositionEN,
 			Role:               user.Role,
+			Degree:             user.Degree,
 			Password:           user.Password,
 		})
 	}
