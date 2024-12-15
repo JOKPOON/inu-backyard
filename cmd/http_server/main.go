@@ -5,7 +5,6 @@ import (
 	"log"
 	"os"
 
-	"github.com/joho/godotenv"
 	"github.com/team-inu/inu-backyard/infrastructure/captcha"
 	"github.com/team-inu/inu-backyard/infrastructure/database"
 	"github.com/team-inu/inu-backyard/infrastructure/fiber"
@@ -23,11 +22,6 @@ func MustGetenv(key string) string {
 }
 
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
-
 	fmt.Println("Starting server...")
 	fmt.Println(MustGetenv("SMTP_HOST"))
 
