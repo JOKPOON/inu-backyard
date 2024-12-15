@@ -41,7 +41,7 @@ jobs:
 
   deploy:
     needs: build-and-push-docker-image
-    name: Deploy to Alibaba Cloud
+    name: Deploy to AWS
     runs-on: ubuntu-latest
 
     steps:
@@ -69,5 +69,5 @@ jobs:
           PORT=22
           ssh -o StrictHostKeyChecking=no $USER@$HOST << 'EOF'
             docker pull ghcr.io/jokpoon/inu-backyard:latest
-            docker compose -f /home/$USER/inu/docker-compose.yml up -d
+            docker-compose -f /home/$USER/inu/docker-compose.yml up -d
           EOF
