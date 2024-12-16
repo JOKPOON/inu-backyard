@@ -4,6 +4,7 @@
   ],
   "cSpell.words": [
     "AUNQA",
+    "cpus",
     "datatypes",
     "foreignkey",
     "godotenv",
@@ -12,6 +13,7 @@
     "Gorm",
     "GPAX",
     "healthcheck",
+    "jokpoon",
     "kmutt",
     "mysqladmin",
     "oklog",
