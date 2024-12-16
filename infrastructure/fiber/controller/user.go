@@ -24,8 +24,9 @@ func NewUserController(validator validator.PayloadValidator, userUseCase entity.
 func (c UserController) GetAll(ctx *fiber.Ctx) error {
 	pageIndex := ctx.Query("pageIndex")
 	pageSize := ctx.Query("pageSize")
+	query := ctx.Query("query")
 
-	users, err := c.UserUseCase.GetAll(pageIndex, pageSize)
+	users, err := c.UserUseCase.GetAll(query, pageIndex, pageSize)
 	if err != nil {
 		return err
 	}

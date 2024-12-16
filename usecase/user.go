@@ -25,13 +25,13 @@ func NewUserUseCase(userRepo entity.UserRepository) entity.UserUseCase {
 	return &userUseCase{userRepo: userRepo}
 }
 
-func (u userUseCase) GetAll(pageIndex string, pageSize string) (*entity.Pagination, error) {
+func (u userUseCase) GetAll(query string, pageIndex string, pageSize string) (*entity.Pagination, error) {
 	offset, limit, err := utils.ValidatePagination(pageIndex, pageSize)
 	if err != nil {
 		return nil, errs.New(errs.ErrQueryUser, "cannot get all users", err)
 	}
 
-	users, err := u.userRepo.GetAll(offset, limit)
+	users, err := u.userRepo.GetAll(query, offset, limit)
 	if err != nil {
 		return nil, errs.New(errs.ErrQueryUser, "cannot get all users", err)
 	}

@@ -16,7 +16,7 @@ func NewUserRepositoryGorm(gorm *gorm.DB) entity.UserRepository {
 	return &userRepositoryGorm{gorm: gorm}
 }
 
-func (r userRepositoryGorm) GetAll(offset int, limit int) (*entity.Pagination, error) {
+func (r userRepositoryGorm) GetAll(query string, offset int, limit int) (*entity.Pagination, error) {
 	var users []entity.User
 	var pagination entity.Pagination
 
@@ -27,7 +27,16 @@ func (r userRepositoryGorm) GetAll(offset int, limit int) (*entity.Pagination, e
 
 	pagination.TotalPage = int(math.Ceil(float64(pagination.Total) / float64(limit)))
 
-	err = r.gorm.Offset(offset).Limit(limit).Find(&users).Error
+	if query == "" {
+		err = r.gorm.Offset(offset).Limit(limit).Find(&users).Error
+	} else {
+		err = r.gorm.Where("first_name_th LIKE ? OR last_name_th LIKE ? OR first_name_en LIKE ? OR last_name_en LIKE ?",
+			"%"+query+"%", "%"+query+"%", "%"+query+"%", "%"+query+"%").
+			Offset(offset).
+			Limit(limit).
+			Find(&users).
+			Error
+	}
 	if err == gorm.ErrRecordNotFound {
 		return nil, nil
 	} else if err != nil {

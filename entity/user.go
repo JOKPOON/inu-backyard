@@ -40,7 +40,7 @@ func (u User) IsRoles(expectedRoles []UserRole) bool {
 }
 
 type UserRepository interface {
-	GetAll(offset int, limit int) (*Pagination, error)
+	GetAll(query string, offset int, limit int) (*Pagination, error)
 	GetById(id string) (*User, error)
 	GetByParams(params *User, limit int, offset int) ([]User, error)
 	GetByEmail(email string) (*User, error)
@@ -52,7 +52,7 @@ type UserRepository interface {
 }
 
 type UserUseCase interface {
-	GetAll(index string, size string) (*Pagination, error)
+	GetAll(query string, index string, size string) (*Pagination, error)
 	GetById(id string) (*User, error)
 	GetByParams(params *User, limit int, offset int) ([]User, error)
 	GetByEmail(email string) (*User, error)
