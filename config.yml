@@ -16,3 +16,4 @@ client:
   cors:
     AllowOrigins:
       - "http://localhost:3000"
+      - "https://inugardenview.vercel.app"
