@@ -45,8 +45,7 @@ func (u StudentOutcomeUsecase) Create(payload []entity.CreateStudentOutcome) err
 			Code:            so.Code,
 			DescriptionThai: so.DescriptionThai,
 			DescriptionEng:  so.DescriptionEng,
-			ProgrammeName:   so.ProgrammeName,
-			ProgramYear:     so.ProgramYear,
+			ProgrammeId:     so.ProgrammeId,
 		})
 
 		for _, sso := range so.SubStudentOutcomes {
@@ -88,8 +87,7 @@ func (u StudentOutcomeUsecase) Update(id string, payload *entity.UpdateStudentOu
 		Code:            payload.Code,
 		DescriptionThai: payload.DescriptionThai,
 		DescriptionEng:  payload.DescriptionEng,
-		ProgrammeName:   payload.ProgrammeName,
-		ProgramYear:     payload.ProgramYear,
+		ProgrammeId:     payload.ProgrammeId,
 	})
 
 	if err != nil {

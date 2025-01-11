@@ -101,8 +101,10 @@ func (u ImporterUseCase) UpdateOrCreate(
 	fmt.Println(user)
 	fmt.Println("::::::: ", user.IsRoles([]entity.UserRole{entity.UserRoleHeadOfCurriculum}))
 
-	if course.UserId != user.Id && !user.IsRoles([]entity.UserRole{entity.UserRoleHeadOfCurriculum}) {
-		return errs.New(errs.ErrCreateCourse, "no permission to do this action")
+	for _, lecturer := range course.Lecturers {
+		if lecturer.Id != user.Id && !user.IsRoles([]entity.UserRole{entity.UserRoleHeadOfCurriculum}) {
+			return errs.New(errs.ErrCreateCourse, "no permission to do this action")
+		}
 	}
 
 	// prepare old data to delete
@@ -176,12 +178,12 @@ func (u ImporterUseCase) UpdateOrCreate(
 		subPlos := []*entity.SubProgramLearningOutcome{}
 		fmt.Println(clo.SubProgramLearningOutcomeCodes)
 		for _, subPloCode := range clo.SubProgramLearningOutcomeCodes {
-			subPlo, err := u.programLearningOutcomeUseCase.GetSubPloByCode(subPloCode, course.Curriculum, course.ProgramYear)
+			subPlo, err := u.programLearningOutcomeUseCase.GetSubPloByCode(subPloCode, "", 0)
 			if err != nil {
 				return errs.New(errs.ErrSubPLONotFound, "cannot get sub plo id %s while import course", clo.ProgramOutcomeCode, subPloCode)
 
 			} else if subPlo == nil {
-				return errs.New(errs.ErrSubPLONotFound, "sub program learning outcome code %s curriculum: %s year: %d not found while import course", subPloCode, course.Curriculum, course.ProgramYear)
+				return errs.New(errs.ErrSubPLONotFound, "sub program learning outcome code %s curriculum: %s year: %d not found while import course", subPloCode)
 			}
 
 			subPlos = append(subPlos, &entity.SubProgramLearningOutcome{
@@ -200,8 +202,9 @@ func (u ImporterUseCase) UpdateOrCreate(
 			ExpectedPassingAssignmentPercentage: clo.ExpectedPassingAssignmentPercentage,
 			ExpectedPassingStudentPercentage:    clo.ExpectedPassingStudentPercentage,
 			CourseId:                            courseId,
-			ProgramOutcomeId:                    programOutcome.Id,
+			ProgramOutcomes:                     []*entity.ProgramOutcome{{Id: programOutcome.Id}},
 			SubProgramLearningOutcomes:          subPlos,
+			SubStudentOutcomes:                  make([]*entity.SubStudentOutcome, 0),
 		})
 	}
 

@@ -50,11 +50,10 @@ type ProgramLearningOutcome struct {
 	Code            string `json:"code"`
 	DescriptionThai string `json:"description_thai"`
 	DescriptionEng  string `json:"description_eng"`
-	ProgramYear     int    `json:"program_year"`
-	ProgrammeName   string `json:"programme_name"`
+	ProgrammeId     string `json:"programme_id"`
 
 	SubProgramLearningOutcomes []SubProgramLearningOutcome `json:"sub_program_learning_outcomes"`
-	Programme                  Programme                   `json:"-"`
+	Programme                  Programme                   `json:"programme"`
 }
 
 type CreateSubProgramLearningOutcomeDto struct {
@@ -64,21 +63,11 @@ type CreateSubProgramLearningOutcomeDto struct {
 	ProgramLearningOutcomeId string `json:"program_learning_outcome_id"`
 }
 
-type CreateProgramLearningOutcomeDto struct {
-	Code                       string                               `json:"code"`
-	DescriptionThai            string                               `json:"description_thai"`
-	DescriptionEng             string                               `json:"description_eng"`
-	ProgramYear                int                                  `json:"program_year"`
-	ProgrammeName              string                               `json:"programme_name"`
-	SubProgramLearningOutcomes []CreateSubProgramLearningOutcomeDto `json:"sub_program_learning_outcomes"`
-}
-
 type CreateProgramLearningOutcome struct {
 	Code                       string                            `validate:"required" json:"code"`
 	DescriptionThai            string                            `validate:"required" json:"description_thai"`
 	DescriptionEng             string                            `json:"description_eng"`
-	ProgramYear                int                               `validate:"required" json:"program_year"`
-	ProgrammeName              string                            `validate:"required" json:"programme_name"`
+	ProgrammeId                string                            `validate:"required" json:"programme_id"`
 	SubProgramLearningOutcomes []CreateSubProgramLearningOutcome `json:"sub_program_learning_outcomes"`
 }
 
@@ -90,8 +79,7 @@ type UpdateProgramLearningOutcomePayload struct {
 	Code            string  `json:"code" validate:"required"`
 	DescriptionThai string  `json:"description_thai" validate:"required"`
 	DescriptionEng  *string `json:"description_eng" validate:"required"`
-	ProgramYear     int     `json:"program_year" validate:"required"`
-	ProgrammeName   string  `json:"programme_name" validate:"required"`
+	ProgrammeId     string  `json:"programme_id" validate:"required"`
 }
 
 type CreateSubProgramLearningOutcome struct {

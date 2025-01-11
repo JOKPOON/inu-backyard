@@ -98,3 +98,18 @@ func (r programOutcomeRepositoryGorm) Delete(id string) error {
 
 	return nil
 }
+
+func (r programOutcomeRepositoryGorm) FilterExisted(ids []string) ([]string, error) {
+	var pos []entity.ProgramOutcome
+	err := r.gorm.Where("id IN ?", ids).Find(&pos).Error
+	if err != nil {
+		return nil, fmt.Errorf("cannot filter existed program outcomes: %w", err)
+	}
+
+	var existedIds []string
+	for _, po := range pos {
+		existedIds = append(existedIds, po.Id)
+	}
+
+	return existedIds, nil
+}

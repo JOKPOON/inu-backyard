@@ -52,7 +52,7 @@ func (c StudentController) GetStudents(ctx *fiber.Ctx) error {
 	}
 
 	students, err := c.StudentUseCase.GetByParams(&entity.Student{
-		ProgrammeName:  payload.ProgrammeName,
+		ProgrammeId:    payload.ProgrammeId,
 		DepartmentName: payload.DepartmentName,
 		Year:           payload.Year,
 	}, -1, -1)

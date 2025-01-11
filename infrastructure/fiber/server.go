@@ -229,6 +229,12 @@ func (f *fiberServer) initController() error {
 	clo.Patch("/:cloId", courseLearningOutcomeController.Update)
 	clo.Delete("/:cloId", courseLearningOutcomeController.Delete)
 
+	// program outcome by course learning outcome route
+	poByClo := clo.Group("/:cloId/pos", authMiddleware)
+
+	poByClo.Post("/", courseLearningOutcomeController.CreateLinkProgramOutcome)
+	poByClo.Delete("/:poId", courseLearningOutcomeController.DeleteLinkProgramOutcome)
+
 	// sub program learning outcome by course learning outcome route
 	sploByClo := clo.Group("/:cloId/splos", authMiddleware)
 

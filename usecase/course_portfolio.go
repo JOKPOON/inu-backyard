@@ -121,18 +121,23 @@ func (u coursePortfolioUseCase) Generate(courseId string) (*entity.CoursePortfol
 		return nil, errs.New(errs.ErrCourseNotFound, "course id %s not found while generate course portfolio", courseId)
 	}
 
-	lecturer, err := u.UserUseCase.GetById(course.UserId)
-	if err != nil {
-		return nil, errs.New(errs.SameCode, "cannot get lecturer id %s while generate course portfolio", course.UserId, err)
-	} else if lecturer == nil {
-		return nil, errs.New(errs.ErrCourseNotFound, "user id %s not found while generate course portfolio", course.UserId)
+	lecturersNameTH := make([]string, 0)
+	lecturersNameEN := make([]string, 0)
+	for _, lecturer := range course.Lecturers {
+		if lecturer == nil {
+			return nil, errs.New(errs.ErrCourseNotFound, "lecturer not found while generate course portfolio", courseId)
+		}
+
+		lecturersNameTH = append(lecturersNameTH, fmt.Sprintf("%s %s", lecturer.FirstNameTH, lecturer.LastNameTH))
+		lecturersNameEN = append(lecturersNameEN, fmt.Sprintf("%s %s", lecturer.FirstNameEN, lecturer.LastNameEN))
 	}
 
 	courseInfo := entity.CourseInfo{
-		Name:      course.Name,
-		Code:      course.Code,
-		Lecturers: []string{fmt.Sprintf("%s %s", lecturer.FirstNameTH, lecturer.LastNameTH)},
-		Programme: course.Curriculum,
+		Name:        course.Name,
+		Code:        course.Code,
+		LecturersTH: lecturersNameTH,
+		LecturersEN: lecturersNameEN,
+		Programme:   course.Programme.Name,
 	}
 
 	gradeDistribution, err := u.CalculateGradeDistribution(courseId)
@@ -372,139 +377,140 @@ func (u coursePortfolioUseCase) CalculateGradeDistribution(courseId string) (*en
 }
 
 func (u coursePortfolioUseCase) EvaluateTabeeOutcomes(courseId string) ([]entity.TabeeOutcome, error) {
-	assignmentPercentages, err := u.CoursePortfolioRepository.EvaluatePassingAssignmentPercentage(courseId)
-	if err != nil {
-		return nil, errs.New(errs.SameCode, "cannot evaluate passing assignment percentage by course id %s while evaluate tabee outcome", courseId, err)
-	}
+	// assignmentPercentages, err := u.CoursePortfolioRepository.EvaluatePassingAssignmentPercentage(courseId)
+	// if err != nil {
+	// 	return nil, errs.New(errs.SameCode, "cannot evaluate passing assignment percentage by course id %s while evaluate tabee outcome", courseId, err)
+	// }
 
-	assessmentsByCloId := make(map[string][]entity.Assessment, len(assignmentPercentages))
-	for _, assignmentPercentage := range assignmentPercentages {
+	// assessmentsByCloId := make(map[string][]entity.Assessment, len(assignmentPercentages))
+	// for _, assignmentPercentage := range assignmentPercentages {
 
-		cloId := assignmentPercentage.CourseLearningOutcomeId
+	// 	cloId := assignmentPercentage.CourseLearningOutcomeId
 
-		assessmentsByCloId[cloId] = append(assessmentsByCloId[cloId], entity.Assessment{
-			AssessmentTask:        assignmentPercentage.Name,
-			PassingCriteria:       assignmentPercentage.ExpectedScorePercentage,
-			StudentPassPercentage: assignmentPercentage.PassingPercentage,
-		})
-	}
+	// 	assessmentsByCloId[cloId] = append(assessmentsByCloId[cloId], entity.Assessment{
+	// 		AssessmentTask:        assignmentPercentage.Name,
+	// 		PassingCriteria:       assignmentPercentage.ExpectedScorePercentage,
+	// 		StudentPassPercentage: assignmentPercentage.PassingPercentage,
+	// 	})
+	// }
 
-	clos, err := u.CourseLearningOutcomeUseCase.GetByCourseId(courseId)
-	if err != nil {
-		return nil, errs.New(errs.SameCode, "cannot get clo while evaluate tabee outcome", err)
-	}
+	// clos, err := u.CourseLearningOutcomeUseCase.GetByCourseId(courseId)
+	// if err != nil {
+	// 	return nil, errs.New(errs.SameCode, "cannot get clo while evaluate tabee outcome", err)
+	// }
 
-	cloPassingPercentage, err := u.CoursePortfolioRepository.EvaluatePassingCloPercentage(courseId)
-	if err != nil {
-		return nil, errs.New(errs.SameCode, "cannot evaluate passing clo percentage", err)
-	}
+	// cloPassingPercentage, err := u.CoursePortfolioRepository.EvaluatePassingCloPercentage(courseId)
+	// if err != nil {
+	// 	return nil, errs.New(errs.SameCode, "cannot evaluate passing clo percentage", err)
+	// }
 
-	passingCloPercentage := make(map[string]float64, 0)
-	for _, clo := range cloPassingPercentage {
-		passingCloPercentage[clo.CourseLearningOutcomeId] = clo.PassingPercentage
-	}
+	// passingCloPercentage := make(map[string]float64, 0)
+	// for _, clo := range cloPassingPercentage {
+	// 	passingCloPercentage[clo.CourseLearningOutcomeId] = clo.PassingPercentage
+	// }
 
-	courseOutcomeByPoId := make(map[string][]entity.CourseOutcome, 0)
-	expectedPassingCloByPoId := make(map[string]float64, 0)
+	// courseOutcomeByPoId := make(map[string][]entity.CourseOutcome, 0)
+	// expectedPassingCloByPoId := make(map[string]float64, 0)
 
-	sploDuplicates := make(map[[3]string]entity.Outcome, 0)
-	splosByBothId := make(map[[2]string][]entity.Outcome, 0)
-	plosByBothId := make(map[[2]string]entity.NestedOutcome, 0)
-	for _, clo := range clos {
-		courseOutcomeByPoId[clo.ProgramOutcomeId] = append(courseOutcomeByPoId[clo.ProgramOutcomeId], entity.CourseOutcome{
-			Name:                                clo.Description,
-			Code:                                clo.Code,
-			ExpectedPassingAssignmentPercentage: clo.ExpectedPassingAssignmentPercentage,
-			PassingCloPercentage:                passingCloPercentage[clo.Id],
-			Assessments:                         assessmentsByCloId[clo.Id],
-		})
-		expectedPassingCloByPoId[clo.ProgramOutcomeId] = clo.ExpectedPassingCloPercentage
+	// sploDuplicates := make(map[[3]string]entity.Outcome, 0)
+	// splosByBothId := make(map[[2]string][]entity.Outcome, 0)
+	// plosByBothId := make(map[[2]string]entity.NestedOutcome, 0)
+	// for _, clo := range clos {
+	// 	courseOutcomeByPoId[clo.ProgramOutcomeId] = append(courseOutcomeByPoId[clo.ProgramOutcomeId], entity.CourseOutcome{
+	// 		Name:                                clo.Description,
+	// 		Code:                                clo.Code,
+	// 		ExpectedPassingAssignmentPercentage: clo.ExpectedPassingAssignmentPercentage,
+	// 		PassingCloPercentage:                passingCloPercentage[clo.Id],
+	// 		Assessments:                         assessmentsByCloId[clo.Id],
+	// 	})
+	// 	expectedPassingCloByPoId[clo.ProgramOutcomeId] = clo.ExpectedPassingCloPercentage
 
-		key := [2]string{clo.ProgramOutcomeId, clo.ProgramLearningOutcomeCode}
+	// 	key := [2]string{clo.ProgramOutcomeId, clo.ProgramLearningOutcomeCode}
 
-		_, found := sploDuplicates[[3]string{clo.ProgramOutcomeId, clo.ProgramLearningOutcomeCode, clo.SubProgramLearningOutcomeCode}]
+	// 	_, found := sploDuplicates[[3]string{clo.ProgramOutcomeId, clo.ProgramLearningOutcomeCode, clo.SubProgramLearningOutcomeCode}]
 
-		if !found {
-			splo := entity.Outcome{
-				Name: clo.SubProgramLearningOutcomeName,
-				Code: clo.SubProgramLearningOutcomeCode,
-			}
-			sploDuplicates[[3]string{clo.ProgramOutcomeId, clo.ProgramLearningOutcomeCode, clo.SubProgramLearningOutcomeCode}] = splo
-			splosByBothId[key] = append(splosByBothId[key], splo)
-			plosByBothId[key] = entity.NestedOutcome{
-				Name: clo.ProgramLearningOutcomeName,
-				Code: clo.ProgramLearningOutcomeCode,
-			}
-		}
-	}
+	// 	if !found {
+	// 		splo := entity.Outcome{
+	// 			Name: clo.SubProgramLearningOutcomeName,
+	// 			Code: clo.SubProgramLearningOutcomeCode,
+	// 		}
+	// 		sploDuplicates[[3]string{clo.ProgramOutcomeId, clo.ProgramLearningOutcomeCode, clo.SubProgramLearningOutcomeCode}] = splo
+	// 		splosByBothId[key] = append(splosByBothId[key], splo)
+	// 		plosByBothId[key] = entity.NestedOutcome{
+	// 			Name: clo.ProgramLearningOutcomeName,
+	// 			Code: clo.ProgramLearningOutcomeCode,
+	// 		}
+	// 	}
+	// }
 
-	plosByPoId := make(map[string][]entity.NestedOutcome, 0)
-	for key := range plosByBothId {
-		plo := plosByBothId[key]
-		plo.Nested = splosByBothId[key]
-		plosByBothId[key] = plo
-		plosByPoId[key[0]] = append(plosByPoId[key[0]], plosByBothId[key])
-	}
+	// plosByPoId := make(map[string][]entity.NestedOutcome, 0)
+	// for key := range plosByBothId {
+	// 	plo := plosByBothId[key]
+	// 	plo.Nested = splosByBothId[key]
+	// 	plosByBothId[key] = plo
+	// 	plosByPoId[key[0]] = append(plosByPoId[key[0]], plosByBothId[key])
+	// }
 
-	passingPoPercentages, err := u.CoursePortfolioRepository.EvaluatePassingPoPercentage(courseId)
-	if err != nil {
-		return nil, errs.New(errs.SameCode, "cannot evaluate passing po percentage by course id %s while evaluate tabee outcome", courseId, err)
-	}
+	// passingPoPercentages, err := u.CoursePortfolioRepository.EvaluatePassingPoPercentage(courseId)
+	// if err != nil {
+	// 	return nil, errs.New(errs.SameCode, "cannot evaluate passing po percentage by course id %s while evaluate tabee outcome", courseId, err)
+	// }
 
-	passingPoPercentageByPoId := make(map[string]float64, len(passingPoPercentages))
-	for _, passingPoPercentage := range passingPoPercentages {
-		passingPoPercentageByPoId[passingPoPercentage.ProgramOutcomeId] = passingPoPercentage.PassingPercentage
-	}
+	// passingPoPercentageByPoId := make(map[string]float64, len(passingPoPercentages))
+	// for _, passingPoPercentage := range passingPoPercentages {
+	// 	passingPoPercentageByPoId[passingPoPercentage.ProgramOutcomeId] = passingPoPercentage.PassingPercentage
+	// }
 
-	tabeeOutcomesByPoId := make(map[string][]entity.TabeeOutcome, 0)
-	for _, clo := range clos {
-		checkIsSameOutcomeName := func(foundOutcome []entity.TabeeOutcome, clo entity.CourseLearningOutcomeWithPO) bool {
-			isNameSame := false
+	// tabeeOutcomesByPoId := make(map[string][]entity.TabeeOutcome, 0)
+	// for _, clo := range clos {
+	// 	checkIsSameOutcomeName := func(foundOutcome []entity.TabeeOutcome, clo entity.CourseLearningOutcomeWithPO) bool {
+	// 		isNameSame := false
 
-			for _, tabeeOutcome := range foundOutcome {
-				if tabeeOutcome.Name == clo.ProgramOutcomeName {
-					isNameSame = true
-					break
-				}
-			}
+	// 		for _, tabeeOutcome := range foundOutcome {
+	// 			if tabeeOutcome.Name == clo.ProgramOutcomeName {
+	// 				isNameSame = true
+	// 				break
+	// 			}
+	// 		}
 
-			return isNameSame
-		}
+	// 		return isNameSame
+	// 	}
 
-		foundOutcome, found := tabeeOutcomesByPoId[clo.ProgramOutcomeId]
-		if !found {
-			tabeeOutcomesByPoId[clo.ProgramOutcomeId] = append(tabeeOutcomesByPoId[clo.ProgramOutcomeId], entity.TabeeOutcome{
-				Name:                  clo.ProgramOutcomeName,
-				Code:                  clo.ProgramLearningOutcomeCode,
-				CourseOutcomes:        courseOutcomeByPoId[clo.ProgramOutcomeId],
-				MinimumPercentage:     passingPoPercentageByPoId[clo.ProgramOutcomeId],
-				ExpectedCloPercentage: expectedPassingCloByPoId[clo.ProgramOutcomeId],
-				Plos:                  plosByPoId[clo.ProgramOutcomeId],
-			})
-			continue
-		}
+	// 	foundOutcome, found := tabeeOutcomesByPoId[clo.ProgramOutcomeId]
+	// 	if !found {
+	// 		tabeeOutcomesByPoId[clo.ProgramOutcomeId] = append(tabeeOutcomesByPoId[clo.ProgramOutcomeId], entity.TabeeOutcome{
+	// 			Name:                  clo.ProgramOutcomeName,
+	// 			Code:                  clo.ProgramLearningOutcomeCode,
+	// 			CourseOutcomes:        courseOutcomeByPoId[clo.ProgramOutcomeId],
+	// 			MinimumPercentage:     passingPoPercentageByPoId[clo.ProgramOutcomeId],
+	// 			ExpectedCloPercentage: expectedPassingCloByPoId[clo.ProgramOutcomeId],
+	// 			Plos:                  plosByPoId[clo.ProgramOutcomeId],
+	// 		})
+	// 		continue
+	// 	}
 
-		isNameSame := checkIsSameOutcomeName(foundOutcome, clo)
-		if isNameSame {
-			continue
-		}
+	// 	isNameSame := checkIsSameOutcomeName(foundOutcome, clo)
+	// 	if isNameSame {
+	// 		continue
+	// 	}
 
-		tabeeOutcomesByPoId[clo.ProgramOutcomeId] = append(tabeeOutcomesByPoId[clo.ProgramOutcomeId], entity.TabeeOutcome{
-			Name:                  clo.ProgramOutcomeName,
-			Code:                  clo.ProgramLearningOutcomeCode,
-			CourseOutcomes:        courseOutcomeByPoId[clo.ProgramOutcomeId],
-			MinimumPercentage:     passingPoPercentageByPoId[clo.ProgramOutcomeId],
-			ExpectedCloPercentage: expectedPassingCloByPoId[clo.ProgramOutcomeId],
-			Plos:                  plosByPoId[clo.ProgramOutcomeId],
-		})
-	}
+	// 	tabeeOutcomesByPoId[clo.ProgramOutcomeId] = append(tabeeOutcomesByPoId[clo.ProgramOutcomeId], entity.TabeeOutcome{
+	// 		Name:                  clo.ProgramOutcomeName,
+	// 		Code:                  clo.ProgramLearningOutcomeCode,
+	// 		CourseOutcomes:        courseOutcomeByPoId[clo.ProgramOutcomeId],
+	// 		MinimumPercentage:     passingPoPercentageByPoId[clo.ProgramOutcomeId],
+	// 		ExpectedCloPercentage: expectedPassingCloByPoId[clo.ProgramOutcomeId],
+	// 		Plos:                  plosByPoId[clo.ProgramOutcomeId],
+	// 	})
+	// }
 
-	tabeeOutcomes := make([]entity.TabeeOutcome, 0, len(tabeeOutcomesByPoId))
-	for _, tabeeOutcome := range tabeeOutcomesByPoId {
-		tabeeOutcomes = append(tabeeOutcomes, tabeeOutcome...)
-	}
+	// tabeeOutcomes := make([]entity.TabeeOutcome, 0, len(tabeeOutcomesByPoId))
+	// for _, tabeeOutcome := range tabeeOutcomesByPoId {
+	// 	tabeeOutcomes = append(tabeeOutcomes, tabeeOutcome...)
+	// }
 
-	return tabeeOutcomes, nil
+	// return tabeeOutcomes, nil
+	return nil, nil
 }
 
 func (u coursePortfolioUseCase) GetCloPassingStudentsByCourseId(courseId string) ([]entity.CloPassingStudent, error) {

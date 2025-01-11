@@ -9,6 +9,8 @@ type CourseRepository interface {
 	Create(course *Course) error
 	Update(id string, course *Course) error
 	Delete(id string) error
+	CreateLinkWithLecturer(courseId string, lecturerId []string) error
+	DeleteLinkWithLecturer(courseId string, lecturerId []string) error
 }
 
 type CourseUseCase interface {
@@ -85,46 +87,40 @@ type Course struct {
 	Id                           string         `json:"id" gorm:"primaryKey;type:char(255)"`
 	Name                         string         `json:"name"`
 	Code                         string         `json:"code"`
-	Curriculum                   string         `json:"curriculum"`
 	Description                  string         `json:"description"`
+	Credit                       int            `json:"credit"`
 	ExpectedPassingCloPercentage float64        `json:"expected_passing_clo_percentage"`
-	IsPortfolioCompleted         *bool          `json:"is_portfolio_completed" gorm:"default:false"`
+	IsPortfolioCompleted         bool           `json:"is_portfolio_completed" gorm:"default:false"`
 	PortfolioData                datatypes.JSON `json:"portfolio_data" gorm:"type:json"`
-	AcademicYear                 int            `json:"academic_year"`
-	GraduateYear                 int            `json:"graduate_year"`
-	ProgramYear                  int            `json:"program_year"`
 
-	SemesterId string `json:"semester_id"`
-	UserId     string `json:"user_id"`
 	CriteriaGrade
 
-	Semester Semester `json:"semester"`
-	User     User     `json:"user"`
+	ProgrammeId string `json:"programme_id"`
+	SemesterId  string `json:"semester_id"`
+
+	Lecturers []*User   `gorm:"many2many:course_lecturer" json:"lecturers"`
+	Semester  Semester  `json:"semester"`
+	Programme Programme `json:"programme"`
 }
 
 type CreateCoursePayload struct {
-	SemesterId                   string  `json:"semester_id" validate:"required"`
-	UserId                       string  `json:"user_id" validate:"required"`
-	Name                         string  `json:"name" validate:"required"`
-	Code                         string  `json:"code" validate:"required"`
-	Curriculum                   string  `json:"curriculum" validate:"required"`
-	Description                  string  `json:"description" validate:"required"`
-	ExpectedPassingCloPercentage float64 `json:"expected_passing_clo_percentage" validate:"required"`
-	AcademicYear                 int     `json:"academic_year" validate:"required"`
-	GraduateYear                 int     `json:"graduate_year" validate:"required"`
-	ProgramYear                  int     `json:"program_year" validate:"required"`
+	SemesterId                   string   `json:"semester_id" validate:"required"`
+	LecturerIds                  []string `json:"lecturer_ids" validate:"required"`
+	Name                         string   `json:"name" validate:"required"`
+	Code                         string   `json:"code" validate:"required"`
+	Description                  string   `json:"description" validate:"required"`
+	ExpectedPassingCloPercentage float64  `json:"expected_passing_clo_percentage" validate:"required"`
+	ProgrammeId                  string   `json:"programme_id" validate:"required"`
 	CriteriaGrade
 }
 
 type UpdateCoursePayload struct {
-	Name                         string  `json:"name" validate:"required"`
-	Code                         string  `json:"code" validate:"required"`
-	Curriculum                   string  `json:"curriculum" validate:"required"`
-	Description                  string  `json:"description" validate:"required"`
-	ExpectedPassingCloPercentage float64 `json:"expected_passing_clo_percentage" validate:"required"`
-	AcademicYear                 int     `json:"academic_year" validate:"required"`
-	GraduateYear                 int     `json:"graduate_year" validate:"required"`
-	ProgramYear                  int     `json:"program_year" validate:"required"`
-	IsPortfolioCompleted         *bool   `json:"is_portfolio_completed" validate:"required"`
+	SemesterId                   string   `json:"semester_id" validate:"required"`
+	LecturerIds                  []string `json:"lecturer_ids" validate:"required"`
+	Name                         string   `json:"name" validate:"required"`
+	Code                         string   `json:"code" validate:"required"`
+	Description                  string   `json:"description" validate:"required"`
+	ExpectedPassingCloPercentage float64  `json:"expected_passing_clo_percentage" validate:"required"`
+	ProgrammeId                  string   `json:"programme_id" validate:"required"`
 	CriteriaGrade
 }

@@ -54,11 +54,11 @@ func (u studentUseCase) GetByParams(params *entity.Student, limit int, offset in
 
 func (u studentUseCase) CreateMany(students []entity.CreateStudentPayload) error {
 	departmentNames := []string{}
-	programmeNames := []string{}
+	programmeIds := []string{}
 	studentIds := []string{}
 	for _, student := range students {
 		departmentNames = append(departmentNames, student.DepartmentName)
-		programmeNames = append(programmeNames, student.ProgrammeName)
+		programmeIds = append(programmeIds, student.ProgrammeId)
 		studentIds = append(studentIds, student.Id)
 	}
 
@@ -82,12 +82,16 @@ func (u studentUseCase) CreateMany(students []entity.CreateStudentPayload) error
 		return errs.New(errs.ErrCreateEnrollment, "there are non exist department %v", nonExistedDepartmentNames)
 	}
 
-	deduplicateProgrammeNames := slice.RemoveDuplicates(programmeNames)
-	nonExistedProgrammeNames, err := u.programmeUseCase.FilterNonExisted(deduplicateProgrammeNames)
-	if err != nil {
-		return errs.New(errs.SameCode, "cannot get non existed programme while creating students")
-	} else if len(nonExistedProgrammeNames) != 0 {
-		return errs.New(errs.ErrCreateEnrollment, "there are non exist programme %v", nonExistedProgrammeNames)
+	deduplicateProgrammeNames := slice.RemoveDuplicates(programmeIds)
+	for _, id := range deduplicateProgrammeNames {
+		programme, err := u.programmeUseCase.GetById(id)
+		if err != nil {
+			return errs.New(errs.SameCode, "cannot get programme id %s while creating students", id, err)
+		}
+
+		if programme == nil {
+			return errs.New(errs.ErrCreateStudent, "programme id %s not found while creating students", id)
+		}
 	}
 
 	studentsToCreate := make([]entity.Student, 0, len(students))
@@ -97,7 +101,7 @@ func (u studentUseCase) CreateMany(students []entity.CreateStudentPayload) error
 			FirstName:      student.FirstName,
 			LastName:       student.LastName,
 			Email:          student.Email,
-			ProgrammeName:  student.ProgrammeName,
+			ProgrammeId:    student.ProgrammeId,
 			DepartmentName: student.DepartmentName,
 			GPAX:           *student.GPAX,
 			MathGPA:        *student.MathGPA,
@@ -133,7 +137,7 @@ func (u studentUseCase) Update(id string, student *entity.UpdateStudentPayload) 
 			FirstName:      student.FirstName,
 			LastName:       student.LastName,
 			Email:          student.Email,
-			ProgrammeName:  student.ProgrammeName,
+			ProgrammeId:    student.ProgrammeId,
 			DepartmentName: student.DepartmentName,
 			GPAX:           *student.GPAX,
 			MathGPA:        *student.MathGPA,

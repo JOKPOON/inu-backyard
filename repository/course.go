@@ -17,8 +17,7 @@ func NewCourseRepositoryGorm(gorm *gorm.DB) entity.CourseRepository {
 
 func (r courseRepositoryGorm) GetAll() ([]entity.Course, error) {
 	var courses []entity.Course
-	err := r.gorm.Preload("User").Preload("Semester").Find(&courses).Error
-
+	err := r.gorm.Preload("Lecturers").Preload("Semester").Preload("Programme").Find(&courses).Error
 	if err == gorm.ErrRecordNotFound {
 		return nil, nil
 	} else if err != nil {
@@ -30,7 +29,7 @@ func (r courseRepositoryGorm) GetAll() ([]entity.Course, error) {
 
 func (r courseRepositoryGorm) GetById(id string) (*entity.Course, error) {
 	var course entity.Course
-	err := r.gorm.Preload("User").Preload("Semester").Where("id = ?", id).First(&course).Error
+	err := r.gorm.Where("id = ?", id).First(&course).Error
 
 	if err == gorm.ErrRecordNotFound {
 		return nil, nil
@@ -84,6 +83,38 @@ func (r courseRepositoryGorm) Delete(id string) error {
 	}
 	go cacheOutcomes(r.gorm, TabeeSelectorAllPloCourses)
 	go cacheOutcomes(r.gorm, TabeeSelectorAllPoCourses)
+
+	return nil
+}
+
+func (r courseRepositoryGorm) CreateLinkWithLecturer(courseId string, lecturerIds []string) error {
+	query := ""
+	for _, lecturerId := range lecturerIds {
+		query += fmt.Sprintf("('%s', '%s'),", lecturerId, courseId)
+	}
+
+	query = query[:len(query)-1]
+
+	err := r.gorm.Exec(fmt.Sprintf("INSERT INTO `course_lecturer` (user_id, course_id) VALUES %s", query)).Error
+	if err != nil {
+		return fmt.Errorf("cannot create link between lecturer and course: %w", err)
+	}
+
+	return nil
+}
+
+func (r courseRepositoryGorm) DeleteLinkWithLecturer(courseId string, lecturerIds []string) error {
+	query := ""
+	for _, lecturerId := range lecturerIds {
+		query += fmt.Sprintf("('%s', '%s'),", lecturerId, courseId)
+	}
+
+	query = query[:len(query)-1]
+
+	err := r.gorm.Exec(fmt.Sprintf("DELETE FROM `course_lecturer` WHERE (user_id, course_id) IN (%s)", query)).Error
+	if err != nil {
+		return fmt.Errorf("cannot delete link between lecturer and course: %w", err)
+	}
 
 	return nil
 }

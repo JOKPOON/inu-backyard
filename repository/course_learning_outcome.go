@@ -17,7 +17,7 @@ func NewCourseLearningOutcomeRepositoryGorm(gorm *gorm.DB) entity.CourseLearning
 
 func (r courseLearningOutcomeRepositoryGorm) GetAll() ([]entity.CourseLearningOutcome, error) {
 	var clos []entity.CourseLearningOutcome
-	err := r.gorm.Preload("SubProgramLearningOutcomes").Preload("SubStudentOutcomes").Find(&clos).Error
+	err := r.gorm.Preload("ProgramOutcomes").Preload("SubProgramLearningOutcomes").Preload("SubStudentOutcomes").Preload("Assignments").Find(&clos).Error
 
 	if err == gorm.ErrRecordNotFound {
 		return nil, nil
@@ -81,6 +81,25 @@ func (r courseLearningOutcomeRepositoryGorm) Create(courseLearningOutcome *entit
 	return r.gorm.Create(&courseLearningOutcome).Error
 }
 
+func (r courseLearningOutcomeRepositoryGorm) CreateLinkProgramOutcome(id string, programOutcomeIds []string) error {
+	var query string
+	for _, poId := range programOutcomeIds {
+		query += fmt.Sprintf("('%s', '%s'),", id, poId)
+	}
+
+	query = query[:len(query)-1]
+
+	err := r.gorm.Exec(fmt.Sprintf("INSERT INTO `clo_po` (course_learning_outcome_id, program_outcome_id) VALUES %s", query)).Error
+
+	if err != nil {
+		return fmt.Errorf("cannot create link between CLO and PO: %w", err)
+	}
+	go cacheOutcomes(r.gorm, TabeeSelectorAllPloCourses)
+	go cacheOutcomes(r.gorm, TabeeSelectorAllPoCourses)
+
+	return nil
+}
+
 func (r courseLearningOutcomeRepositoryGorm) CreateLinkSubProgramLearningOutcome(id string, subProgramLearningOutcomeIds []string) error {
 
 	var query string
@@ -141,6 +160,18 @@ func (r courseLearningOutcomeRepositoryGorm) Delete(id string) error {
 	if err != nil {
 		return fmt.Errorf("cannot delete courseLearningOutcome: %w", err)
 	}
+	go cacheOutcomes(r.gorm, TabeeSelectorAllPloCourses)
+	go cacheOutcomes(r.gorm, TabeeSelectorAllPoCourses)
+
+	return nil
+}
+
+func (r courseLearningOutcomeRepositoryGorm) DeleteLinkProgramOutcome(id string, programOutcomeId string) error {
+	err := r.gorm.Exec("DELETE FROM `clo_po` WHERE course_learning_outcome_id = ? AND program_outcome_id = ?", id, programOutcomeId).Error
+	if err != nil {
+		return fmt.Errorf("cannot delete link between CLO and PO: %w", err)
+	}
+
 	go cacheOutcomes(r.gorm, TabeeSelectorAllPloCourses)
 	go cacheOutcomes(r.gorm, TabeeSelectorAllPoCourses)
 

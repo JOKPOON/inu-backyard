@@ -64,11 +64,13 @@ func (u courseUseCase) Create(user entity.User, payload entity.CreateCoursePaylo
 		return errs.New(errs.ErrSemesterNotFound, "semester id %s not found while creating course", payload.SemesterId)
 	}
 
-	lecturer, err := u.userUseCase.GetById(payload.UserId)
-	if err != nil {
-		return errs.New(errs.SameCode, "cannot get user id %s while creating course", payload.UserId, err)
-	} else if lecturer == nil {
-		return errs.New(errs.ErrUserNotFound, "user id %s not found while creating course", payload.UserId)
+	for _, lecturerId := range payload.LecturerIds {
+		lecturer, err := u.userUseCase.GetById(lecturerId)
+		if err != nil {
+			return errs.New(errs.SameCode, "cannot get user id %s while creating course", lecturerId, err)
+		} else if lecturer == nil {
+			return errs.New(errs.ErrUserNotFound, "user id %s not found while creating course", lecturerId)
+		}
 	}
 
 	if !payload.CriteriaGrade.IsValid() {
@@ -80,13 +82,9 @@ func (u courseUseCase) Create(user entity.User, payload entity.CreateCoursePaylo
 		Id:                           ulid.Make().String(),
 		Name:                         payload.Name,
 		Code:                         payload.Code,
-		Curriculum:                   payload.Curriculum,
+		ProgrammeId:                  payload.ProgrammeId,
 		Description:                  payload.Description,
 		ExpectedPassingCloPercentage: payload.ExpectedPassingCloPercentage,
-		AcademicYear:                 payload.AcademicYear,
-		GraduateYear:                 payload.GraduateYear,
-		ProgramYear:                  payload.ProgramYear,
-		UserId:                       payload.UserId,
 		SemesterId:                   payload.SemesterId,
 		CriteriaGrade:                payload.CriteriaGrade,
 		PortfolioData:                emptyJson,
@@ -95,6 +93,11 @@ func (u courseUseCase) Create(user entity.User, payload entity.CreateCoursePaylo
 	err = u.courseRepo.Create(&course)
 	if err != nil {
 		return errs.New(errs.ErrCreateCourse, "cannot create course", err)
+	}
+
+	err = u.courseRepo.CreateLinkWithLecturer(course.Id, payload.LecturerIds)
+	if err != nil {
+		return errs.New(errs.ErrCreateCourse, "cannot create link with lecturer", err)
 	}
 
 	return nil
@@ -108,8 +111,10 @@ func (u courseUseCase) Update(user entity.User, id string, payload entity.Update
 		return errs.New(errs.ErrCourseNotFound, "cannot get course id %s to update", id)
 	}
 
-	if !user.IsRoles([]entity.UserRole{entity.UserRoleHeadOfCurriculum}) && user.Id != existCourse.UserId {
-		return errs.New(errs.ErrCreateCourse, "No permission to edit this course")
+	for _, lecturerId := range payload.LecturerIds {
+		if !user.IsRoles([]entity.UserRole{entity.UserRoleHeadOfCurriculum}) && user.Id != lecturerId {
+			return errs.New(errs.ErrCreateCourse, "No permission to edit this course")
+		}
 	}
 
 	if !payload.CriteriaGrade.IsValid() {
@@ -119,14 +124,10 @@ func (u courseUseCase) Update(user entity.User, id string, payload entity.Update
 	err = u.courseRepo.Update(id, &entity.Course{
 		Name:                         payload.Name,
 		Code:                         payload.Code,
-		Curriculum:                   payload.Curriculum,
+		ProgrammeId:                  payload.ProgrammeId,
 		Description:                  payload.Description,
 		CriteriaGrade:                payload.CriteriaGrade,
 		ExpectedPassingCloPercentage: payload.ExpectedPassingCloPercentage,
-		AcademicYear:                 payload.AcademicYear,
-		GraduateYear:                 payload.GraduateYear,
-		ProgramYear:                  payload.ProgramYear,
-		IsPortfolioCompleted:         payload.IsPortfolioCompleted,
 	})
 	if err != nil {
 		return errs.New(errs.ErrUpdateCourse, "cannot update course by id %s", id, err)

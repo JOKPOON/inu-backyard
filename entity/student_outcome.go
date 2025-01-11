@@ -39,11 +39,10 @@ type StudentOutcome struct {
 	Code            string `validate:"required" json:"code"`
 	DescriptionThai string `validate:"required" json:"description_thai"`
 	DescriptionEng  string `json:"description_eng"`
-	ProgrammeName   string `json:"programme_name"  gorm:"type:char(255)"`
-	ProgramYear     int    `json:"program_year"`
+	ProgrammeId     string `json:"programme_id"`
 
 	SubStudentOutcomes []SubStudentOutcome `json:"sub_student_outcomes"`
-	Programme          Programme           `gorm:"foreignKey:ProgrammeName" json:"programme"`
+	Programme          Programme           `json:"programme"`
 }
 
 type SubStudentOutcome struct {
@@ -69,8 +68,7 @@ type CreateStudentOutcome struct {
 	Code               string                    `validate:"required" json:"code"`
 	DescriptionThai    string                    `validate:"required" json:"description_thai"`
 	DescriptionEng     string                    `json:"description_eng"`
-	ProgramYear        int                       `validate:"required" json:"program_year"`
-	ProgrammeName      string                    `validate:"required" json:"programme_name"`
+	ProgrammeId        string                    `validate:"required" json:"programme_id"`
 	SubStudentOutcomes []CreateSubStudentOutcome `json:"sub_student_outcomes" validate:"required,dive"`
 }
 
@@ -82,8 +80,7 @@ type UpdateStudentOutcomePayload struct {
 	Code            string `json:"code"`
 	DescriptionThai string `json:"description_thai"`
 	DescriptionEng  string `json:"description_eng"`
-	ProgramYear     int    `json:"program_year"`
-	ProgrammeName   string `json:"programme_name"`
+	ProgrammeId     string `json:"programme_id"`
 }
 
 type UpdateSubStudentOutcomePayload struct {

@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"github.com/oklog/ulid/v2"
 	"github.com/team-inu/inu-backyard/entity"
 	errs "github.com/team-inu/inu-backyard/entity/error"
 	slice "github.com/team-inu/inu-backyard/internal/utils/slice"
@@ -23,8 +24,8 @@ func (u programmeUseCase) GetAll() ([]entity.Programme, error) {
 	return programme, nil
 }
 
-func (u programmeUseCase) Get(name string) (*entity.Programme, error) {
-	programme, err := u.programmeRepo.Get(name)
+func (u programmeUseCase) GetByName(name string) (*entity.Programme, error) {
+	programme, err := u.programmeRepo.GetByName(name)
 	if err != nil {
 		return nil, errs.New(errs.ErrQueryProgramme, "cannot get programme by name %s", name, err)
 	}
@@ -32,15 +33,27 @@ func (u programmeUseCase) Get(name string) (*entity.Programme, error) {
 	return programme, nil
 }
 
+func (u programmeUseCase) GetById(id string) (*entity.Programme, error) {
+	programme, err := u.programmeRepo.GetById(id)
+	if err != nil {
+		return nil, errs.New(errs.ErrQueryProgramme, "cannot get programme by id %s", id, err)
+	}
+
+	return programme, nil
+}
+
 func (u programmeUseCase) Create(name string) error {
-	existProgramme, err := u.Get(name)
+	existProgramme, err := u.GetByName(name)
 	if err != nil {
 		return errs.New(errs.SameCode, "cannot get programme name %s to update", name, err)
 	} else if existProgramme != nil {
 		return errs.New(errs.ErrDupName, "cannot create duplicate programme name %s", name)
 	}
 
-	programme := &entity.Programme{Name: name}
+	programme := &entity.Programme{
+		Id:   ulid.Make().String(),
+		Name: name,
+	}
 
 	err = u.programmeRepo.Create(programme)
 	if err != nil {
@@ -50,15 +63,15 @@ func (u programmeUseCase) Create(name string) error {
 	return nil
 }
 
-func (u programmeUseCase) Update(name string, programme *entity.UpdateProgrammePayload) error {
-	existProgramme, err := u.Get(name)
+func (u programmeUseCase) Update(id string, programme *entity.UpdateProgrammePayload) error {
+	existProgramme, err := u.GetById(id)
 	if err != nil {
-		return errs.New(errs.SameCode, "cannot get programme name %s to update", name, err)
+		return errs.New(errs.SameCode, "cannot get programme name %s to update", id, err)
 	} else if existProgramme == nil {
-		return errs.New(errs.ErrProgrammeNotFound, "cannot get programme name %s to update", name)
+		return errs.New(errs.ErrProgrammeNotFound, "cannot get programme name %s to update", id)
 	}
 
-	err = u.programmeRepo.Update(name, &entity.Programme{Name: programme.Name})
+	err = u.programmeRepo.Update(id, &entity.Programme{Name: programme.Name})
 	if err != nil {
 		return errs.New(errs.ErrUpdateProgramme, "cannot update programme by id %s", programme.Name, err)
 	}
@@ -66,18 +79,18 @@ func (u programmeUseCase) Update(name string, programme *entity.UpdateProgrammeP
 	return nil
 }
 
-func (u programmeUseCase) Delete(name string) error {
-	programme, err := u.Get(name)
+func (u programmeUseCase) Delete(id string) error {
+	programme, err := u.GetById(id)
 	if err != nil {
-		return errs.New(errs.SameCode, "cannot get programme id %s name delete", name, err)
+		return errs.New(errs.SameCode, "cannot get programme id %s name delete", id, err)
 	} else if programme == nil {
-		return errs.New(errs.ErrProgrammeNotFound, "cannot get programme name %s to delete", name)
+		return errs.New(errs.ErrProgrammeNotFound, "cannot get programme name %s to delete", id)
 	}
 
-	err = u.programmeRepo.Delete(name)
+	err = u.programmeRepo.Delete(id)
 
 	if err != nil {
-		return errs.New(errs.ErrDeleteProgramme, "cannot delete programme by name %s", name, err)
+		return errs.New(errs.ErrDeleteProgramme, "cannot delete programme by name %s", id, err)
 	}
 
 	return nil

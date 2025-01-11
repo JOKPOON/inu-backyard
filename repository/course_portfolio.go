@@ -427,7 +427,7 @@ func (r coursePortfolioRepositoryGorm) UpdateCoursePortfolio(courseId string, da
 
 	err := r.gorm.Model(&entity.Course{}).Where("id = ?", courseId).Updates(&entity.Course{
 		PortfolioData:        data,
-		IsPortfolioCompleted: &completed,
+		IsPortfolioCompleted: completed,
 	}).Error
 	if err != nil {
 		return fmt.Errorf("cannot update course: %w", err)

@@ -6,6 +6,7 @@ import (
 	"github.com/oklog/ulid/v2"
 	"github.com/team-inu/inu-backyard/entity"
 	errs "github.com/team-inu/inu-backyard/entity/error"
+	slice "github.com/team-inu/inu-backyard/internal/utils/slice"
 )
 
 type programOutcomeUseCase struct {
@@ -56,6 +57,8 @@ func (u programOutcomeUseCase) Create(dto []entity.CreateProgramOutcome) error {
 			Code:        po.Code,
 			Name:        po.Name,
 			Description: po.Description,
+			Category:    po.Category,
+			ProgrammeId: po.ProgrammeId,
 		})
 	}
 	err := u.programOutcomeRepo.CreateMany(pos)
@@ -97,4 +100,15 @@ func (u programOutcomeUseCase) Delete(id string) error {
 	}
 
 	return nil
+}
+
+func (u programOutcomeUseCase) FilterNonExisted(ids []string) ([]string, error) {
+	existedIds, err := u.programOutcomeRepo.FilterExisted(ids)
+	if err != nil {
+		return nil, errs.New(errs.ErrQueryPO, "cannot filter existed POs", err)
+	}
+
+	nonExistedIds := slice.Subtraction(ids, existedIds)
+
+	return nonExistedIds, nil
 }

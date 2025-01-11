@@ -33,7 +33,7 @@ type Student struct {
 	FirstName      string  `json:"first_name"`
 	LastName       string  `json:"last_name"`
 	Email          string  `json:"email"`
-	ProgrammeName  string  `json:"programme_name"`
+	ProgrammeId    string  `json:"programme_id"`
 	DepartmentName string  `json:"department_name"`
 	GPAX           float64 `json:"gpax"`
 	MathGPA        float64 `json:"math_gpa"`
@@ -68,13 +68,13 @@ type CreateStudentPayload struct {
 	Admission string   `json:"admission" validate:"required"`
 	Remark    string   `json:"remark"`
 
-	ProgrammeName  string `json:"programme_name" validate:"required"`
+	ProgrammeId    string `json:"programme_id" validate:"required"`
 	DepartmentName string `json:"department_name" validate:"required"`
 }
 
 type GetStudentsByParamsPayload struct {
 	Year           string `json:"year"`
-	ProgrammeName  string `json:"programme_name"`
+	ProgrammeId    string `json:"programme_id"`
 	DepartmentName string `json:"department_name"`
 }
 
@@ -93,6 +93,6 @@ type UpdateStudentPayload struct {
 	Admission string   `json:"admission" validate:"required"`
 	Remark    *string  `json:"remark" validate:"required"`
 
-	ProgrammeName  string `json:"programme_name" validate:"required"`
+	ProgrammeId    string `json:"programme_id" validate:"required"`
 	DepartmentName string `json:"department_name" validate:"required"`
 }

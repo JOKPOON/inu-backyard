@@ -77,12 +77,14 @@ func (u courseLearningOutcomeUseCase) Create(payload entity.CreateCourseLearning
 		return errs.New(errs.ErrCourseNotFound, "course id %s not found while creating clo", payload.CourseId)
 	}
 
-	if payload.ProgramOutcomeId != "" {
-		po, err := u.programOutcomeUseCase.GetById(payload.ProgramOutcomeId)
-		if err != nil {
-			return errs.New(errs.SameCode, "cannot get program outcome id %s while creating clo", payload.ProgramOutcomeId, err)
-		} else if po == nil {
-			return errs.New(errs.ErrCourseNotFound, "program outcome id %s not found while creating clo", payload.ProgramOutcomeId)
+	if len(payload.ProgramOutcomeIds) > 0 {
+		for _, programOutcomeId := range payload.ProgramOutcomeIds {
+			po, err := u.programOutcomeUseCase.GetById(programOutcomeId)
+			if err != nil {
+				return errs.New(errs.SameCode, "cannot get program outcome id %s while creating clo", programOutcomeId, err)
+			} else if po == nil {
+				return errs.New(errs.ErrCourseNotFound, "program outcome id %s not found while creating clo", programOutcomeId)
+			}
 		}
 	}
 
@@ -102,6 +104,13 @@ func (u courseLearningOutcomeUseCase) Create(payload entity.CreateCourseLearning
 		} else if len(nonExistedSubSoIds) != 0 {
 			return errs.New(errs.ErrCreateEnrollment, "there are non exist sub so %v", nonExistedSubSoIds)
 		}
+	}
+
+	pos := []*entity.ProgramOutcome{}
+	for _, poId := range payload.ProgramOutcomeIds {
+		pos = append(pos, &entity.ProgramOutcome{
+			Id: poId,
+		})
 	}
 
 	subPlos := []*entity.SubProgramLearningOutcome{}
@@ -126,7 +135,7 @@ func (u courseLearningOutcomeUseCase) Create(payload entity.CreateCourseLearning
 		ExpectedPassingAssignmentPercentage: payload.ExpectedPassingAssignmentPercentage,
 		ExpectedPassingStudentPercentage:    payload.ExpectedPassingStudentPercentage,
 		CourseId:                            payload.CourseId,
-		ProgramOutcomeId:                    payload.ProgramOutcomeId,
+		ProgramOutcomes:                     pos,
 		SubProgramLearningOutcomes:          subPlos,
 		SubStudentOutcomes:                  subSos,
 	}
@@ -134,6 +143,29 @@ func (u courseLearningOutcomeUseCase) Create(payload entity.CreateCourseLearning
 	err = u.courseLearningOutcomeRepo.Create(&clo)
 	if err != nil {
 		return errs.New(errs.ErrCreateCLO, "cannot create CLO", err)
+	}
+
+	return nil
+}
+
+func (u courseLearningOutcomeUseCase) CreateLinkProgramOutcome(id string, programOutcomeIds []string) error {
+	existCourseLearningOutcome, err := u.GetById(id)
+	if err != nil {
+		return errs.New(errs.SameCode, "cannot get courseLearningOutcome id %s to link programOutcome", id, err)
+	} else if existCourseLearningOutcome == nil {
+		return errs.New(errs.ErrCLONotFound, "cannot get courseLearningOutcome id %s to link programOutcome", id)
+	}
+
+	nonExistedProgramOutcomeIds, err := u.programOutcomeUseCase.FilterNonExisted(programOutcomeIds)
+	if err != nil {
+		return errs.New(errs.SameCode, "cannot get non existed program outcome ids while linking clo and program outcome")
+	} else if len(nonExistedProgramOutcomeIds) != 0 {
+		return errs.New(errs.ErrCreateEnrollment, "there are non exist program outcome %v", nonExistedProgramOutcomeIds)
+	}
+
+	err = u.courseLearningOutcomeRepo.CreateLinkProgramOutcome(id, programOutcomeIds)
+	if err != nil {
+		return errs.New(errs.ErrCreateCLO, "cannot link CLO and programOutcome", err)
 	}
 
 	return nil
@@ -197,20 +229,12 @@ func (u courseLearningOutcomeUseCase) Update(id string, payload entity.UpdateCou
 		return errs.New(errs.ErrCLONotFound, "cannot get courseLearningOutcome id %s to update", id)
 	}
 
-	existedProgramOutcome, err := u.programOutcomeUseCase.GetById(payload.ProgramOutcomeId)
-	if err != nil {
-		return errs.New(errs.SameCode, "cannot get program outcome id %s to update clo", payload.ProgramOutcomeId, err)
-	} else if existedProgramOutcome == nil {
-		return errs.New(errs.ErrPONotFound, "program outcome id %s not found while updating clo", payload.ProgramOutcomeId)
-	}
-
 	err = u.courseLearningOutcomeRepo.Update(id, &entity.CourseLearningOutcome{
 		Code:                                payload.Code,
 		Description:                         payload.Description,
 		ExpectedPassingAssignmentPercentage: payload.ExpectedPassingAssignmentPercentage,
 		ExpectedPassingStudentPercentage:    payload.ExpectedPassingStudentPercentage,
 		Status:                              payload.Status,
-		ProgramOutcomeId:                    payload.ProgramOutcomeId,
 	})
 
 	if err != nil {
@@ -231,6 +255,15 @@ func (u courseLearningOutcomeUseCase) Delete(id string) error {
 	err = u.courseLearningOutcomeRepo.Delete(id)
 	if err != nil {
 		return errs.New(errs.ErrDeleteCLO, "cannot delete CLO", err)
+	}
+
+	return nil
+}
+
+func (u courseLearningOutcomeUseCase) DeleteLinkProgramOutcome(id string, programOutcomeId string) error {
+	err := u.courseLearningOutcomeRepo.DeleteLinkProgramOutcome(id, programOutcomeId)
+	if err != nil {
+		return errs.New(errs.ErrUnLinkSubPLO, "cannot delete link CLO and program outcome", err)
 	}
 
 	return nil

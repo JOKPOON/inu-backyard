@@ -32,10 +32,11 @@ type CoursePortfolioUseCase interface {
 
 // [1] Info
 type CourseInfo struct {
-	Name      string   `json:"course_name"`
-	Code      string   `json:"course_code"`
-	Lecturers []string `json:"lecturers"`
-	Programme string   `json:"programme"`
+	Name        string   `json:"course_name"`
+	Code        string   `json:"course_code"`
+	LecturersTH []string `json:"lecturers_th"`
+	LecturersEN []string `json:"lecturers_en"`
+	Programme   string   `json:"programme"`
 }
 
 // [2] Summary

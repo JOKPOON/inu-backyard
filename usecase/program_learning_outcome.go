@@ -41,17 +41,21 @@ func (u programLearningOutcomeUseCase) GetById(id string) (*entity.ProgramLearni
 }
 
 func (u programLearningOutcomeUseCase) Create(payload []entity.CreateProgramLearningOutcome) error {
-	programmeNames := make([]string, 0, len(payload))
+	programmeId := make([]string, 0, len(payload))
 	for _, plo := range payload {
-		programmeNames = append(programmeNames, plo.ProgrammeName)
+		programmeId = append(programmeId, plo.ProgrammeId)
 	}
 
-	programmeNames = slice.RemoveDuplicates(programmeNames)
-	nonExistedProgrammes, err := u.programmeUseCase.FilterNonExisted(programmeNames)
-	if err != nil {
-		return errs.New(errs.SameCode, "cannot validate existed programmes while creating plo")
-	} else if len(nonExistedProgrammes) > 0 {
-		return errs.New(errs.ErrCreateCLO, "there are non existed programme %v while creating plo", nonExistedProgrammes)
+	programmeId = slice.RemoveDuplicates(programmeId)
+	for _, id := range programmeId {
+		programme, err := u.programmeUseCase.GetById(id)
+		if err != nil {
+			return errs.New(errs.SameCode, "cannot get programme id %s while creating plo", id, err)
+		}
+
+		if programme == nil {
+			return errs.New(errs.ErrCreatePLO, "programme id %s not found while creating plo", id)
+		}
 	}
 
 	plos := make([]entity.ProgramLearningOutcome, 0, len(payload))
@@ -65,8 +69,7 @@ func (u programLearningOutcomeUseCase) Create(payload []entity.CreateProgramLear
 			Code:            plo.Code,
 			DescriptionThai: plo.DescriptionThai,
 			DescriptionEng:  plo.DescriptionEng,
-			ProgramYear:     plo.ProgramYear,
-			ProgrammeName:   plo.ProgrammeName,
+			ProgrammeId:     plo.ProgrammeId,
 		})
 
 		for _, subPlo := range plo.SubProgramLearningOutcomes {
@@ -80,7 +83,7 @@ func (u programLearningOutcomeUseCase) Create(payload []entity.CreateProgramLear
 		}
 	}
 
-	err = u.programLearningOutcomeRepo.CreateMany(plos)
+	err := u.programLearningOutcomeRepo.CreateMany(plos)
 	if err != nil {
 		return errs.New(errs.ErrCreatePLO, "cannot create PLO", err)
 	}
@@ -103,11 +106,11 @@ func (u programLearningOutcomeUseCase) Update(id string, programLearningOutcome 
 		return errs.New(errs.ErrCreateSubPLO, "plo id not existed while updating plo %v", nonExistedPloIds)
 	}
 
-	nonExistedProgrammes, err := u.programmeUseCase.FilterNonExisted([]string{programLearningOutcome.ProgrammeName})
+	programme, err := u.programmeUseCase.GetById(programLearningOutcome.ProgrammeId)
 	if err != nil {
-		return errs.New(errs.SameCode, "cannot validate existed programmes while creating plo")
-	} else if len(nonExistedProgrammes) > 0 {
-		return errs.New(errs.ErrCreateCLO, "there are non existed programme %v while creating plo", nonExistedProgrammes)
+		return errs.New(errs.SameCode, "cannot get programme id %s while updating plo", programLearningOutcome.ProgrammeId, err)
+	} else if programme == nil {
+		return errs.New(errs.ErrCreatePLO, "programme id %s not found while updating plo", programLearningOutcome.ProgrammeId)
 	}
 
 	err = u.programLearningOutcomeRepo.Update(id, programLearningOutcome)

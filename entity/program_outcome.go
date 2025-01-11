@@ -8,6 +8,7 @@ type ProgramOutcomeRepository interface {
 	CreateMany(programOutcome []ProgramOutcome) error
 	Update(id string, programOutcome *ProgramOutcome) error
 	Delete(id string) error
+	FilterExisted(ids []string) ([]string, error)
 }
 
 type ProgramOutcomeUseCase interface {
@@ -17,18 +18,26 @@ type ProgramOutcomeUseCase interface {
 	Create(programOutcome []CreateProgramOutcome) error
 	Update(id string, programOutcome *ProgramOutcome) error
 	Delete(id string) error
+	FilterNonExisted(ids []string) ([]string, error)
 }
+
 type ProgramOutcome struct {
 	Id          string `json:"id" gorm:"primaryKey;type:char(255)"`
 	Code        string `json:"code"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
+	Category    string `json:"category"`
+	ProgrammeId string `json:"programme_id"`
+
+	Programme Programme `json:"programme"`
 }
 
 type CreateProgramOutcome struct {
 	Code        string `json:"code" validate:"required"`
 	Name        string `json:"name" validate:"required"`
 	Description string `json:"description" validate:"required"`
+	Category    string `json:"category" validate:"required"`
+	ProgrammeId string `json:"programme_id" validate:"required"`
 }
 
 type CreateProgramOutcomePayload struct {

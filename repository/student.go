@@ -89,7 +89,7 @@ func (r studentRepositoryGorm) Update(id string, student *entity.Student) error 
 		"year":            student.Year,
 		"admission":       student.Admission,
 		"remark":          student.Remark,
-		"programme_name":  student.ProgrammeName,
+		"programme_id":    student.ProgrammeId,
 		"department_name": student.DepartmentName,
 	}).Error
 	if err != nil {

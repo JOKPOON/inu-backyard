@@ -1,12 +1,14 @@
 package entity
 
 type Programme struct {
-	Name string `json:"name" gorm:"primaryKey;type:char(255)"`
+	Id   string `json:"id" gorm:"primaryKey;type:char(255)"`
+	Name string `json:"name" gorm:"unique;not null"`
 }
 
 type ProgrammeRepository interface {
 	GetAll() ([]Programme, error)
-	Get(name string) (*Programme, error)
+	GetByName(name string) (*Programme, error)
+	GetById(id string) (*Programme, error)
 	Create(programme *Programme) error
 	Update(name string, programme *Programme) error
 	Delete(name string) error
@@ -15,7 +17,8 @@ type ProgrammeRepository interface {
 
 type ProgrammeUseCase interface {
 	GetAll() ([]Programme, error)
-	Get(name string) (*Programme, error)
+	GetByName(name string) (*Programme, error)
+	GetById(id string) (*Programme, error)
 	Create(name string) error
 	Update(name string, programme *UpdateProgrammePayload) error
 	Delete(name string) error

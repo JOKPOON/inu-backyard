@@ -28,7 +28,21 @@ func (r programmeRepositoryGorm) GetAll() ([]entity.Programme, error) {
 	return programs, nil
 }
 
-func (r programmeRepositoryGorm) Get(name string) (*entity.Programme, error) {
+func (r programmeRepositoryGorm) GetById(id string) (*entity.Programme, error) {
+	var programme *entity.Programme
+
+	err := r.gorm.Where("id = ?", id).First(&programme).Error
+
+	if err == gorm.ErrRecordNotFound {
+		return nil, nil
+	} else if err != nil {
+		return nil, fmt.Errorf("cannot query to get programme by id: %w", err)
+	}
+
+	return programme, nil
+}
+
+func (r programmeRepositoryGorm) GetByName(name string) (*entity.Programme, error) {
 	var programme *entity.Programme
 
 	err := r.gorm.Where("name = ?", name).First(&programme).Error
@@ -51,8 +65,8 @@ func (r programmeRepositoryGorm) Create(programme *entity.Programme) error {
 	return nil
 }
 
-func (r programmeRepositoryGorm) Update(name string, programme *entity.Programme) error {
-	err := r.gorm.Model(&entity.Programme{}).Where("name = ?", name).Updates(programme).Error
+func (r programmeRepositoryGorm) Update(id string, programme *entity.Programme) error {
+	err := r.gorm.Model(&entity.Programme{}).Where("id = ?", id).Updates(programme).Error
 	if err != nil {
 		return fmt.Errorf("cannot update programme: %w", err)
 	}
@@ -60,9 +74,8 @@ func (r programmeRepositoryGorm) Update(name string, programme *entity.Programme
 	return nil
 }
 
-func (r programmeRepositoryGorm) Delete(name string) error {
-	err := r.gorm.Delete(&entity.Programme{Name: name}).Error
-
+func (r programmeRepositoryGorm) Delete(id string) error {
+	err := r.gorm.Where("id = ?", id).Delete(&entity.Programme{}).Error
 	if err != nil {
 		return fmt.Errorf("cannot delete programme: %w", err)
 	}

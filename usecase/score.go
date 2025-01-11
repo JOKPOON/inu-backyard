@@ -137,8 +137,10 @@ func (u scoreUseCase) CreateMany(userId string, assignmentId string, studentScor
 		return errs.New(errs.ErrCourseNotFound, "cannot get course id %s to create score", assignment.CourseId)
 	}
 
-	if user.IsRoles([]entity.UserRole{entity.UserRoleLecturer}) && user.Id != course.UserId {
-		return errs.New(errs.ErrDeleteScore, "no permission to create score")
+	for _, lecturer := range course.Lecturers {
+		if user.IsRoles([]entity.UserRole{entity.UserRoleLecturer}) && user.Id != lecturer.Id {
+			return errs.New(errs.ErrDeleteScore, "no permission to create score")
+		}
 	}
 
 	for _, studentScore := range studentScores {
