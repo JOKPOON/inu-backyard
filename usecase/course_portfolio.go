@@ -3,7 +3,6 @@ package usecase
 import (
 	"encoding/json"
 	"fmt"
-	"math"
 
 	"github.com/team-inu/inu-backyard/entity"
 	errs "github.com/team-inu/inu-backyard/entity/error"
@@ -274,9 +273,31 @@ func (u coursePortfolioUseCase) CalculateGradeDistribution(courseId string) (*en
 	}
 
 	// score frequency
-	frequencyByScore := make(map[int]int, 0)
+	frequencyByScore := make(map[string]int, 0)
 	for _, score := range sumScoreByStudentId {
-		frequencyByScore[int(math.Round(score))] += 1
+		if score <= 50 {
+			frequencyByScore["0-50"] += 1
+		} else if score <= 55 {
+			frequencyByScore["51-55"] += 1
+		} else if score <= 60 {
+			frequencyByScore["56-60"] += 1
+		} else if score <= 65 {
+			frequencyByScore["61-65"] += 1
+		} else if score <= 70 {
+			frequencyByScore["66-70"] += 1
+		} else if score <= 75 {
+			frequencyByScore["71-75"] += 1
+		} else if score <= 80 {
+			frequencyByScore["76-80"] += 1
+		} else if score <= 85 {
+			frequencyByScore["81-85"] += 1
+		} else if score <= 90 {
+			frequencyByScore["86-90"] += 1
+		} else if score <= 95 {
+			frequencyByScore["91-95"] += 1
+		} else {
+			frequencyByScore["96-100"] += 1
+		}
 	}
 
 	scoreFrequencies := make([]entity.ScoreFrequency, 0, len(frequencyByScore))

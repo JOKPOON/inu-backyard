@@ -93,3 +93,14 @@ func (c CoursePortfolioController) GetOutcomesByStudentId(ctx *fiber.Ctx) error 
 	}
 	return response.NewSuccessResponse(ctx, fiber.StatusOK, records)
 }
+
+func (c CoursePortfolioController) GetCourseResult(ctx *fiber.Ctx) error {
+	courseId := ctx.Params("courseId")
+
+	result, err := c.CoursePortfolioUseCase.CalculateGradeDistribution(courseId)
+	if err != nil {
+		return err
+	}
+
+	return response.NewSuccessResponse(ctx, fiber.StatusOK, result)
+}

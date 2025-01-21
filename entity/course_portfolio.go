@@ -78,8 +78,8 @@ type GradeFrequency struct {
 }
 
 type ScoreFrequency struct {
-	Score     int `json:"score"`
-	Frequency int `json:"frequency"`
+	Score     string `json:"score"`
+	Frequency int    `json:"frequency"`
 }
 
 type GradeDistribution struct {

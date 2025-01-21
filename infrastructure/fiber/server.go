@@ -214,6 +214,7 @@ func (f *fiberServer) initController() error {
 	course.Get("/:courseId/clos", courseLearningOutcomeController.GetByCourseId)
 	course.Get("/:courseId/clos/students", coursePortfolioController.GetCloPassingStudentsByCourseId)
 	course.Get("/:courseId/students/outcomes", coursePortfolioController.GetStudentOutcomeStatusByCourseId)
+	course.Get("/:courseId/result", coursePortfolioController.GetCourseResult)
 	course.Get("/:courseId/enrollments", enrollmentController.GetByCourseId)
 	course.Get("/:courseId/portfolio", coursePortfolioController.Generate)
 	course.Patch("/:courseId/portfolio", coursePortfolioController.Update)
