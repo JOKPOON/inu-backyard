@@ -26,7 +26,7 @@ func NewCourseController(validator validator.PayloadValidator, courseUseCase ent
 func (c CourseController) GetAll(ctx *fiber.Ctx) error {
 	user := middleware.GetUserFromCtx(ctx)
 
-	var courses []entity.Course
+	var courses *entity.GetAllCourseResponse
 	var err error
 
 	if user.IsRoles([]entity.UserRole{entity.UserRoleHeadOfCurriculum, entity.UserRoleModerator, entity.UserRoleTABEEManager}) {

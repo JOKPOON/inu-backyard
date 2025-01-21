@@ -24,6 +24,7 @@ type ScoreUseCase interface {
 	Delete(user User, id string) error
 	FilterSubmittedScoreStudents(assignmentId string, studentIds []string) ([]string, error)
 }
+
 type Score struct {
 	Id           string  `json:"id" gorm:"primaryKey;type:char(255)"`
 	Score        float64 `json:"score"`

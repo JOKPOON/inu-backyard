@@ -18,13 +18,35 @@ func NewCourseUseCase(courseRepo entity.CourseRepository, semesterUseCase entity
 	return &courseUseCase{courseRepo: courseRepo, semesterUseCase: semesterUseCase, userUseCase: userUseCase}
 }
 
-func (u courseUseCase) GetAll() ([]entity.Course, error) {
+func (u courseUseCase) GetAll() (*entity.GetAllCourseResponse, error) {
 	courses, err := u.courseRepo.GetAll()
 	if err != nil {
 		return nil, errs.New(errs.ErrQueryStudent, "cannot get all courses", err)
 	}
 
-	return courses, nil
+	lec := []string{}
+	for _, c := range courses {
+		for _, l := range c.Lecturers {
+			lec = append(lec, l.Id)
+		}
+	}
+
+	res := entity.GetAllCourseResponse{}
+	for _, c := range courses {
+		res.Courses = append(res.Courses, entity.CourseSimpleData{
+			Id:           c.Id,
+			Name:         c.Name,
+			Code:         c.Code,
+			Credit:       c.Credit,
+			AcademicYear: c.AcademicYear,
+			GraduateYear: c.GraduateYear,
+			Description:  c.Description,
+			ProgramName:  c.Programme.Name,
+			Lecturers:    lec,
+		})
+	}
+
+	return &res, nil
 }
 
 func (u courseUseCase) GetById(id string) (*entity.Course, error) {
@@ -36,7 +58,7 @@ func (u courseUseCase) GetById(id string) (*entity.Course, error) {
 	return course, nil
 }
 
-func (u courseUseCase) GetByUserId(userId string) ([]entity.Course, error) {
+func (u courseUseCase) GetByUserId(userId string) (*entity.GetAllCourseResponse, error) {
 	user, err := u.userUseCase.GetById(userId)
 	if err != nil {
 		return nil, errs.New(errs.SameCode, "cannot get user id %s while get scores", user, err)
@@ -44,12 +66,34 @@ func (u courseUseCase) GetByUserId(userId string) ([]entity.Course, error) {
 		return nil, errs.New(errs.ErrQueryCourse, "user id %s not found while getting scores", userId, err)
 	}
 
-	course, err := u.courseRepo.GetByUserId(userId)
+	courses, err := u.courseRepo.GetByUserId(userId)
 	if err != nil {
 		return nil, errs.New(errs.ErrQueryCourse, "cannot get score by user id %s", userId, err)
 	}
 
-	return course, nil
+	lec := []string{}
+	for _, c := range courses {
+		for _, l := range c.Lecturers {
+			lec = append(lec, l.Id)
+		}
+	}
+
+	res := entity.GetAllCourseResponse{}
+	for _, c := range courses {
+		res.Courses = append(res.Courses, entity.CourseSimpleData{
+			Id:           c.Id,
+			Name:         c.Name,
+			Code:         c.Code,
+			Credit:       c.Credit,
+			AcademicYear: c.AcademicYear,
+			GraduateYear: c.GraduateYear,
+			Description:  c.Description,
+			ProgramName:  c.Programme.Name,
+			Lecturers:    lec,
+		})
+	}
+
+	return &res, nil
 }
 
 func (u courseUseCase) Create(user entity.User, payload entity.CreateCoursePayload) error {
@@ -84,6 +128,9 @@ func (u courseUseCase) Create(user entity.User, payload entity.CreateCoursePaylo
 		Code:                         payload.Code,
 		ProgrammeId:                  payload.ProgrammeId,
 		Description:                  payload.Description,
+		Credit:                       payload.Credit,
+		AcademicYear:                 payload.AcademicYear,
+		GraduateYear:                 payload.GraduateYear,
 		ExpectedPassingCloPercentage: payload.ExpectedPassingCloPercentage,
 		SemesterId:                   payload.SemesterId,
 		CriteriaGrade:                payload.CriteriaGrade,
@@ -126,6 +173,9 @@ func (u courseUseCase) Update(user entity.User, id string, payload entity.Update
 		Code:                         payload.Code,
 		ProgrammeId:                  payload.ProgrammeId,
 		Description:                  payload.Description,
+		Credit:                       payload.Credit,
+		AcademicYear:                 payload.AcademicYear,
+		GraduateYear:                 payload.GraduateYear,
 		CriteriaGrade:                payload.CriteriaGrade,
 		ExpectedPassingCloPercentage: payload.ExpectedPassingCloPercentage,
 	})

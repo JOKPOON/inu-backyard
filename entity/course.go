@@ -14,9 +14,9 @@ type CourseRepository interface {
 }
 
 type CourseUseCase interface {
-	GetAll() ([]Course, error)
+	GetAll() (*GetAllCourseResponse, error)
 	GetById(id string) (*Course, error)
-	GetByUserId(userId string) ([]Course, error)
+	GetByUserId(userId string) (*GetAllCourseResponse, error)
 	Create(user User, payload CreateCoursePayload) error
 	Update(user User, id string, payload UpdateCoursePayload) error
 	Delete(user User, id string) error
@@ -88,10 +88,13 @@ type Course struct {
 	Name                         string         `json:"name"`
 	Code                         string         `json:"code"`
 	Description                  string         `json:"description"`
+	AcademicYear                 string         `json:"academic_year"`
+	GraduateYear                 string         `json:"graduate_year"`
 	Credit                       int            `json:"credit"`
 	ExpectedPassingCloPercentage float64        `json:"expected_passing_clo_percentage"`
 	IsPortfolioCompleted         bool           `json:"is_portfolio_completed" gorm:"default:false"`
 	PortfolioData                datatypes.JSON `json:"portfolio_data" gorm:"type:json"`
+	Result                       datatypes.JSON `json:"result" gorm:"type:json"`
 
 	CriteriaGrade
 
@@ -108,6 +111,9 @@ type CreateCoursePayload struct {
 	LecturerIds                  []string `json:"lecturer_ids" validate:"required"`
 	Name                         string   `json:"name" validate:"required"`
 	Code                         string   `json:"code" validate:"required"`
+	AcademicYear                 string   `json:"academic_year" validate:"required"`
+	GraduateYear                 string   `json:"graduate_year" validate:"required"`
+	Credit                       int      `json:"credit" validate:"required"`
 	Description                  string   `json:"description" validate:"required"`
 	ExpectedPassingCloPercentage float64  `json:"expected_passing_clo_percentage" validate:"required"`
 	ProgrammeId                  string   `json:"programme_id" validate:"required"`
@@ -119,8 +125,27 @@ type UpdateCoursePayload struct {
 	LecturerIds                  []string `json:"lecturer_ids" validate:"required"`
 	Name                         string   `json:"name" validate:"required"`
 	Code                         string   `json:"code" validate:"required"`
+	AcademicYear                 string   `json:"academic_year" validate:"required"`
+	GraduateYear                 string   `json:"graduate_year" validate:"required"`
+	Credit                       int      `json:"credit" validate:"required"`
 	Description                  string   `json:"description" validate:"required"`
 	ExpectedPassingCloPercentage float64  `json:"expected_passing_clo_percentage" validate:"required"`
 	ProgrammeId                  string   `json:"programme_id" validate:"required"`
 	CriteriaGrade
+}
+
+type CourseSimpleData struct {
+	Id           string   `json:"id"`
+	Code         string   `json:"code"`
+	Name         string   `json:"name"`
+	ProgramName  string   `json:"program_name"`
+	Lecturers    []string `json:"lecturers"`
+	Description  string   `json:"description"`
+	Credit       int      `json:"credit"`
+	AcademicYear string   `json:"academic_year"`
+	GraduateYear string   `json:"graduate_year"`
+}
+
+type GetAllCourseResponse struct {
+	Courses []CourseSimpleData `json:"courses"`
 }
