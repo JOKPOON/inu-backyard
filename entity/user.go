@@ -69,6 +69,10 @@ type User struct {
 	Id                 string   `json:"id" gorm:"primaryKey;type:char(255)"`
 	Email              string   `json:"email" gorm:"unique"`
 	Password           string   `json:"password"`
+	TitleTHShort       string   `json:"title_th_short"`
+	TitleENShort       string   `json:"title_en_short"`
+	TitleTH            string   `json:"title_th"`
+	TitleEN            string   `json:"title_en"`
 	FirstNameTH        string   `json:"first_name_th"`
 	LastNameTH         string   `json:"last_name_th"`
 	FirstNameEN        string   `json:"first_name_en"`
@@ -78,23 +82,33 @@ type User struct {
 	Role               UserRole `json:"role" gorm:"default:'LECTURER'"`
 	DegreeTH           string   `json:"degree_th"`
 	DegreeEN           string   `json:"degree_en"`
+	Tel                string   `json:"tel"`
 }
 
 type CreateUserPayload struct {
+	TitleTHShort       string   `json:"title_th_short" validate:"required"`
+	TitleENShort       string   `json:"title_en_short" validate:"required"`
+	TitleTH            string   `json:"title_th" validate:"required"`
+	TitleEN            string   `json:"title_en" validate:"required"`
 	FirstNameTH        string   `json:"first_name_th" validate:"required"`
 	LastNameTH         string   `json:"last_name_th" validate:"required"`
 	FirstNameEN        string   `json:"first_name_en" validate:"required"`
 	LastNameEN         string   `json:"last_name_en" validate:"required"`
 	Role               UserRole `json:"role" validate:"required"`
-	AcademicPositionTH string   `json:"academic_position_th"`
-	AcademicPositionEN string   `json:"academic_position_en"`
+	AcademicPositionTH string   `json:"academic_position_th" validate:"required"`
+	AcademicPositionEN string   `json:"academic_position_en" validate:"required"`
 	Email              string   `json:"email" validate:"required,email"`
 	Password           string   `json:"password"`
 	DegreeTH           string   `json:"degree_th" validate:"required"`
 	DegreeEN           string   `json:"degree_en" validate:"required"`
+	Tel                string   `json:"tel" validate:"required"`
 }
 
 type UpdateUserPayload struct {
+	TitleTHShort       string   `json:"title_th_short"`
+	TitleENShort       string   `json:"title_en_short"`
+	TitleTH            string   `json:"title_th"`
+	TitleEN            string   `json:"title_en"`
 	FirstNameTH        string   `json:"first_name_th"`
 	LastNameTH         string   `json:"last_name_th"`
 	FirstNameEN        string   `json:"first_name_en"`
@@ -105,6 +119,7 @@ type UpdateUserPayload struct {
 	Role               UserRole `json:"role" `
 	DegreeTH           string   `json:"degree_th"`
 	DegreeEN           string   `json:"degree_en"`
+	Tel                string   `json:"tel"`
 }
 
 type ChangePasswordPayload struct {

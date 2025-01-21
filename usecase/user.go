@@ -96,6 +96,10 @@ func (u userUseCase) Create(payload entity.CreateUserPayload) error {
 	user := &entity.User{
 		Id:                 ulid.Make().String(),
 		Email:              payload.Email,
+		TitleTHShort:       payload.TitleTHShort,
+		TitleENShort:       payload.TitleENShort,
+		TitleTH:            payload.TitleTH,
+		TitleEN:            payload.TitleEN,
 		FirstNameTH:        payload.FirstNameTH,
 		LastNameTH:         payload.LastNameTH,
 		FirstNameEN:        payload.FirstNameEN,
@@ -106,6 +110,7 @@ func (u userUseCase) Create(payload entity.CreateUserPayload) error {
 		Role:               payload.Role,
 		DegreeTH:           payload.DegreeTH,
 		DegreeEN:           payload.DegreeEN,
+		Tel:                payload.Tel,
 	}
 
 	if !user.IsRoles(entity.Roles) {

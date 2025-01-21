@@ -77,6 +77,10 @@ func (c UserController) CreateMany(ctx *fiber.Ctx) error {
 	newUsers := make([]entity.User, 0, len(payload.Users))
 	for _, user := range payload.Users {
 		newUsers = append(newUsers, entity.User{
+			TitleTHShort:       user.TitleTHShort,
+			TitleENShort:       user.TitleENShort,
+			TitleTH:            user.TitleTH,
+			TitleEN:            user.TitleEN,
 			FirstNameTH:        user.FirstNameTH,
 			LastNameTH:         user.LastNameTH,
 			FirstNameEN:        user.FirstNameEN,
@@ -88,6 +92,7 @@ func (c UserController) CreateMany(ctx *fiber.Ctx) error {
 			DegreeTH:           user.DegreeTH,
 			DegreeEN:           user.DegreeEN,
 			Password:           user.Password,
+			Tel:                user.Tel,
 		})
 	}
 
@@ -113,6 +118,10 @@ func (c UserController) Update(ctx *fiber.Ctx) error {
 	// }
 
 	err := c.UserUseCase.Update(targetUserId, &entity.User{
+		TitleTHShort:       payload.TitleTHShort,
+		TitleENShort:       payload.TitleENShort,
+		TitleTH:            payload.TitleTH,
+		TitleEN:            payload.TitleEN,
 		FirstNameTH:        payload.FirstNameTH,
 		LastNameTH:         payload.LastNameTH,
 		FirstNameEN:        payload.FirstNameEN,
@@ -123,6 +132,7 @@ func (c UserController) Update(ctx *fiber.Ctx) error {
 		Role:               payload.Role,
 		DegreeTH:           payload.DegreeTH,
 		DegreeEN:           payload.DegreeEN,
+		Tel:                payload.Tel,
 	})
 	if err != nil {
 		return err
