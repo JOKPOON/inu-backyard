@@ -42,10 +42,24 @@ func (r programmeRepositoryGorm) GetById(id string) (*entity.Programme, error) {
 	return programme, nil
 }
 
-func (r programmeRepositoryGorm) GetByName(name string) (*entity.Programme, error) {
+func (r programmeRepositoryGorm) GetByName(name string) ([]entity.Programme, error) {
+	var programme []entity.Programme
+
+	err := r.gorm.Find(&programme, "name = ?", name).Error
+
+	if err == gorm.ErrRecordNotFound {
+		return nil, nil
+	} else if err != nil {
+		return nil, fmt.Errorf("cannot query to get programme by id: %w", err)
+	}
+
+	return programme, nil
+}
+
+func (r programmeRepositoryGorm) GetByNameAndYear(name string, year string) (*entity.Programme, error) {
 	var programme *entity.Programme
 
-	err := r.gorm.Where("name = ?", name).First(&programme).Error
+	err := r.gorm.Where("name = ? AND year = ?", name, year).First(&programme).Error
 
 	if err == gorm.ErrRecordNotFound {
 		return nil, nil

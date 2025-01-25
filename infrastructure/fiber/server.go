@@ -365,6 +365,7 @@ func (f *fiberServer) initController() error {
 	programme.Get("/", programmeController.GetAll)
 	programme.Post("/", programmeController.Create)
 	programme.Get("/:programmeName", programmeController.GetByName)
+	programme.Get("/:programmeName/:year", programmeController.GetByNameAndYear)
 	programme.Patch("/:programmeName", programmeController.Update)
 	programme.Delete("/:programmeName", programmeController.Delete)
 

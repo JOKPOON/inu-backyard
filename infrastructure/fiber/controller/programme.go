@@ -43,6 +43,22 @@ func (c ProgrammeController) GetByName(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusOK, programme)
 }
 
+func (c ProgrammeController) GetByNameAndYear(ctx *fiber.Ctx) error {
+	name := ctx.Params("programmeName")
+	year := ctx.Params("year")
+
+	programme, err := c.ProgrammeUseCase.GetByNameAndYear(name, year)
+	if err != nil {
+		return err
+	}
+
+	if programme == nil {
+		return response.NewSuccessResponse(ctx, fiber.StatusNotFound, programme)
+	}
+
+	return response.NewSuccessResponse(ctx, fiber.StatusOK, programme)
+}
+
 func (c ProgrammeController) Create(ctx *fiber.Ctx) error {
 	var payload entity.CreateProgrammePayload
 
@@ -50,7 +66,7 @@ func (c ProgrammeController) Create(ctx *fiber.Ctx) error {
 		return err
 	}
 
-	err := c.ProgrammeUseCase.Create(payload.Name)
+	err := c.ProgrammeUseCase.Create(payload)
 	if err != nil {
 		return err
 	}

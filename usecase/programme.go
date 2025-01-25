@@ -1,6 +1,8 @@
 package usecase
 
 import (
+	"encoding/json"
+
 	"github.com/oklog/ulid/v2"
 	"github.com/team-inu/inu-backyard/entity"
 	errs "github.com/team-inu/inu-backyard/entity/error"
@@ -24,8 +26,17 @@ func (u programmeUseCase) GetAll() ([]entity.Programme, error) {
 	return programme, nil
 }
 
-func (u programmeUseCase) GetByName(name string) (*entity.Programme, error) {
+func (u programmeUseCase) GetByName(name string) ([]entity.Programme, error) {
 	programme, err := u.programmeRepo.GetByName(name)
+	if err != nil {
+		return nil, errs.New(errs.ErrQueryProgramme, "cannot get programme by name %s", name, err)
+	}
+
+	return programme, nil
+}
+
+func (u programmeUseCase) GetByNameAndYear(name string, year string) (*entity.Programme, error) {
+	programme, err := u.programmeRepo.GetByNameAndYear(name, year)
 	if err != nil {
 		return nil, errs.New(errs.ErrQueryProgramme, "cannot get programme by name %s", name, err)
 	}
@@ -42,17 +53,24 @@ func (u programmeUseCase) GetById(id string) (*entity.Programme, error) {
 	return programme, nil
 }
 
-func (u programmeUseCase) Create(name string) error {
-	existProgramme, err := u.GetByName(name)
+func (u programmeUseCase) Create(payload entity.CreateProgrammePayload) error {
+	existProgramme, err := u.GetByNameAndYear(payload.Name, payload.Year)
 	if err != nil {
-		return errs.New(errs.SameCode, "cannot get programme name %s to update", name, err)
+		return errs.New(errs.SameCode, "cannot get programme name %s to update", payload.Name+", "+payload.Year, err)
 	} else if existProgramme != nil {
-		return errs.New(errs.ErrDupName, "cannot create duplicate programme name %s", name)
+		return errs.New(errs.ErrDupName, "cannot create duplicate programme name %s", payload.Name+", "+payload.Year)
+	}
+
+	json, err := json.Marshal(payload.Structure)
+	if err != nil {
+		return errs.New(errs.ErrCreateProgramme, "cannot marshal programme structure", err)
 	}
 
 	programme := &entity.Programme{
-		Id:   ulid.Make().String(),
-		Name: name,
+		Id:        ulid.Make().String(),
+		Name:      payload.Name,
+		Year:      payload.Year,
+		Structure: json,
 	}
 
 	err = u.programmeRepo.Create(programme)
