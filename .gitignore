@@ -26,6 +26,7 @@ dist
 tmp
 
 config.yml
+config.dev.yml
 
 .env
 

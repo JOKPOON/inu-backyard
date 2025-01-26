@@ -41,7 +41,7 @@ func (u courseUseCase) GetAll() (*entity.GetAllCourseResponse, error) {
 			AcademicYear: c.AcademicYear,
 			GraduateYear: c.GraduateYear,
 			Description:  c.Description,
-			ProgramName:  c.Programme.Name,
+			ProgramName:  c.Programme.NameTH + ", " + c.Programme.NameEN,
 			Lecturers:    lec,
 		})
 	}
@@ -88,7 +88,7 @@ func (u courseUseCase) GetByUserId(userId string) (*entity.GetAllCourseResponse,
 			AcademicYear: c.AcademicYear,
 			GraduateYear: c.GraduateYear,
 			Description:  c.Description,
-			ProgramName:  c.Programme.Name,
+			ProgramName:  c.Programme.NameTH + ", " + c.Programme.NameEN,
 			Lecturers:    lec,
 		})
 	}

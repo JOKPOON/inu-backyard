@@ -136,7 +136,7 @@ func (u coursePortfolioUseCase) Generate(courseId string) (*entity.CoursePortfol
 		Code:        course.Code,
 		LecturersTH: lecturersNameTH,
 		LecturersEN: lecturersNameEN,
-		Programme:   course.Programme.Name,
+		Programme:   course.Programme.NameTH + " " + course.Programme.NameEN,
 	}
 
 	gradeDistribution, err := u.CalculateGradeDistribution(courseId)

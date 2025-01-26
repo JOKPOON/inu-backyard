@@ -42,10 +42,10 @@ func (r programmeRepositoryGorm) GetById(id string) (*entity.Programme, error) {
 	return programme, nil
 }
 
-func (r programmeRepositoryGorm) GetByName(name string) ([]entity.Programme, error) {
+func (r programmeRepositoryGorm) GetByName(nameTH string, nameEN string) ([]entity.Programme, error) {
 	var programme []entity.Programme
 
-	err := r.gorm.Find(&programme, "name = ?", name).Error
+	err := r.gorm.Find(&programme, "name_th = ? OR name_en = ?", nameTH, nameEN).Error
 
 	if err == gorm.ErrRecordNotFound {
 		return nil, nil
@@ -56,10 +56,10 @@ func (r programmeRepositoryGorm) GetByName(name string) ([]entity.Programme, err
 	return programme, nil
 }
 
-func (r programmeRepositoryGorm) GetByNameAndYear(name string, year string) (*entity.Programme, error) {
+func (r programmeRepositoryGorm) GetByNameAndYear(nameTH string, nameEN string, year string) (*entity.Programme, error) {
 	var programme *entity.Programme
 
-	err := r.gorm.Where("name = ? AND year = ?", name, year).First(&programme).Error
+	err := r.gorm.Where("(name_th = ? OR name_en = ?) AND year = ?", nameTH, nameEN, year).First(&programme).Error
 
 	if err == gorm.ErrRecordNotFound {
 		return nil, nil
@@ -97,12 +97,12 @@ func (r programmeRepositoryGorm) Delete(id string) error {
 	return nil
 }
 
-func (r programmeRepositoryGorm) FilterExisted(names []string) ([]string, error) {
+func (r programmeRepositoryGorm) FilterExisted(namesTH []string, namesEN []string) ([]string, error) {
 	var existedNames []string
 
-	err := r.gorm.Raw("SELECT name FROM `programme` WHERE name in ?", names).Scan(&existedNames).Error
+	err := r.gorm.Model(&entity.Programme{}).Where("name_th IN (?) OR name_en IN (?)", namesTH, namesEN).Pluck("name_th", &existedNames).Error
 	if err != nil {
-		return nil, fmt.Errorf("cannot query programme: %w", err)
+		return nil, fmt.Errorf("cannot filter existed programme names: %w", err)
 	}
 
 	return existedNames, nil

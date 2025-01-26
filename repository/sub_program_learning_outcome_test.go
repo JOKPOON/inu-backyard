@@ -10,7 +10,9 @@ import (
 )
 
 func setupProgrammeAndPLOs(db *gorm.DB) (*entity.Programme, *entity.ProgramLearningOutcome) {
-	pro := &entity.Programme{Name: "CS"}
+	pro := &entity.Programme{
+		Id: "1",
+	}
 	db.Create(pro)
 
 	plo := &entity.ProgramLearningOutcome{Id: "1", ProgrammeId: pro.Id}

@@ -20,44 +20,70 @@ func NewProgrammeController(validator validator.PayloadValidator, programmeUseCa
 }
 
 func (c ProgrammeController) GetAll(ctx *fiber.Ctx) error {
-	programmes, err := c.ProgrammeUseCase.GetAll()
-	if err != nil {
-		return err
-	}
+	nameTH := ctx.Query("nameTH")
+	nameEN := ctx.Query("nameEN")
+	year := ctx.Query("year")
 
-	return response.NewSuccessResponse(ctx, fiber.StatusOK, programmes)
+	if (nameTH != "" || nameEN != "") && year != "" {
+		programme, err := c.ProgrammeUseCase.GetByNameAndYear(nameTH, nameEN, year)
+		if err != nil {
+			return err
+		}
+
+		if programme == nil {
+			return response.NewSuccessResponse(ctx, fiber.StatusNotFound, programme)
+		}
+
+		return response.NewSuccessResponse(ctx, fiber.StatusOK, programme)
+	} else if nameTH != "" || nameEN != "" {
+		programme, err := c.ProgrammeUseCase.GetByName(nameTH, nameEN)
+		if err != nil {
+			return err
+		}
+
+		if programme == nil {
+			return response.NewSuccessResponse(ctx, fiber.StatusNotFound, programme)
+		}
+
+		return response.NewSuccessResponse(ctx, fiber.StatusOK, programme)
+	} else {
+		programmes, err := c.ProgrammeUseCase.GetAll()
+		if err != nil {
+			return err
+		}
+
+		return response.NewSuccessResponse(ctx, fiber.StatusOK, programmes)
+	}
 }
 
-func (c ProgrammeController) GetByName(ctx *fiber.Ctx) error {
-	name := ctx.Params("programmeName")
+// func (c ProgrammeController) GetByName(ctx *fiber.Ctx) error {
+// 	nameTH := ctx.Query("nameTH")
+// 	nameEN := ctx.Query("nameEN")
 
-	programme, err := c.ProgrammeUseCase.GetByName(name)
-	if err != nil {
-		return err
-	}
+// 	programme, err := c.ProgrammeUseCase.GetByName(nameTH, nameEN)
+// 	if err != nil {
+// 		return err
+// 	}
 
-	if programme == nil {
-		return response.NewSuccessResponse(ctx, fiber.StatusNotFound, programme)
-	}
+// 	if programme == nil {
+// 		return response.NewSuccessResponse(ctx, fiber.StatusNotFound, programme)
+// 	}
 
-	return response.NewSuccessResponse(ctx, fiber.StatusOK, programme)
-}
+// 	return response.NewSuccessResponse(ctx, fiber.StatusOK, programme)
+// }
 
-func (c ProgrammeController) GetByNameAndYear(ctx *fiber.Ctx) error {
-	name := ctx.Params("programmeName")
-	year := ctx.Params("year")
+// func (c ProgrammeController) GetByNameAndYear(ctx *fiber.Ctx) error {
+// 	programme, err := c.ProgrammeUseCase.GetByNameAndYear(nameTH, nameEN, year)
+// 	if err != nil {
+// 		return err
+// 	}
 
-	programme, err := c.ProgrammeUseCase.GetByNameAndYear(name, year)
-	if err != nil {
-		return err
-	}
+// 	if programme == nil {
+// 		return response.NewSuccessResponse(ctx, fiber.StatusNotFound, programme)
+// 	}
 
-	if programme == nil {
-		return response.NewSuccessResponse(ctx, fiber.StatusNotFound, programme)
-	}
-
-	return response.NewSuccessResponse(ctx, fiber.StatusOK, programme)
-}
+// 	return response.NewSuccessResponse(ctx, fiber.StatusOK, programme)
+// }
 
 func (c ProgrammeController) Create(ctx *fiber.Ctx) error {
 	var payload entity.CreateProgrammePayload
