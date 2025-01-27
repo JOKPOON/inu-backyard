@@ -48,6 +48,27 @@ type CourseLearningOutcome struct {
 	Course                     Course                       `json:"course"`
 }
 
+type CourseLearningOutcomeDal struct {
+	Code                                string  `json:"code"`
+	Description                         string  `json:"description"`
+	ExpectedPassingAssignmentPercentage float64 `json:"expected_passing_assignment_percentage"`
+	ExpectedPassingStudentPercentage    float64 `json:"expected_passing_student_percentage"`
+	Status                              string  `json:"status"`
+	CourseId                            string  `json:"course_id"`
+}
+
+type CourseLearningOutcomeWithOutcomeDal struct {
+	CourseLearningOutcomeDal
+	ProgramOutcomes            []*ProgramOutcome            `gorm:"many2many:clo_po" json:"program_outcomes"`
+	SubProgramLearningOutcomes []*SubProgramLearningOutcome `gorm:"many2many:clo_subplo" json:"sub_program_learning_outcomes"`
+	SubStudentOutcomes         []*SubStudentOutcome         `gorm:"many2many:clo_subso" json:"sub_student_outcomes"`
+}
+
+type CourseLearningOutcomeWithAssignmentDal struct {
+	CourseLearningOutcomeDal
+	AssignmentId string `json:"assignment_id"`
+}
+
 type CourseLearningOutcomeWithPO struct {
 	CourseLearningOutcome
 	ProgramOutcomeCode            string  `json:"program_outcome_code"`
