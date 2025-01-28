@@ -6,6 +6,7 @@ type CourseRepository interface {
 	GetAll() ([]Course, error)
 	GetById(id string) (*Course, error)
 	GetByUserId(userId string) ([]Course, error)
+	GetStudentsPassingCLOs(courseId string) (*StudentPassCLOResp, error)
 	Create(course *Course) error
 	Update(id string, course *Course) error
 	Delete(id string) error
@@ -17,6 +18,7 @@ type CourseUseCase interface {
 	GetAll() (*GetAllCourseResponse, error)
 	GetById(id string) (*Course, error)
 	GetByUserId(userId string) (*GetAllCourseResponse, error)
+	GetStudentsPassingCLOs(courseId string) (*StudentPassCLOResp, error)
 	Create(user User, payload CreateCoursePayload) error
 	Update(user User, id string, payload UpdateCoursePayload) error
 	Delete(user User, id string) error

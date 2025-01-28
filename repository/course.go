@@ -2,6 +2,7 @@ package repository
 
 import (
 	"fmt"
+	"math"
 
 	"github.com/team-inu/inu-backyard/entity"
 	"gorm.io/gorm"
@@ -117,4 +118,95 @@ func (r courseRepositoryGorm) DeleteLinkWithLecturer(courseId string, lecturerId
 	}
 
 	return nil
+}
+
+func (r courseRepositoryGorm) GetStudentsPassingCLOs(courseId string) (*entity.StudentPassCLOResp, error) {
+	var cloResults []entity.CLOResult
+	err := r.gorm.Raw(`
+	SELECT
+		s.id AS student_id,
+		clo.id AS clo_id,
+		clo.code AS clo_code,
+		COUNT(DISTINCT a.id) AS passed_assignments,
+		(
+		SELECT
+			COUNT(*)
+		FROM
+			clo_assignment ca2
+		WHERE
+			ca2.course_learning_outcome_id = clo.id
+	) AS total_assignments,
+	clo.expected_passing_assignment_percentage
+	FROM
+		student s
+	JOIN enrollment e ON
+		s.id = e.student_id
+	JOIN course c ON
+		e.course_id = c.id
+	JOIN course_learning_outcome clo ON
+		c.id = clo.course_id
+	JOIN clo_assignment ca ON
+		clo.id = ca.course_learning_outcome_id
+	JOIN assignment a ON
+		ca.assignment_id = a.id
+	JOIN score sc ON
+		a.id = sc.assignment_id AND s.id = sc.student_id
+	WHERE
+		sc.score >=(
+			a.max_score * a.expected_score_percentage / 100
+		) AND c.id = ?
+	GROUP BY
+		s.id,
+		clo.id,
+		clo.code,
+		clo.expected_passing_assignment_percentage
+	ORDER BY
+		s.id,
+		clo.id;
+	`, courseId).Scan(&cloResults).Error
+	if err == gorm.ErrRecordNotFound {
+		return nil, nil
+	} else if err != nil {
+		return nil, fmt.Errorf("cannot query to get students passing CLOs: %w", err)
+	}
+
+	studentCLOs := make(map[int]*entity.StudentCLO)
+
+	for _, res := range cloResults {
+		passingThreshold := int(math.Ceil(float64(res.TotalAssignments) * (res.ExpectedPassingAssignmentPerc / 100)))
+		if res.PassedAssignments >= passingThreshold {
+			if _, exists := studentCLOs[res.StudentID]; !exists {
+				studentCLOs[res.StudentID] = &entity.StudentCLO{
+					StudentID: res.StudentID,
+					PassCLO:   []string{},
+				}
+			}
+
+			studentCLOs[res.StudentID].PassCLO = append(studentCLOs[res.StudentID].PassCLO, res.CLOCode)
+		}
+	}
+
+	cloCodes := []string{}
+	err = r.gorm.Raw(`
+		SELECT clo.code AS clo_code
+		FROM course c
+		JOIN course_learning_outcome clo ON c.id = clo.course_id
+		WHERE c.id = ?;
+	`, courseId).Scan(&cloCodes).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	var students []entity.StudentCLO
+	for _, student := range studentCLOs {
+		students = append(students, *student)
+	}
+
+	output := &entity.StudentPassCLOResp{
+		Clos:   cloCodes,
+		Result: students,
+	}
+
+	return output, nil
 }

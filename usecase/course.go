@@ -14,8 +14,16 @@ type courseUseCase struct {
 	userUseCase     entity.UserUseCase
 }
 
-func NewCourseUseCase(courseRepo entity.CourseRepository, semesterUseCase entity.SemesterUseCase, userUseCase entity.UserUseCase) entity.CourseUseCase {
-	return &courseUseCase{courseRepo: courseRepo, semesterUseCase: semesterUseCase, userUseCase: userUseCase}
+func NewCourseUseCase(
+	courseRepo entity.CourseRepository,
+	semesterUseCase entity.SemesterUseCase,
+	userUseCase entity.UserUseCase,
+) entity.CourseUseCase {
+	return &courseUseCase{
+		courseRepo:      courseRepo,
+		semesterUseCase: semesterUseCase,
+		userUseCase:     userUseCase,
+	}
 }
 
 func (u courseUseCase) GetAll() (*entity.GetAllCourseResponse, error) {
@@ -197,4 +205,13 @@ func (u courseUseCase) Delete(user entity.User, id string) error {
 	}
 
 	return nil
+}
+
+func (u courseUseCase) GetStudentsPassingCLOs(courseId string) (*entity.StudentPassCLOResp, error) {
+	resp, err := u.courseRepo.GetStudentsPassingCLOs(courseId)
+	if err != nil {
+		return nil, errs.New(errs.ErrQueryCourse, "cannot get students passing CLOs by course id %s", courseId, err)
+	}
+
+	return resp, nil
 }

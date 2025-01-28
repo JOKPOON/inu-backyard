@@ -132,3 +132,22 @@ type CreateLinkSubProgramLearningOutcomePayload struct {
 type CreateLinkSubStudentOutcomePayload struct {
 	SubStudentOutcomeIds []string `json:"sub_student_outcome_ids" validate:"required"`
 }
+
+type StudentPassCLOResp struct {
+	Clos   []string     `json:"clos"`
+	Result []StudentCLO `json:"result"`
+}
+
+type StudentCLO struct {
+	StudentID int      `json:"student_id"`
+	PassCLO   []string `json:"pass_clo"`
+}
+
+type CLOResult struct {
+	StudentID                     int     `json:"student_id"`
+	CLOID                         string  `json:"clo_id"` // Change to string
+	CLOCode                       string  `json:"clo_code"`
+	PassedAssignments             int     `json:"passed_assignments"`
+	TotalAssignments              int     `json:"total_assignments"`
+	ExpectedPassingAssignmentPerc float64 `json:"expected_passing_assignment_percentage"`
+}

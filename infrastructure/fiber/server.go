@@ -210,6 +210,7 @@ func (f *fiberServer) initController() error {
 	course.Get("/:courseId", courseController.GetById)
 	course.Patch("/:courseId", courseController.Update)
 	course.Delete("/:courseId", courseController.Delete)
+	course.Get("/:courseId/students/clos", courseController.GetStudentsPassingCLOs)
 
 	course.Get("/:courseId/clos", courseLearningOutcomeController.GetByCourseId)
 	course.Get("/:courseId/clos/students", coursePortfolioController.GetCloPassingStudentsByCourseId)
