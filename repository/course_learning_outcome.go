@@ -56,8 +56,8 @@ func (r courseLearningOutcomeRepositoryGorm) GetByCourseId(courseId string) ([]e
 }
 
 func (r courseLearningOutcomeRepositoryGorm) Create(courseLearningOutcome *entity.CourseLearningOutcome) error {
-	go cacheOutcomes(r.gorm, TabeeSelectorAllPloCourses)
-	go cacheOutcomes(r.gorm, TabeeSelectorAllPoCourses)
+	// go cacheOutcomes(r.gorm, TabeeSelectorAllPloCourses)
+	// go cacheOutcomes(r.gorm, TabeeSelectorAllPoCourses)
 	return r.gorm.Create(&courseLearningOutcome).Error
 }
 
@@ -74,8 +74,8 @@ func (r courseLearningOutcomeRepositoryGorm) CreateLinkProgramOutcome(id string,
 	if err != nil {
 		return fmt.Errorf("cannot create link between CLO and PO: %w", err)
 	}
-	go cacheOutcomes(r.gorm, TabeeSelectorAllPloCourses)
-	go cacheOutcomes(r.gorm, TabeeSelectorAllPoCourses)
+	// go cacheOutcomes(r.gorm, TabeeSelectorAllPloCourses)
+	// go cacheOutcomes(r.gorm, TabeeSelectorAllPoCourses)
 
 	return nil
 }
@@ -94,8 +94,8 @@ func (r courseLearningOutcomeRepositoryGorm) CreateLinkSubProgramLearningOutcome
 	if err != nil {
 		return fmt.Errorf("cannot create link between CLO and SPLO: %w", err)
 	}
-	go cacheOutcomes(r.gorm, TabeeSelectorAllPloCourses)
-	go cacheOutcomes(r.gorm, TabeeSelectorAllPoCourses)
+	// go cacheOutcomes(r.gorm, TabeeSelectorAllPloCourses)
+	// go cacheOutcomes(r.gorm, TabeeSelectorAllPoCourses)
 
 	return nil
 }
@@ -113,8 +113,8 @@ func (r courseLearningOutcomeRepositoryGorm) CreateLinkSubStudentOutcome(id stri
 	if err != nil {
 		return fmt.Errorf("cannot create link between CLO and SSO: %w", err)
 	}
-	go cacheOutcomes(r.gorm, TabeeSelectorAllPloCourses)
-	go cacheOutcomes(r.gorm, TabeeSelectorAllPoCourses)
+	// go cacheOutcomes(r.gorm, TabeeSelectorAllPloCourses)
+	// go cacheOutcomes(r.gorm, TabeeSelectorAllPoCourses)
 
 	return nil
 }
@@ -128,8 +128,8 @@ func (r courseLearningOutcomeRepositoryGorm) Update(id string, courseLearningOut
 	if err != nil {
 		return fmt.Errorf("cannot update courseLearningOutcome: %w", err)
 	}
-	go cacheOutcomes(r.gorm, TabeeSelectorAllPloCourses)
-	go cacheOutcomes(r.gorm, TabeeSelectorAllPoCourses)
+	// go cacheOutcomes(r.gorm, TabeeSelectorAllPloCourses)
+	// go cacheOutcomes(r.gorm, TabeeSelectorAllPoCourses)
 
 	return nil
 }
@@ -140,8 +140,8 @@ func (r courseLearningOutcomeRepositoryGorm) Delete(id string) error {
 	if err != nil {
 		return fmt.Errorf("cannot delete courseLearningOutcome: %w", err)
 	}
-	go cacheOutcomes(r.gorm, TabeeSelectorAllPloCourses)
-	go cacheOutcomes(r.gorm, TabeeSelectorAllPoCourses)
+	// go cacheOutcomes(r.gorm, TabeeSelectorAllPloCourses)
+	// go cacheOutcomes(r.gorm, TabeeSelectorAllPoCourses)
 
 	return nil
 }
@@ -152,8 +152,8 @@ func (r courseLearningOutcomeRepositoryGorm) DeleteLinkProgramOutcome(id string,
 		return fmt.Errorf("cannot delete link between CLO and PO: %w", err)
 	}
 
-	go cacheOutcomes(r.gorm, TabeeSelectorAllPloCourses)
-	go cacheOutcomes(r.gorm, TabeeSelectorAllPoCourses)
+	// go cacheOutcomes(r.gorm, TabeeSelectorAllPloCourses)
+	// go cacheOutcomes(r.gorm, TabeeSelectorAllPoCourses)
 
 	return nil
 }
@@ -165,8 +165,8 @@ func (r courseLearningOutcomeRepositoryGorm) DeleteLinkSubProgramLearningOutcome
 	if err != nil {
 		return fmt.Errorf("cannot delete link between CLO and SPLO: %w", err)
 	}
-	go cacheOutcomes(r.gorm, TabeeSelectorAllPloCourses)
-	go cacheOutcomes(r.gorm, TabeeSelectorAllPoCourses)
+	// go cacheOutcomes(r.gorm, TabeeSelectorAllPloCourses)
+	// go cacheOutcomes(r.gorm, TabeeSelectorAllPoCourses)
 
 	return nil
 }
@@ -177,8 +177,8 @@ func (r courseLearningOutcomeRepositoryGorm) DeleteLinkSubStudentOutcome(id stri
 	if err != nil {
 		return fmt.Errorf("cannot delete link between CLO and SSO: %w", err)
 	}
-	go cacheOutcomes(r.gorm, TabeeSelectorAllPloCourses)
-	go cacheOutcomes(r.gorm, TabeeSelectorAllPoCourses)
+	// go cacheOutcomes(r.gorm, TabeeSelectorAllPloCourses)
+	// go cacheOutcomes(r.gorm, TabeeSelectorAllPoCourses)
 
 	return nil
 }

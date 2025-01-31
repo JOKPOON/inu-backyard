@@ -41,23 +41,6 @@ func (u programLearningOutcomeUseCase) GetById(id string) (*entity.ProgramLearni
 }
 
 func (u programLearningOutcomeUseCase) Create(payload []entity.CreateProgramLearningOutcome) error {
-	programmeId := make([]string, 0, len(payload))
-	for _, plo := range payload {
-		programmeId = append(programmeId, plo.ProgrammeId)
-	}
-
-	programmeId = slice.RemoveDuplicates(programmeId)
-	for _, id := range programmeId {
-		programme, err := u.programmeUseCase.GetById(id)
-		if err != nil {
-			return errs.New(errs.SameCode, "cannot get programme id %s while creating plo", id, err)
-		}
-
-		if programme == nil {
-			return errs.New(errs.ErrCreatePLO, "programme id %s not found while creating plo", id)
-		}
-	}
-
 	plos := make([]entity.ProgramLearningOutcome, 0, len(payload))
 	subPlos := make([]entity.SubProgramLearningOutcome, 0)
 
@@ -69,7 +52,6 @@ func (u programLearningOutcomeUseCase) Create(payload []entity.CreateProgramLear
 			Code:            plo.Code,
 			DescriptionThai: plo.DescriptionThai,
 			DescriptionEng:  plo.DescriptionEng,
-			ProgrammeId:     plo.ProgrammeId,
 		})
 
 		for _, subPlo := range plo.SubProgramLearningOutcomes {
@@ -104,13 +86,6 @@ func (u programLearningOutcomeUseCase) Update(id string, programLearningOutcome 
 		return errs.New(errs.SameCode, "cannot get programLearningOutcome id %s to update")
 	} else if len(nonExistedPloIds) > 0 {
 		return errs.New(errs.ErrCreateSubPLO, "plo id not existed while updating plo %v", nonExistedPloIds)
-	}
-
-	programme, err := u.programmeUseCase.GetById(programLearningOutcome.ProgrammeId)
-	if err != nil {
-		return errs.New(errs.SameCode, "cannot get programme id %s while updating plo", programLearningOutcome.ProgrammeId, err)
-	} else if programme == nil {
-		return errs.New(errs.ErrCreatePLO, "programme id %s not found while updating plo", programLearningOutcome.ProgrammeId)
 	}
 
 	err = u.programLearningOutcomeRepo.Update(id, programLearningOutcome)

@@ -140,3 +140,130 @@ func (u programmeUseCase) FilterNonExisted(namesTH []string, namesEN []string) (
 
 	return nonExistedIds, nil
 }
+
+func (u programmeUseCase) GetAllCourseOutcomeLinked(programmeId string) ([]entity.CourseOutcomes, error) {
+	programme, err := u.GetById(programmeId)
+	if err != nil {
+		return nil, errs.New(errs.SameCode, "cannot get programme id %s to get course outcome", programmeId, err)
+	} else if programme == nil {
+		return nil, errs.New(errs.ErrQueryProgramme, "cannot get programme id %s to get course outcome", programmeId, err)
+	}
+
+	resp, err := u.programmeRepo.GetAllCourseOutcomeLinked(programmeId)
+	if err != nil {
+		return nil, errs.New(errs.ErrQueryProgramme, "cannot get course outcome by programme id %s", programmeId, err)
+	}
+
+	return resp, nil
+}
+
+func (u programmeUseCase) GetAllCourseLinkedPO(programmeId string) (*entity.ProgrammeLinkedPO, error) {
+	programme, err := u.GetById(programmeId)
+	if err != nil {
+		return nil, errs.New(errs.SameCode, "cannot get programme id %s to get course outcome", programmeId, err)
+	} else if programme == nil {
+		return nil, errs.New(errs.ErrQueryProgramme, "cannot get programme id %s to get course outcome", programmeId, err)
+	}
+
+	resp, err := u.programmeRepo.GetAllCourseLinkedPO(programmeId)
+	if err != nil {
+		return nil, errs.New(errs.ErrQueryProgramme, "cannot get course outcome by programme id %s", programmeId, err)
+	}
+
+	resp.ProgrammeName = programme.NameTH + ", " + programme.NameEN
+	resp.ProgrammeYear = programme.Year
+
+	return resp, nil
+}
+
+func (u programmeUseCase) GetAllCourseLinkedPLO(programmeId string) (*entity.ProgrammeLinkedPLO, error) {
+	programme, err := u.GetById(programmeId)
+	if err != nil {
+		return nil, errs.New(errs.SameCode, "cannot get programme id %s to get course outcome", programmeId, err)
+	} else if programme == nil {
+		return nil, errs.New(errs.ErrQueryProgramme, "cannot get programme id %s to get course outcome", programmeId, err)
+	}
+
+	resp, err := u.programmeRepo.GetAllCourseLinkedPLO(programmeId)
+	if err != nil {
+		return nil, errs.New(errs.ErrQueryProgramme, "cannot get course outcome by programme id %s", programmeId, err)
+	}
+
+	resp.ProgrammeName = programme.NameTH + ", " + programme.NameEN
+	resp.ProgrammeYear = programme.Year
+
+	return resp, nil
+}
+
+func (u programmeUseCase) GetAllCourseLinkedSO(programmeId string) (*entity.ProgrammeLinkedSO, error) {
+	programme, err := u.GetById(programmeId)
+	if err != nil {
+		return nil, errs.New(errs.SameCode, "cannot get programme id %s to get course outcome", programmeId, err)
+	} else if programme == nil {
+		return nil, errs.New(errs.ErrQueryProgramme, "cannot get programme id %s to get course outcome", programmeId, err)
+	}
+
+	resp, err := u.programmeRepo.GetAllCourseLinkedSO(programmeId)
+	if err != nil {
+		return nil, errs.New(errs.ErrQueryProgramme, "cannot get course outcome by programme id %s", programmeId, err)
+	}
+
+	resp.ProgrammeName = programme.NameTH + ", " + programme.NameEN
+	resp.ProgrammeYear = programme.Year
+
+	return resp, nil
+}
+
+func (u programmeUseCase) CreateLinkWithPO(programmeId string, poIds []string) error {
+	programme, err := u.GetById(programmeId)
+	if err != nil {
+		return errs.New(errs.SameCode, "cannot get programme id %s to create link with po", programmeId, err)
+	} else if programme == nil {
+		return errs.New(errs.ErrQueryProgramme, "cannot get programme id %s to create link with po", programmeId, err)
+	}
+
+	for _, poId := range poIds {
+		err = u.programmeRepo.CreateLinkWithPO(programmeId, poId)
+		if err != nil {
+			return errs.New(errs.ErrCreateProgramme, "cannot create link with po by programme id %s", programmeId, err)
+		}
+	}
+
+	return nil
+}
+
+func (u programmeUseCase) CreateLinkWithPLO(programmeId string, ploIds []string) error {
+	programme, err := u.GetById(programmeId)
+	if err != nil {
+		return errs.New(errs.SameCode, "cannot get programme id %s to create link with plo", programmeId, err)
+	} else if programme == nil {
+		return errs.New(errs.ErrQueryProgramme, "cannot get programme id %s to create link with plo", programmeId, err)
+	}
+
+	for _, ploId := range ploIds {
+		err = u.programmeRepo.CreateLinkWithPLO(programmeId, ploId)
+		if err != nil {
+			return errs.New(errs.ErrCreateProgramme, "cannot create link with plo by programme id %s", programmeId, err)
+		}
+	}
+
+	return nil
+}
+
+func (u programmeUseCase) CreateLinkWithSO(programmeId string, soIds []string) error {
+	programme, err := u.GetById(programmeId)
+	if err != nil {
+		return errs.New(errs.SameCode, "cannot get programme id %s to create link with so", programmeId, err)
+	} else if programme == nil {
+		return errs.New(errs.ErrQueryProgramme, "cannot get programme id %s to create link with so", programmeId, err)
+	}
+
+	for _, soId := range soIds {
+		err = u.programmeRepo.CreateLinkWithSO(programmeId, soId)
+		if err != nil {
+			return errs.New(errs.ErrCreateProgramme, "cannot create link with so by programme id %s", programmeId, err)
+		}
+	}
+
+	return nil
+}

@@ -27,9 +27,6 @@ type ProgramOutcome struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	Category    string `json:"category"`
-	ProgrammeId string `json:"programme_id"`
-
-	Programme Programme `json:"programme"`
 }
 
 type CreateProgramOutcome struct {
@@ -37,7 +34,6 @@ type CreateProgramOutcome struct {
 	Name        string `json:"name" validate:"required"`
 	Description string `json:"description" validate:"required"`
 	Category    string `json:"category" validate:"required"`
-	ProgrammeId string `json:"programme_id" validate:"required"`
 }
 
 type CreateProgramOutcomePayload struct {

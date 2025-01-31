@@ -58,7 +58,6 @@ func (u programOutcomeUseCase) Create(dto []entity.CreateProgramOutcome) error {
 			Name:        po.Name,
 			Description: po.Description,
 			Category:    po.Category,
-			ProgrammeId: po.ProgrammeId,
 		})
 	}
 	err := u.programOutcomeRepo.CreateMany(pos)

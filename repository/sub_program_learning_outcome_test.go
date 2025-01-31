@@ -15,7 +15,7 @@ func setupProgrammeAndPLOs(db *gorm.DB) (*entity.Programme, *entity.ProgramLearn
 	}
 	db.Create(pro)
 
-	plo := &entity.ProgramLearningOutcome{Id: "1", ProgrammeId: pro.Id}
+	plo := &entity.ProgramLearningOutcome{Id: "1"}
 	db.Create(plo)
 
 	return pro, plo

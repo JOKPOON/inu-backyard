@@ -364,12 +364,20 @@ func (f *fiberServer) initController() error {
 	programme := api.Group("/programmes", authMiddleware)
 
 	programme.Post("/", programmeController.Create)
+	programme.Post("/:programmeId/link/po", programmeController.CreateLinkWithPO)
+	programme.Post("/:programmeId/link/plo", programmeController.CreateLinkWithPLO)
+	programme.Post("/:programmeId/link/so", programmeController.CreateLinkWithSO)
 
 	// programme.Get("/", programmeController.GetByNameAndYear)
 	// programme.Get("/", programmeController.GetByName)
 	programme.Get("/", programmeController.GetAll)
 	programme.Patch("/:programmeName", programmeController.Update)
 	programme.Delete("/:programmeName", programmeController.Delete)
+
+	programme.Get("/:programmeId/outcome", programmeController.GetAllCourseOutcomeLinked)
+	programme.Get("/:programmeId/po", programmeController.GetAllCourseLinkedPO)
+	programme.Get("/:programmeId/plo", programmeController.GetAllCourseLinkedPLO)
+	programme.Get("/:programmeId/so", programmeController.GetAllCourseLinkedSO)
 
 	// enrollment route
 	enrollment := api.Group("/enrollments", authMiddleware)

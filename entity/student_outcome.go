@@ -39,10 +39,8 @@ type StudentOutcome struct {
 	Code            string `validate:"required" json:"code"`
 	DescriptionThai string `validate:"required" json:"description_thai"`
 	DescriptionEng  string `json:"description_eng"`
-	ProgrammeId     string `json:"programme_id"`
 
 	SubStudentOutcomes []SubStudentOutcome `json:"sub_student_outcomes"`
-	Programme          Programme           `json:"programme"`
 }
 
 type SubStudentOutcome struct {
@@ -68,7 +66,6 @@ type CreateStudentOutcome struct {
 	Code               string                    `validate:"required" json:"code"`
 	DescriptionThai    string                    `validate:"required" json:"description_thai"`
 	DescriptionEng     string                    `json:"description_eng"`
-	ProgrammeId        string                    `validate:"required" json:"programme_id"`
 	SubStudentOutcomes []CreateSubStudentOutcome `json:"sub_student_outcomes" validate:"required,dive"`
 }
 

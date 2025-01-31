@@ -70,7 +70,6 @@ func (c ProgramLearningOutcomeController) Update(ctx *fiber.Ctx) error {
 		Code:            payload.Code,
 		DescriptionThai: payload.DescriptionThai,
 		DescriptionEng:  *payload.DescriptionEng, // because description eng can be empty string
-		ProgrammeId:     payload.ProgrammeId,
 	})
 
 	if err != nil {

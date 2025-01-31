@@ -127,3 +127,95 @@ func (c ProgrammeController) Delete(ctx *fiber.Ctx) error {
 
 	return response.NewSuccessResponse(ctx, fiber.StatusOK, nil)
 }
+
+func (c ProgrammeController) CreateLinkWithPO(ctx *fiber.Ctx) error {
+	programmeId := ctx.Params("programmeId")
+	payload := entity.LinkProgrammePO{}
+
+	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
+		return err
+	}
+
+	err := c.ProgrammeUseCase.CreateLinkWithPO(programmeId, payload.POIds)
+	if err != nil {
+		return err
+	}
+
+	return response.NewSuccessResponse(ctx, fiber.StatusCreated, nil)
+}
+
+func (c ProgrammeController) CreateLinkWithPLO(ctx *fiber.Ctx) error {
+	programmeId := ctx.Params("programmeId")
+	payload := entity.LinkProgrammePLO{}
+
+	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
+		return err
+	}
+
+	err := c.ProgrammeUseCase.CreateLinkWithPLO(programmeId, payload.PLOIds)
+	if err != nil {
+		return err
+	}
+
+	return response.NewSuccessResponse(ctx, fiber.StatusCreated, nil)
+}
+
+func (c ProgrammeController) CreateLinkWithSO(ctx *fiber.Ctx) error {
+	programmeId := ctx.Params("programmeId")
+	payload := entity.LinkProgrammeSO{}
+
+	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
+		return err
+	}
+
+	err := c.ProgrammeUseCase.CreateLinkWithSO(programmeId, payload.SOIds)
+	if err != nil {
+		return err
+	}
+
+	return response.NewSuccessResponse(ctx, fiber.StatusCreated, nil)
+}
+
+func (c ProgrammeController) GetAllCourseOutcomeLinked(ctx *fiber.Ctx) error {
+	programmeId := ctx.Params("programmeId")
+
+	allCourseOutcome, err := c.ProgrammeUseCase.GetAllCourseOutcomeLinked(programmeId)
+	if err != nil {
+		return err
+	}
+
+	return response.NewSuccessResponse(ctx, fiber.StatusOK, allCourseOutcome)
+}
+
+func (c ProgrammeController) GetAllCourseLinkedPO(ctx *fiber.Ctx) error {
+	programmeId := ctx.Params("programmeId")
+
+	allCourseLinkedPO, err := c.ProgrammeUseCase.GetAllCourseLinkedPO(programmeId)
+	if err != nil {
+		return err
+	}
+
+	return response.NewSuccessResponse(ctx, fiber.StatusOK, allCourseLinkedPO)
+}
+
+func (c ProgrammeController) GetAllCourseLinkedPLO(ctx *fiber.Ctx) error {
+	programmeId := ctx.Params("programmeId")
+
+	allCourseLinkedPLO, err := c.ProgrammeUseCase.GetAllCourseLinkedPLO(programmeId)
+	if err != nil {
+		return err
+	}
+
+	return response.NewSuccessResponse(ctx, fiber.StatusOK, allCourseLinkedPLO)
+}
+
+func (c ProgrammeController) GetAllCourseLinkedSO(ctx *fiber.Ctx) error {
+	programmeId := ctx.Params("programmeId")
+
+	allCourseLinkedSO, err := c.ProgrammeUseCase.GetAllCourseLinkedSO(programmeId)
+	if err != nil {
+		return err
+	}
+
+	return response.NewSuccessResponse(ctx, fiber.StatusOK, allCourseLinkedSO)
+}

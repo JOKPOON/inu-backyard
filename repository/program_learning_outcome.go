@@ -68,7 +68,6 @@ func (r programLearningOutcomeRepositoryGorm) Update(id string, programLearningO
 		"code":             programLearningOutcome.Code,
 		"description_thai": programLearningOutcome.DescriptionThai,
 		"description_eng":  programLearningOutcome.DescriptionEng,
-		"program_id":       programLearningOutcome.ProgrammeId,
 	}).Error
 	if err != nil {
 		return fmt.Errorf("cannot update programLearningOutcome: %w", err)

@@ -37,23 +37,21 @@ type ProgramLearningOutcomeUseCase interface {
 	FilterNonExistedSubPLO(subPloIds []string) ([]string, error)
 }
 
+type ProgramLearningOutcome struct {
+	Id              string `json:"id" gorm:"primaryKey;type:char(255)"`
+	Code            string `json:"code"`
+	DescriptionThai string `json:"description_thai"`
+	DescriptionEng  string `json:"description_eng"`
+
+	SubProgramLearningOutcomes []SubProgramLearningOutcome `json:"sub_program_learning_outcomes"`
+}
+
 type SubProgramLearningOutcome struct {
 	Id                       string `json:"id" gorm:"primaryKey;type:char(255)"`
 	Code                     string `json:"code"`
 	DescriptionThai          string `json:"description_thai"`
 	DescriptionEng           string `json:"description_eng"`
 	ProgramLearningOutcomeId string `json:"program_learning_outcome_id"`
-}
-
-type ProgramLearningOutcome struct {
-	Id              string `json:"id" gorm:"primaryKey;type:char(255)"`
-	Code            string `json:"code"`
-	DescriptionThai string `json:"description_thai"`
-	DescriptionEng  string `json:"description_eng"`
-	ProgrammeId     string `json:"programme_id"`
-
-	SubProgramLearningOutcomes []SubProgramLearningOutcome `json:"sub_program_learning_outcomes"`
-	Programme                  Programme                   `json:"programme"`
 }
 
 type CreateSubProgramLearningOutcomeDto struct {
@@ -67,7 +65,6 @@ type CreateProgramLearningOutcome struct {
 	Code                       string                            `validate:"required" json:"code"`
 	DescriptionThai            string                            `validate:"required" json:"description_thai"`
 	DescriptionEng             string                            `json:"description_eng"`
-	ProgrammeId                string                            `validate:"required" json:"programme_id"`
 	SubProgramLearningOutcomes []CreateSubProgramLearningOutcome `json:"sub_program_learning_outcomes"`
 }
 
