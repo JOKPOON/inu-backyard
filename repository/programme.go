@@ -339,11 +339,12 @@ func (r programmeRepositoryGorm) GetAllCourseLinkedPO(programmeId string) (*enti
 				CourseName: res.CourseName,
 				POs:        []string{},
 			}
-			course := courseMap[res.CourseCode]
+			program.AllCourse = append(program.AllCourse, res.CourseCode)
+		}
+		course := courseMap[res.CourseCode]
 
-			if res.POCode != "" && !contains(course.POs, res.POCode) {
-				course.POs = append(course.POs, res.POCode)
-			}
+		if res.POCode != "" && !contains(course.POs, res.POCode) {
+			course.POs = append(course.POs, res.POCode)
 		}
 	}
 
@@ -498,6 +499,7 @@ func (r programmeRepositoryGorm) GetAllCourseLinkedSO(programmeId string) (*enti
 				CourseName: res.CourseName,
 				SOs:        make(map[string][]string),
 			}
+			program.AllCourse = append(program.AllCourse, res.CourseCode)
 		}
 		course := courseMap[res.CourseCode]
 
