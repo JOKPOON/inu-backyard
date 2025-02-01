@@ -11,9 +11,16 @@ type ProgrammeRepository interface {
 	GetAllCourseLinkedPO(programmeId string) (*ProgrammeLinkedPO, error)
 	GetAllCourseLinkedPLO(programmeId string) (*ProgrammeLinkedPLO, error)
 	GetAllCourseLinkedSO(programmeId string) (*ProgrammeLinkedSO, error)
+	GetAllPO(programmeId string) ([]ProgramOutcome, error)
+	GetAllPLO(programmeId string) ([]ProgramLearningOutcome, error)
+	GetAllSO(programmeId string) ([]StudentOutcome, error)
 	Create(programme *Programme) error
 	Update(name string, programme *Programme) error
 	Delete(name string) error
+
+	FilterExistedPO(programmeId string, poIds []string) ([]string, error)
+	FilterExistedPLO(programmeId string, ploIds []string) ([]string, error)
+	FilterExistedSO(programmeId string, soIds []string) ([]string, error)
 	FilterExisted(nameTH []string, nameEN []string) ([]string, error)
 
 	CreateLinkWithPO(programmeId string, poId string) error
@@ -30,9 +37,17 @@ type ProgrammeUseCase interface {
 	GetAllCourseLinkedPO(programmeId string) (*ProgrammeLinkedPO, error)
 	GetAllCourseLinkedPLO(programmeId string) (*ProgrammeLinkedPLO, error)
 	GetAllCourseLinkedSO(programmeId string) (*ProgrammeLinkedSO, error)
+	GetAllPO(programmeId string) ([]ProgramOutcome, error)
+	GetAllPLO(programmeId string) ([]ProgramLearningOutcome, error)
+	GetAllSO(programmeId string) ([]StudentOutcome, error)
+
 	Create(payload CreateProgrammePayload) error
 	Update(name string, programme *UpdateProgrammePayload) error
 	Delete(name string) error
+
+	FilterExistedPO(programmeId string, poIds []string) ([]string, error)
+	FilterExistedPLO(programmeId string, ploIds []string) ([]string, error)
+	FilterExistedSO(programmeId string, soIds []string) ([]string, error)
 	FilterNonExisted(namesTH []string, namesEN []string) ([]string, error)
 
 	CreateLinkWithPO(programmeId string, poIds []string) error

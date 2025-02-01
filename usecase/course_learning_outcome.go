@@ -10,6 +10,7 @@ import (
 type courseLearningOutcomeUseCase struct {
 	courseLearningOutcomeRepo     entity.CourseLearningOutcomeRepository
 	courseUseCase                 entity.CourseUseCase
+	programmeUseCase              entity.ProgrammeUseCase
 	programOutcomeUseCase         entity.ProgramOutcomeUseCase
 	programLearningOutcomeUseCase entity.ProgramLearningOutcomeUseCase
 	studentOutcomeUseCase         entity.StudentOutcomeUseCase
@@ -18,6 +19,7 @@ type courseLearningOutcomeUseCase struct {
 func NewCourseLearningOutcomeUseCase(
 	courseLearningOutcomeRepo entity.CourseLearningOutcomeRepository,
 	courseUseCase entity.CourseUseCase,
+	programmeUseCase entity.ProgrammeUseCase,
 	programOutcomeUseCase entity.ProgramOutcomeUseCase,
 	programLearningOutcomeUseCase entity.ProgramLearningOutcomeUseCase,
 	studentOutcomeUseCase entity.StudentOutcomeUseCase,
@@ -25,6 +27,7 @@ func NewCourseLearningOutcomeUseCase(
 	return &courseLearningOutcomeUseCase{
 		courseLearningOutcomeRepo:     courseLearningOutcomeRepo,
 		courseUseCase:                 courseUseCase,
+		programmeUseCase:              programmeUseCase,
 		programOutcomeUseCase:         programOutcomeUseCase,
 		programLearningOutcomeUseCase: programLearningOutcomeUseCase,
 		studentOutcomeUseCase:         studentOutcomeUseCase,
@@ -156,16 +159,31 @@ func (u courseLearningOutcomeUseCase) CreateLinkProgramOutcome(id string, progra
 		return errs.New(errs.ErrCLONotFound, "cannot get courseLearningOutcome id %s to link programOutcome", id)
 	}
 
-	nonExistedProgramOutcomeIds, err := u.programOutcomeUseCase.FilterNonExisted(programOutcomeIds)
+	course, err := u.courseUseCase.GetById(existCourseLearningOutcome.CourseId)
 	if err != nil {
-		return errs.New(errs.SameCode, "cannot get non existed program outcome ids while linking clo and program outcome")
-	} else if len(nonExistedProgramOutcomeIds) != 0 {
-		return errs.New(errs.ErrCreateEnrollment, "there are non exist program outcome %v", nonExistedProgramOutcomeIds)
+		return errs.New(errs.SameCode, "cannot get course id %s while linking clo and program outcome", existCourseLearningOutcome.CourseId, err)
+	} else if course == nil {
+		return errs.New(errs.ErrCourseNotFound, "course id %s not found while linking clo and program outcome", existCourseLearningOutcome.CourseId)
+	}
+
+	allPOs, err := u.programmeUseCase.GetAllPO(course.ProgrammeId)
+	if err != nil {
+		return errs.New(errs.SameCode, "cannot get program outcome while linking clo and program outcome", err)
+	}
+
+	allPOIds := []string{}
+	for _, po := range allPOs {
+		allPOIds = append(allPOIds, po.Id)
+	}
+
+	useablePOIds := slice.Intersection(programOutcomeIds, allPOIds)
+	if len(useablePOIds) != len(programOutcomeIds) {
+		return errs.New(errs.ErrCreateEnrollment, "there are non exist po %v", slice.Subtraction(programOutcomeIds, useablePOIds))
 	}
 
 	err = u.courseLearningOutcomeRepo.CreateLinkProgramOutcome(id, programOutcomeIds)
 	if err != nil {
-		return errs.New(errs.ErrCreateCLO, "cannot link CLO and programOutcome", err)
+		return errs.New(errs.ErrCreateCLO, "cannot link CLO and program outcome", err)
 	}
 
 	return nil
@@ -175,22 +193,35 @@ func (u courseLearningOutcomeUseCase) CreateLinkSubProgramLearningOutcome(id str
 	existCourseLearningOutcome, err := u.GetById(id)
 	if err != nil {
 		return errs.New(errs.SameCode, "cannot get courseLearningOutcome id %s to link subPLO", id, err)
-	}
-
-	if existCourseLearningOutcome == nil {
+	} else if existCourseLearningOutcome == nil {
 		return errs.New(errs.ErrCLONotFound, "cannot get courseLearningOutcome id %s to link subPLO", id)
 	}
 
-	nonExistedSubPloIds, err := u.programLearningOutcomeUseCase.FilterNonExistedSubPLO(subProgramLearningOutcomeIds)
-
+	course, err := u.courseUseCase.GetById(existCourseLearningOutcome.CourseId)
 	if err != nil {
-		return errs.New(errs.SameCode, "cannot get non existed sub plo ids while linking clo and sub plo")
-	} else if len(nonExistedSubPloIds) != 0 {
-		return errs.New(errs.ErrCreateEnrollment, "there are non exist sub plo %v", nonExistedSubPloIds)
+		return errs.New(errs.SameCode, "cannot get course id %s while linking clo and program outcome", existCourseLearningOutcome.CourseId, err)
+	} else if course == nil {
+		return errs.New(errs.ErrCourseNotFound, "course id %s not found while linking clo and program outcome", existCourseLearningOutcome.CourseId)
+	}
+
+	allPLOs, err := u.programmeUseCase.GetAllPLO(course.ProgrammeId)
+	if err != nil {
+		return errs.New(errs.SameCode, "cannot get program learning outcome while linking clo and subPLO", err)
+	}
+
+	allSPLOIds := []string{}
+	for _, plo := range allPLOs {
+		for _, splo := range plo.SubProgramLearningOutcomes {
+			allSPLOIds = append(allSPLOIds, splo.Id)
+		}
+	}
+
+	useablePLOIds := slice.Intersection(subProgramLearningOutcomeIds, allSPLOIds)
+	if len(useablePLOIds) != len(subProgramLearningOutcomeIds) {
+		return errs.New(errs.ErrCreateEnrollment, "there are non exist sub plo %v", slice.Subtraction(subProgramLearningOutcomeIds, useablePLOIds))
 	}
 
 	err = u.courseLearningOutcomeRepo.CreateLinkSubProgramLearningOutcome(id, subProgramLearningOutcomeIds)
-
 	if err != nil {
 		return errs.New(errs.ErrCreateCLO, "cannot link CLO and subPLO", err)
 	}
@@ -206,11 +237,28 @@ func (u courseLearningOutcomeUseCase) CreateLinkSubStudentOutcome(id string, sub
 		return errs.New(errs.ErrCLONotFound, "cannot get courseLearningOutcome id %s to link subPLO", id)
 	}
 
-	nonExistedSubStudentOutcomeIds, err := u.studentOutcomeUseCase.FilterNonExistedSubSO(subStudentOutcomeIds)
+	course, err := u.courseUseCase.GetById(existCourseLearningOutcome.CourseId)
 	if err != nil {
-		return errs.New(errs.SameCode, "cannot get non existed sub student outcome ids while linking clo and sub student outcome")
-	} else if len(nonExistedSubStudentOutcomeIds) != 0 {
-		return errs.New(errs.ErrCreateEnrollment, "there are non exist sub student outcome %v", nonExistedSubStudentOutcomeIds)
+		return errs.New(errs.SameCode, "cannot get course id %s while linking clo and program outcome", existCourseLearningOutcome.CourseId, err)
+	} else if course == nil {
+		return errs.New(errs.ErrCourseNotFound, "course id %s not found while linking clo and program outcome", existCourseLearningOutcome.CourseId)
+	}
+
+	allSOs, err := u.programmeUseCase.GetAllSO(course.ProgrammeId)
+	if err != nil {
+		return errs.New(errs.SameCode, "cannot get student outcome while linking clo and sub student outcome", err)
+	}
+
+	allSSOIds := []string{}
+	for _, so := range allSOs {
+		for _, sso := range so.SubStudentOutcomes {
+			allSSOIds = append(allSSOIds, sso.Id)
+		}
+	}
+
+	useableSOIds := slice.Intersection(subStudentOutcomeIds, allSSOIds)
+	if len(useableSOIds) != len(subStudentOutcomeIds) {
+		return errs.New(errs.ErrCreateEnrollment, "there are non exist sub so %v", slice.Subtraction(subStudentOutcomeIds, useableSOIds))
 	}
 
 	err = u.courseLearningOutcomeRepo.CreateLinkSubStudentOutcome(id, subStudentOutcomeIds)

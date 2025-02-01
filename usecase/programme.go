@@ -222,7 +222,14 @@ func (u programmeUseCase) CreateLinkWithPO(programmeId string, poIds []string) e
 		return errs.New(errs.ErrQueryProgramme, "cannot get programme id %s to create link with po", programmeId, err)
 	}
 
-	for _, poId := range poIds {
+	existedPOIds, err := u.FilterExistedPO(programmeId, poIds)
+	if err != nil {
+		return errs.New(errs.ErrQueryProgramme, "cannot query po by programme id %s", programmeId, err)
+	}
+
+	nonExistedPOIds := slice.Subtraction(poIds, existedPOIds)
+
+	for _, poId := range nonExistedPOIds {
 		err = u.programmeRepo.CreateLinkWithPO(programmeId, poId)
 		if err != nil {
 			return errs.New(errs.ErrCreateProgramme, "cannot create link with po by programme id %s", programmeId, err)
@@ -240,7 +247,14 @@ func (u programmeUseCase) CreateLinkWithPLO(programmeId string, ploIds []string)
 		return errs.New(errs.ErrQueryProgramme, "cannot get programme id %s to create link with plo", programmeId, err)
 	}
 
-	for _, ploId := range ploIds {
+	existedPLOIds, err := u.FilterExistedPLO(programmeId, ploIds)
+	if err != nil {
+		return errs.New(errs.ErrQueryProgramme, "cannot query plo by programme id %s", programmeId, err)
+	}
+
+	nonExistedPLOIds := slice.Subtraction(ploIds, existedPLOIds)
+
+	for _, ploId := range nonExistedPLOIds {
 		err = u.programmeRepo.CreateLinkWithPLO(programmeId, ploId)
 		if err != nil {
 			return errs.New(errs.ErrCreateProgramme, "cannot create link with plo by programme id %s", programmeId, err)
@@ -258,7 +272,14 @@ func (u programmeUseCase) CreateLinkWithSO(programmeId string, soIds []string) e
 		return errs.New(errs.ErrQueryProgramme, "cannot get programme id %s to create link with so", programmeId, err)
 	}
 
-	for _, soId := range soIds {
+	existedSOIds, err := u.FilterExistedSO(programmeId, soIds)
+	if err != nil {
+		return errs.New(errs.ErrQueryProgramme, "cannot query so by programme id %s", programmeId, err)
+	}
+
+	nonExistedSOIds := slice.Subtraction(soIds, existedSOIds)
+
+	for _, soId := range nonExistedSOIds {
 		err = u.programmeRepo.CreateLinkWithSO(programmeId, soId)
 		if err != nil {
 			return errs.New(errs.ErrCreateProgramme, "cannot create link with so by programme id %s", programmeId, err)
@@ -266,4 +287,58 @@ func (u programmeUseCase) CreateLinkWithSO(programmeId string, soIds []string) e
 	}
 
 	return nil
+}
+
+func (u programmeUseCase) FilterExistedPO(programmeId string, poIds []string) ([]string, error) {
+	existedPOIds, err := u.programmeRepo.FilterExistedPO(programmeId, poIds)
+	if err != nil {
+		return nil, errs.New(errs.ErrQueryProgramme, "cannot query po by programme id %s", programmeId, err)
+	}
+
+	return existedPOIds, nil
+}
+
+func (u programmeUseCase) FilterExistedPLO(programmeId string, ploIds []string) ([]string, error) {
+	existedPLOIds, err := u.programmeRepo.FilterExistedPLO(programmeId, ploIds)
+	if err != nil {
+		return nil, errs.New(errs.ErrQueryProgramme, "cannot query plo by programme id %s", programmeId, err)
+	}
+
+	return existedPLOIds, nil
+}
+
+func (u programmeUseCase) FilterExistedSO(programmeId string, soIds []string) ([]string, error) {
+	existedSOIds, err := u.programmeRepo.FilterExistedSO(programmeId, soIds)
+	if err != nil {
+		return nil, errs.New(errs.ErrQueryProgramme, "cannot query so by programme id %s", programmeId, err)
+	}
+
+	return existedSOIds, nil
+}
+
+func (u programmeUseCase) GetAllPO(programmeId string) ([]entity.ProgramOutcome, error) {
+	pos, err := u.programmeRepo.GetAllPO(programmeId)
+	if err != nil {
+		return nil, errs.New(errs.ErrQueryProgramme, "cannot get po by programme id %s", programmeId, err)
+	}
+
+	return pos, nil
+}
+
+func (u programmeUseCase) GetAllPLO(programmeId string) ([]entity.ProgramLearningOutcome, error) {
+	plos, err := u.programmeRepo.GetAllPLO(programmeId)
+	if err != nil {
+		return nil, errs.New(errs.ErrQueryProgramme, "cannot get plo by programme id %s", programmeId, err)
+	}
+
+	return plos, nil
+}
+
+func (u programmeUseCase) GetAllSO(programmeId string) ([]entity.StudentOutcome, error) {
+	sos, err := u.programmeRepo.GetAllSO(programmeId)
+	if err != nil {
+		return nil, errs.New(errs.ErrQueryProgramme, "cannot get so by programme id %s", programmeId, err)
+	}
+
+	return sos, nil
 }

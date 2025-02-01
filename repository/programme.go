@@ -122,7 +122,7 @@ func (r programmeRepositoryGorm) CreateLinkWithPO(programmeId string, poId strin
 
 func (r programmeRepositoryGorm) CreateLinkWithPLO(programmeId string, ploId string) error {
 	err := r.gorm.Exec(`
-	INSERT INTO programme_plo (programme_id, program_learning_outcome_id)
+	INSERT IF NOT EXISTS INTO programme_plo(programme_id, program_learning_outcome_id)
 	VALUES (?, ?);
 	`, programmeId, ploId).Error
 	if err != nil {
@@ -620,6 +620,63 @@ func (r programmeRepositoryGorm) GetAllPO(programmeId string) ([]entity.ProgramO
 	}
 
 	return pos, nil
+}
+
+func (r programmeRepositoryGorm) FilterExistedPO(programmeId string, poIds []string) ([]string, error) {
+	var existedIds []string
+
+	err := r.gorm.Raw(`
+	SELECT
+		ppo.program_outcome_id AS id
+	FROM
+		programme_po ppo
+	WHERE
+		ppo.programme_id = ? AND
+		ppo.program_outcome_id IN ?;
+	`, programmeId, poIds).Pluck("id", &existedIds).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return existedIds, nil
+}
+
+func (r programmeRepositoryGorm) FilterExistedPLO(programmeId string, ploIds []string) ([]string, error) {
+	var existedIds []string
+
+	err := r.gorm.Raw(`
+	SELECT
+		pplo.program_learning_outcome_id AS id
+	FROM
+		programme_plo pplo
+	WHERE
+		pplo.programme_id = ? AND
+		pplo.program_learning_outcome_id IN ?;
+	`, programmeId, ploIds).Pluck("id", &existedIds).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return existedIds, nil
+}
+
+func (r programmeRepositoryGorm) FilterExistedSO(programmeId string, soIds []string) ([]string, error) {
+	var existedIds []string
+
+	err := r.gorm.Raw(`
+	SELECT
+		pso.student_outcome_id AS id
+	FROM
+		programme_so pso
+	WHERE
+		pso.programme_id = ? AND
+		pso.student_outcome_id IN ?;
+	`, programmeId, soIds).Pluck("id", &existedIds).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return existedIds, nil
 }
 
 func contains(slice []string, item string) bool {
