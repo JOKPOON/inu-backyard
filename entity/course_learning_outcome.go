@@ -138,16 +138,23 @@ type StudentPassCLOResp struct {
 	Result []StudentCLO `json:"result"`
 }
 
+type CLO struct {
+	Id   string `json:"id"`
+	Code string `json:"code"`
+	Pass bool   `json:"pass"`
+}
+
 type StudentCLO struct {
-	StudentID int      `json:"student_id"`
-	PassCLO   []string `json:"pass_clo"`
+	StudentID int   `json:"student_id"`
+	CLOs      []CLO `json:"clos"`
 }
 
 type CLOResult struct {
-	StudentID                     int     `json:"student_id"`
-	CLOID                         string  `json:"clo_id"` // Change to string
-	CLOCode                       string  `json:"clo_code"`
-	PassedAssignments             int     `json:"passed_assignments"`
-	TotalAssignments              int     `json:"total_assignments"`
-	ExpectedPassingAssignmentPerc float64 `json:"expected_passing_assignment_percentage"`
+	StudentId                        int     `json:"student_id"`
+	CLOId                            string  `json:"clo_id"` // Change to string
+	CLOCode                          string  `json:"clo_code"`
+	Score                            float64 `json:"score"`
+	MaxScore                         int     `json:"max_score"`
+	ExpectedPassingAssignmentPercent float64 `gorm:"column:expected_passing_assignment_percentage" json:"expected_passing_assignment_percentage"`
+	ExpectedScorePercent             float64 `gorm:"column:expected_score_percentage" json:"expected_score_percentage"`
 }

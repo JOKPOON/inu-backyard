@@ -125,6 +125,7 @@ func (u assignmentUseCase) Create(payload entity.CreateAssignmentPayload) error 
 		CourseLearningOutcomes:           courseLeaningOutcomes,
 		IsIncludedInClo:                  payload.IsIncludedInClo,
 		AssignmentGroupId:                payload.AssignmentGroupId,
+		CourseId:                         assignmentGroup.CourseId,
 	}
 
 	err = u.assignmentRepo.Create(&assignment)
@@ -165,6 +166,13 @@ func (u assignmentUseCase) Delete(id string) error {
 		return errs.New(errs.SameCode, "cannot get assignment id %s to delete", id, err)
 	} else if assignment == nil {
 		return errs.New(errs.ErrAssignmentNotFound, "cannot get assignment id %s to delete", id)
+	}
+
+	for _, clo := range assignment.CourseLearningOutcomes {
+		err = u.assignmentRepo.DeleteLinkCourseLearningOutcome(id, clo.Id)
+		if err != nil {
+			return errs.New(errs.ErrUnLinkSubPLO, "cannot delete link CLO and assignment", err)
+		}
 	}
 
 	err = u.assignmentRepo.Delete(id)
@@ -228,4 +236,20 @@ func (u assignmentUseCase) DeleteLinkCourseLearningOutcome(assignmentId string, 
 	}
 
 	return nil
+}
+
+func (u assignmentUseCase) GetLinkedCLOs(assignmentId string) ([]entity.CourseLearningOutcome, error) {
+	assignment, err := u.GetById(assignmentId)
+	if err != nil {
+		return nil, errs.New(errs.SameCode, "cannot get assignment id %s while get linked clo", assignmentId, err)
+	} else if assignment == nil {
+		return nil, errs.New(errs.ErrAssignmentNotFound, "assignment id %s not found while get linked clo", assignmentId)
+	}
+
+	clos, err := u.assignmentRepo.GetLinkedCLOs(assignmentId)
+	if err != nil {
+		return nil, errs.New(errs.ErrQueryAssignment, "cannot get linked clo by assignment id %s", assignmentId, err)
+	}
+
+	return clos, nil
 }

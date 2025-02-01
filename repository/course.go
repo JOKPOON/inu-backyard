@@ -2,7 +2,6 @@ package repository
 
 import (
 	"fmt"
-	"math"
 
 	"github.com/team-inu/inu-backyard/entity"
 	"gorm.io/gorm"
@@ -30,8 +29,7 @@ func (r courseRepositoryGorm) GetAll() ([]entity.Course, error) {
 
 func (r courseRepositoryGorm) GetById(id string) (*entity.Course, error) {
 	var course entity.Course
-	err := r.gorm.Where("id = ?", id).First(&course).Error
-
+	err := r.gorm.First(&course).Where("id = ?", id).Error
 	if err == gorm.ErrRecordNotFound {
 		return nil, nil
 	} else if err != nil {
@@ -127,16 +125,11 @@ func (r courseRepositoryGorm) GetStudentsPassingCLOs(courseId string) (*entity.S
 		s.id AS student_id,
 		clo.id AS clo_id,
 		clo.code AS clo_code,
-		COUNT(DISTINCT a.id) AS passed_assignments,
-		(
-		SELECT
-			COUNT(*)
-		FROM
-			clo_assignment ca2
-		WHERE
-			ca2.course_learning_outcome_id = clo.id
-	) AS total_assignments,
-	clo.expected_passing_assignment_percentage
+		clo.expected_passing_assignment_percentage,
+		a.id AS assignment_id,
+		a.max_score AS max_score,
+		a.expected_score_percentage,
+		sc.score AS score
 	FROM
 		student s
 	JOIN enrollment e ON
@@ -152,14 +145,14 @@ func (r courseRepositoryGorm) GetStudentsPassingCLOs(courseId string) (*entity.S
 	JOIN score sc ON
 		a.id = sc.assignment_id AND s.id = sc.student_id
 	WHERE
-		sc.score >=(
-			a.max_score * a.expected_score_percentage / 100
-		) AND c.id = ?
+		c.id = ?
 	GROUP BY
+		a.id,
 		s.id,
 		clo.id,
 		clo.code,
-		clo.expected_passing_assignment_percentage
+		clo.expected_passing_assignment_percentage,
+		sc.score
 	ORDER BY
 		s.id,
 		clo.id;
@@ -170,43 +163,64 @@ func (r courseRepositoryGorm) GetStudentsPassingCLOs(courseId string) (*entity.S
 		return nil, fmt.Errorf("cannot query to get students passing CLOs: %w", err)
 	}
 
-	studentCLOs := make(map[int]*entity.StudentCLO)
+	resp := &entity.StudentPassCLOResp{
+		Clos:   []string{},
+		Result: []entity.StudentCLO{},
+	}
 
-	for _, res := range cloResults {
-		passingThreshold := int(math.Ceil(float64(res.TotalAssignments) * (res.ExpectedPassingAssignmentPerc / 100)))
-		if res.PassedAssignments >= passingThreshold {
-			if _, exists := studentCLOs[res.StudentID]; !exists {
-				studentCLOs[res.StudentID] = &entity.StudentCLO{
-					StudentID: res.StudentID,
-					PassCLO:   []string{},
-				}
+	cloCode := make(map[string]string)
+	students := make(map[int]map[string][]bool)
+	for _, cloResult := range cloResults {
+		if _, ok := students[cloResult.StudentId]; !ok {
+			students[cloResult.StudentId] = make(map[string][]bool)
+		}
+
+		if _, ok := students[cloResult.StudentId][cloResult.CLOId]; !ok {
+			students[cloResult.StudentId][cloResult.CLOId] = make([]bool, 0)
+		}
+
+		if _, ok := cloCode[cloResult.CLOId]; !ok {
+			cloCode[cloResult.CLOId] = cloResult.CLOCode
+			resp.Clos = append(resp.Clos, cloResult.CLOCode)
+		}
+
+		score := cloResult.Score / float64(cloResult.MaxScore) * 100
+		pass := score > cloResult.ExpectedScorePercent
+
+		students[cloResult.StudentId][cloResult.CLOId] = append(students[cloResult.StudentId][cloResult.CLOId], pass)
+	}
+
+	for studentId, cloResults := range students {
+		for cloId, results := range cloResults {
+			for _, result := range results {
+				println(studentId, cloId, cloCode[cloId], result)
 			}
-
-			studentCLOs[res.StudentID].PassCLO = append(studentCLOs[res.StudentID].PassCLO, res.CLOCode)
 		}
 	}
 
-	cloCodes := []string{}
-	err = r.gorm.Raw(`
-		SELECT clo.code AS clo_code
-		FROM course c
-		JOIN course_learning_outcome clo ON c.id = clo.course_id
-		WHERE c.id = ?;
-	`, courseId).Scan(&cloCodes).Error
+	for studentId, cloResults := range students {
+		clos := []entity.CLO{}
+		for cloId, results := range cloResults {
+			pass := true
+			for _, result := range results {
+				if !result {
+					pass = false
+					break
+				}
+			}
 
-	if err != nil {
-		return nil, err
+			clos = append(clos, entity.CLO{
+				Id:   cloId,
+				Code: cloCode[cloId],
+				Pass: pass,
+			})
+		}
+
+		resp.Result = append(resp.Result, entity.StudentCLO{
+			StudentID: studentId,
+			CLOs:      clos,
+		})
 	}
 
-	var students []entity.StudentCLO
-	for _, student := range studentCLOs {
-		students = append(students, *student)
-	}
-
-	output := &entity.StudentPassCLOResp{
-		Clos:   cloCodes,
-		Result: students,
-	}
-
-	return output, nil
+	return resp, nil
 }

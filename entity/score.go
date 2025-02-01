@@ -41,10 +41,22 @@ type Score struct {
 	Assignment Assignment `json:"-"`
 }
 
+type AssessmentClos struct {
+	CLOId          string `json:"clo_id"`
+	CLOCode        string `json:"clo_code"`
+	CLODescription string `json:"clo_description"`
+}
+
 type AssignmentScore struct {
-	Scores          []Score `json:"scores"`
-	SubmittedAmount int     `json:"submitted_amount"`
-	EnrolledAmount  int     `json:"enrolled_amount"`
+	CLOs                   []AssessmentClos `json:"clos"`
+	IsIncludedInClo        bool             `json:"is_included_in_clo"`
+	MaxScore               int              `json:"max_score"`
+	ExpectedPassingStudent float64          `json:"expected_passing_student"`
+	ExpectedPassingScore   float64          `json:"expected_passing_score"`
+	Description            string           `json:"description"`
+	Scores                 []Score          `json:"scores"`
+	SubmittedAmount        int              `json:"submitted_amount"`
+	EnrolledAmount         int              `json:"enrolled_amount"`
 }
 
 type CreateScoreRequestPayload struct {

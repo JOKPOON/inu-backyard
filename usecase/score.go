@@ -60,20 +60,45 @@ func (u scoreUseCase) GetByAssignmentId(assignmentId string) (*entity.Assignment
 		return nil, errs.New(errs.ErrQueryScore, "assignment id %s not found while finding score", assignmentId)
 	}
 
+	assignmentGroup, err := u.assignmentUseCase.GetGroupByGroupId(assignment.AssignmentGroupId)
+	if err != nil {
+		return nil, errs.New(errs.SameCode, "cannot get assignment group when finding score", err)
+	}
+
 	scores, err := u.scoreRepo.GetByAssignmentId(assignmentId)
 	if err != nil {
 		return nil, errs.New(errs.SameCode, "cannot get all scores", err)
 	}
 
-	enrollments, err := u.enrollmentUseCase.GetByCourseId(assignment.CourseId)
+	enrollments, err := u.enrollmentUseCase.GetByCourseId(assignmentGroup.CourseId)
 	if err != nil {
 		return nil, errs.New(errs.SameCode, "cannot get enrollments when finding score", err)
 	}
 
+	clos, err := u.assignmentUseCase.GetLinkedCLOs(assignmentId)
+	if err != nil {
+		return nil, errs.New(errs.SameCode, "cannot get linked CLOs when finding score", err)
+	}
+
+	assignmentClos := []entity.AssessmentClos{}
+	for _, clo := range clos {
+		assignmentClos = append(assignmentClos, entity.AssessmentClos{
+			CLOId:          clo.Id,
+			CLOCode:        clo.Code,
+			CLODescription: clo.Description,
+		})
+	}
+
 	assignmentScore := &entity.AssignmentScore{
-		Scores:          scores,
-		EnrolledAmount:  len(enrollments),
-		SubmittedAmount: len(scores),
+		CLOs:                   assignmentClos,
+		IsIncludedInClo:        *assignment.IsIncludedInClo,
+		MaxScore:               assignment.MaxScore,
+		Description:            assignment.Description,
+		ExpectedPassingStudent: assignment.ExpectedPassingStudentPercentage,
+		ExpectedPassingScore:   assignment.ExpectedScorePercentage,
+		Scores:                 scores,
+		EnrolledAmount:         len(enrollments),
+		SubmittedAmount:        len(scores),
 	}
 
 	return assignmentScore, nil
@@ -130,7 +155,12 @@ func (u scoreUseCase) CreateMany(userId string, assignmentId string, studentScor
 		return errs.New(errs.ErrAssignmentNotFound, "cannot get assignment id %s to create score", assignmentId)
 	}
 
-	course, err := u.courseUseCase.GetById(assignment.CourseId)
+	assignmentGroup, err := u.assignmentUseCase.GetGroupByGroupId(assignment.AssignmentGroupId)
+	if err != nil {
+		return errs.New(errs.SameCode, "cannot get assignment group id %s to create score", assignment.AssignmentGroupId, err)
+	}
+
+	course, err := u.courseUseCase.GetById(assignmentGroup.CourseId)
 	if err != nil {
 		return errs.New(errs.SameCode, "cannot get course id %s to create score", assignment.CourseId, err)
 	} else if course == nil {
@@ -155,7 +185,7 @@ func (u scoreUseCase) CreateMany(userId string, assignmentId string, studentScor
 	}
 
 	withStatus := entity.EnrollmentStatusEnroll
-	joinedStudentIds, err := u.enrollmentUseCase.FilterJoinedStudent(studentIds, assignment.CourseId, &withStatus)
+	joinedStudentIds, err := u.enrollmentUseCase.FilterJoinedStudent(studentIds, assignmentGroup.CourseId, &withStatus)
 	if err != nil {
 		return errs.New(errs.SameCode, "cannot get existed student ids while creating score")
 	}

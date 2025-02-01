@@ -207,7 +207,7 @@ func (f *fiberServer) initController() error {
 
 	course.Get("/", courseController.GetAll)
 	course.Post("/", courseController.Create)
-	course.Get("/:courseId", courseController.GetById)
+
 	course.Patch("/:courseId", courseController.Update)
 	course.Delete("/:courseId", courseController.Delete)
 	course.Get("/:courseId/students/clos", courseController.GetStudentsPassingCLOs)
@@ -221,6 +221,7 @@ func (f *fiberServer) initController() error {
 	course.Patch("/:courseId/portfolio", coursePortfolioController.Update)
 	course.Get("/:courseId/assignments", assignmentController.GetByCourseId)
 	course.Get("/:courseId/assignment-groups", assignmentController.GetGroupByCourseId)
+	course.Get("/:courseId", courseController.GetById)
 
 	// course learning outcome route
 	clo := api.Group("/clos", authMiddleware)
@@ -340,6 +341,7 @@ func (f *fiberServer) initController() error {
 	assignment := api.Group("/assignments", authMiddleware)
 
 	assignment.Post("/", assignmentController.Create)
+
 	assignment.Get("/", assignmentController.GetAll)
 	assignment.Get("/:assignmentId", assignmentController.GetById)
 	assignment.Patch("/:assignmentId", assignmentController.Update)

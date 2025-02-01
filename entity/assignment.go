@@ -17,6 +17,7 @@ type AssignmentRepository interface {
 
 	GetGroupByQuery(query AssignmentGroup, withAssignment bool) ([]AssignmentGroup, error)
 	GetGroupByGroupId(assignmentGroupId string) (*AssignmentGroup, error)
+	GetLinkedCLOs(assignmentId string) ([]CourseLearningOutcome, error)
 	CreateGroup(assignmentGroup *AssignmentGroup) error
 	UpdateGroup(assignmentGroupId string, assignmentGroup *AssignmentGroup) error
 	DeleteGroup(assignmentGroupId string) error
@@ -38,6 +39,7 @@ type AssignmentUseCase interface {
 
 	GetGroupByGroupId(assignmentGroupId string) (*AssignmentGroup, error)
 	GetGroupByCourseId(courseId string, withAssignment bool) ([]AssignmentGroup, error)
+	GetLinkedCLOs(assignmentId string) ([]CourseLearningOutcome, error)
 	CreateGroup(CreateAssignmentGroupPayload) error
 	UpdateGroup(assignmentGroupId string, payload UpdateAssignmentGroupPayload) error
 	DeleteGroup(assignmentGroupId string) error

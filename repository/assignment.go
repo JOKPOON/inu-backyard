@@ -28,18 +28,12 @@ func (r assignmentRepositoryGorm) GetAll() ([]entity.Assignment, error) {
 
 func (r assignmentRepositoryGorm) GetById(id string) (*entity.Assignment, error) {
 	var assignment *entity.Assignment
-
-	err := r.gorm.Preload("CourseLearningOutcomes").Where("id = ?", id).Find(&assignment).Error
+	err := r.gorm.Where("id = ?", id).Preload("CourseLearningOutcomes").First(&assignment).Error
 
 	if err == gorm.ErrRecordNotFound {
 		return nil, nil
 	} else if err != nil {
 		return nil, fmt.Errorf("cannot query to get assignment by id: %w", err)
-	}
-
-	if len(assignment.CourseLearningOutcomes) > 0 {
-		assignment.CourseId = assignment.CourseLearningOutcomes[0].CourseId
-
 	}
 
 	return assignment, nil
@@ -98,13 +92,24 @@ func (r assignmentRepositoryGorm) GetPassingStudentPercentage(assignmentId strin
 	return passingStudentPercentage, nil
 }
 
+func (r assignmentRepositoryGorm) GetLinkedCLOs(assignmentId string) ([]entity.CourseLearningOutcome, error) {
+	var clos []entity.CourseLearningOutcome
+	err := r.gorm.Raw("SELECT clo.* FROM clo_assignment AS ca INNER JOIN course_learning_outcome AS clo ON ca.course_learning_outcome_id = clo.id WHERE ca.assignment_id = ?", assignmentId).Scan(&clos).Error
+
+	if err == gorm.ErrRecordNotFound {
+		return nil, nil
+	} else if err != nil {
+		return nil, fmt.Errorf("cannot query to get linked CLOs: %w", err)
+	}
+
+	return clos, nil
+}
+
 func (r assignmentRepositoryGorm) Create(assignment *entity.Assignment) error {
 	err := r.gorm.Create(&assignment).Error
 	if err != nil {
 		return fmt.Errorf("cannot create assignment: %w", err)
 	}
-	go cacheOutcomes(r.gorm, TabeeSelectorAllPloCourses)
-	go cacheOutcomes(r.gorm, TabeeSelectorAllPoCourses)
 
 	return nil
 }
@@ -114,8 +119,6 @@ func (r assignmentRepositoryGorm) CreateMany(assignments []entity.Assignment) er
 	if err != nil {
 		return fmt.Errorf("cannot create assignments: %w", err)
 	}
-	go cacheOutcomes(r.gorm, TabeeSelectorAllPloCourses)
-	go cacheOutcomes(r.gorm, TabeeSelectorAllPoCourses)
 
 	return nil
 }
@@ -133,8 +136,6 @@ func (r assignmentRepositoryGorm) Update(id string, assignment *entity.Assignmen
 	if err != nil {
 		return fmt.Errorf("cannot update assignment by id: %w", err)
 	}
-	go cacheOutcomes(r.gorm, TabeeSelectorAllPloCourses)
-	go cacheOutcomes(r.gorm, TabeeSelectorAllPoCourses)
 
 	return nil
 }
@@ -144,8 +145,6 @@ func (r assignmentRepositoryGorm) Delete(id string) error {
 	if err != nil {
 		return fmt.Errorf("cannot delete assignment by id: %w", err)
 	}
-	go cacheOutcomes(r.gorm, TabeeSelectorAllPloCourses)
-	go cacheOutcomes(r.gorm, TabeeSelectorAllPoCourses)
 
 	return nil
 }
@@ -163,8 +162,6 @@ func (r assignmentRepositoryGorm) CreateLinkCourseLearningOutcome(assignmentId s
 	if err != nil {
 		return fmt.Errorf("cannot create link between assignment and clo: %w", err)
 	}
-	go cacheOutcomes(r.gorm, TabeeSelectorAllPloCourses)
-	go cacheOutcomes(r.gorm, TabeeSelectorAllPoCourses)
 
 	return nil
 }
@@ -175,8 +172,6 @@ func (r assignmentRepositoryGorm) DeleteLinkCourseLearningOutcome(assignmentId s
 	if err != nil {
 		return fmt.Errorf("cannot delete link between assignment and clo: %w", err)
 	}
-	go cacheOutcomes(r.gorm, TabeeSelectorAllPloCourses)
-	go cacheOutcomes(r.gorm, TabeeSelectorAllPoCourses)
 
 	return nil
 }
