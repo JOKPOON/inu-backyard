@@ -138,15 +138,12 @@ type StudentPassCLOResp struct {
 	Result []StudentCLO `json:"result"`
 }
 
-type CLO struct {
-	Id   string `json:"id"`
-	Code string `json:"code"`
-	Pass bool   `json:"pass"`
-}
-
 type StudentCLO struct {
-	StudentID int   `json:"student_id"`
-	CLOs      []CLO `json:"clos"`
+	StudentID int           `json:"student_id"`
+	CLOs      []PassOutcome `json:"clos"`
+	POs       []PassOutcome `json:"pos"`
+	PLOs      []PassOutcome `json:"plos"`
+	SOs       []PassOutcome `json:"sos"`
 }
 
 type CLOResult struct {

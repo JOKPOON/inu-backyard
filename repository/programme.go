@@ -122,7 +122,7 @@ func (r programmeRepositoryGorm) CreateLinkWithPO(programmeId string, poId strin
 
 func (r programmeRepositoryGorm) CreateLinkWithPLO(programmeId string, ploId string) error {
 	err := r.gorm.Exec(`
-	INSERT IF NOT EXISTS INTO programme_plo(programme_id, program_learning_outcome_id)
+	INSERT INTO programme_plo(programme_id, program_learning_outcome_id)
 	VALUES (?, ?);
 	`, programmeId, ploId).Error
 	if err != nil {

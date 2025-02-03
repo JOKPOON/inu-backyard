@@ -151,3 +151,16 @@ type CourseSimpleData struct {
 type GetAllCourseResponse struct {
 	Courses []CourseSimpleData `json:"courses"`
 }
+
+type PassOutcome struct {
+	Id   string `json:"id"`
+	Code string `json:"code"`
+	Pass bool   `json:"pass"`
+}
+
+type StudentPassStatus struct {
+	StudentID int           `json:"student_id"`
+	POPass    []PassOutcome `json:"po_pass"`
+	PLOPass   []PassOutcome `json:"plo_pass"`
+	SOPass    []PassOutcome `json:"so_pass"`
+}
