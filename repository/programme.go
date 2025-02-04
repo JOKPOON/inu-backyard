@@ -337,14 +337,14 @@ func (r programmeRepositoryGorm) GetAllCourseLinkedPO(programmeId string) (*enti
 			courseMap[res.CourseCode] = &entity.CourseLinkedPO{
 				CourseCode: res.CourseCode,
 				CourseName: res.CourseName,
-				POs:        []string{},
+				Outcomes:   []string{},
 			}
 			program.AllCourse = append(program.AllCourse, res.CourseCode)
 		}
 		course := courseMap[res.CourseCode]
 
-		if res.POCode != "" && !contains(course.POs, res.POCode) {
-			course.POs = append(course.POs, res.POCode)
+		if res.POCode != "" && !contains(course.Outcomes, res.POCode) {
+			course.Outcomes = append(course.Outcomes, res.POCode)
 		}
 	}
 
@@ -414,7 +414,7 @@ func (r programmeRepositoryGorm) GetAllCourseLinkedPLO(programmeId string) (*ent
 			courseMap[res.CourseCode] = &entity.CourseLinkedPLO{
 				CourseCode: res.CourseCode,
 				CourseName: res.CourseName,
-				PLOs:       make(map[string][]string),
+				Outcomes:   make(map[string][]string),
 			}
 			program.AllCourse = append(program.AllCourse, res.CourseCode)
 		}
@@ -422,11 +422,11 @@ func (r programmeRepositoryGorm) GetAllCourseLinkedPLO(programmeId string) (*ent
 
 		// Add PLO and SPLO
 		if res.PLOCode != "" && res.SPLOCode != "" {
-			if _, exists := course.PLOs[res.PLOCode]; !exists {
-				course.PLOs[res.PLOCode] = []string{}
+			if _, exists := course.Outcomes[res.PLOCode]; !exists {
+				course.Outcomes[res.PLOCode] = []string{}
 			}
-			if !contains(course.PLOs[res.PLOCode], res.SPLOCode) {
-				course.PLOs[res.PLOCode] = append(course.PLOs[res.PLOCode], res.SPLOCode)
+			if !contains(course.Outcomes[res.PLOCode], res.SPLOCode) {
+				course.Outcomes[res.PLOCode] = append(course.Outcomes[res.PLOCode], res.SPLOCode)
 			}
 		}
 	}
@@ -497,7 +497,7 @@ func (r programmeRepositoryGorm) GetAllCourseLinkedSO(programmeId string) (*enti
 			courseMap[res.CourseCode] = &entity.CourseLinkedSO{
 				CourseCode: res.CourseCode,
 				CourseName: res.CourseName,
-				SOs:        make(map[string][]string),
+				Outcomes:   make(map[string][]string),
 			}
 			program.AllCourse = append(program.AllCourse, res.CourseCode)
 		}
@@ -505,11 +505,11 @@ func (r programmeRepositoryGorm) GetAllCourseLinkedSO(programmeId string) (*enti
 
 		// Add SO and SSO
 		if res.SOCode != "" && res.SSOCode != "" {
-			if _, exists := course.SOs[res.SOCode]; !exists {
-				course.SOs[res.SOCode] = []string{}
+			if _, exists := course.Outcomes[res.SOCode]; !exists {
+				course.Outcomes[res.SOCode] = []string{}
 			}
-			if !contains(course.SOs[res.SOCode], res.SSOCode) {
-				course.SOs[res.SOCode] = append(course.SOs[res.SOCode], res.SSOCode)
+			if !contains(course.Outcomes[res.SOCode], res.SSOCode) {
+				course.Outcomes[res.SOCode] = append(course.Outcomes[res.SOCode], res.SSOCode)
 			}
 		}
 	}

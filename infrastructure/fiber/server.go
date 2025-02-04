@@ -377,9 +377,9 @@ func (f *fiberServer) initController() error {
 	programme.Delete("/:programmeName", programmeController.Delete)
 
 	programme.Get("/:programmeId/outcome", programmeController.GetAllCourseOutcomeLinked)
-	programme.Get("/:programmeId/po", programmeController.GetAllCourseLinkedPO)
-	programme.Get("/:programmeId/plo", programmeController.GetAllCourseLinkedPLO)
-	programme.Get("/:programmeId/so", programmeController.GetAllCourseLinkedSO)
+	programme.Get("/outcomes/po", programmeController.GetAllCourseLinkedPO)
+	programme.Get("/outcomes/plo", programmeController.GetAllCourseLinkedPLO)
+	programme.Get("/outcomes/so", programmeController.GetAllCourseLinkedSO)
 
 	// enrollment route
 	enrollment := api.Group("/enrollments", authMiddleware)

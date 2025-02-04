@@ -227,7 +227,6 @@ func (u coursePortfolioUseCase) Generate(courseId string) (*entity.CoursePortfol
 }
 
 func (u coursePortfolioUseCase) CalculateGradeDistribution(courseId string) (*entity.GradeDistribution, error) {
-	println(courseId)
 	course, err := u.CourseUseCase.GetById(courseId)
 	if err != nil {
 		return nil, errs.New(errs.SameCode, "cannot get course by id %s while calculate grade distribution", courseId, err)

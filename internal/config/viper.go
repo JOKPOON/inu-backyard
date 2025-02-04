@@ -7,7 +7,7 @@ import (
 )
 
 func SetConfig(class interface{}) {
-	viper.SetConfigName("config.dev")
+	viper.SetConfigName("config")
 	viper.AddConfigPath(".")
 
 	if err := viper.ReadInConfig(); err != nil {

@@ -188,9 +188,12 @@ func (c ProgrammeController) GetAllCourseOutcomeLinked(ctx *fiber.Ctx) error {
 }
 
 func (c ProgrammeController) GetAllCourseLinkedPO(ctx *fiber.Ctx) error {
-	programmeId := ctx.Params("programmeId")
+	payload := entity.ProgrammeIds{}
+	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
+		return err
+	}
 
-	allCourseLinkedPO, err := c.ProgrammeUseCase.GetAllCourseLinkedPO(programmeId)
+	allCourseLinkedPO, err := c.ProgrammeUseCase.GetAllCourseLinkedPO(payload.ProgrammeIds)
 	if err != nil {
 		return err
 	}
@@ -199,9 +202,12 @@ func (c ProgrammeController) GetAllCourseLinkedPO(ctx *fiber.Ctx) error {
 }
 
 func (c ProgrammeController) GetAllCourseLinkedPLO(ctx *fiber.Ctx) error {
-	programmeId := ctx.Params("programmeId")
+	payload := entity.ProgrammeIds{}
+	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
+		return err
+	}
 
-	allCourseLinkedPLO, err := c.ProgrammeUseCase.GetAllCourseLinkedPLO(programmeId)
+	allCourseLinkedPLO, err := c.ProgrammeUseCase.GetAllCourseLinkedPLO(payload.ProgrammeIds)
 	if err != nil {
 		return err
 	}
@@ -210,9 +216,12 @@ func (c ProgrammeController) GetAllCourseLinkedPLO(ctx *fiber.Ctx) error {
 }
 
 func (c ProgrammeController) GetAllCourseLinkedSO(ctx *fiber.Ctx) error {
-	programmeId := ctx.Params("programmeId")
+	payload := entity.ProgrammeIds{}
+	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
+		return err
+	}
 
-	allCourseLinkedSO, err := c.ProgrammeUseCase.GetAllCourseLinkedSO(programmeId)
+	allCourseLinkedSO, err := c.ProgrammeUseCase.GetAllCourseLinkedSO(payload.ProgrammeIds)
 	if err != nil {
 		return err
 	}

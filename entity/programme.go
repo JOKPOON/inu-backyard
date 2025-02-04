@@ -8,9 +8,11 @@ type ProgrammeRepository interface {
 	GetByNameAndYear(nameTH string, nameEN string, year string) (*Programme, error)
 	GetById(id string) (*Programme, error)
 	GetAllCourseOutcomeLinked(programmeId string) ([]CourseOutcomes, error)
+
 	GetAllCourseLinkedPO(programmeId string) (*ProgrammeLinkedPO, error)
 	GetAllCourseLinkedPLO(programmeId string) (*ProgrammeLinkedPLO, error)
 	GetAllCourseLinkedSO(programmeId string) (*ProgrammeLinkedSO, error)
+
 	GetAllPO(programmeId string) ([]ProgramOutcome, error)
 	GetAllPLO(programmeId string) ([]ProgramLearningOutcome, error)
 	GetAllSO(programmeId string) ([]StudentOutcome, error)
@@ -33,10 +35,12 @@ type ProgrammeUseCase interface {
 	GetByName(nameTH string, nameEN string) ([]Programme, error)
 	GetByNameAndYear(nameTH string, nameEN string, year string) (*Programme, error)
 	GetById(id string) (*Programme, error)
+
 	GetAllCourseOutcomeLinked(programmeId string) ([]CourseOutcomes, error)
-	GetAllCourseLinkedPO(programmeId string) (*ProgrammeLinkedPO, error)
-	GetAllCourseLinkedPLO(programmeId string) (*ProgrammeLinkedPLO, error)
-	GetAllCourseLinkedSO(programmeId string) (*ProgrammeLinkedSO, error)
+	GetAllCourseLinkedPO(programmeId []string) ([]ProgrammeLinkedPO, error)
+	GetAllCourseLinkedPLO(programmeId []string) ([]ProgrammeLinkedPLO, error)
+	GetAllCourseLinkedSO(programmeId []string) ([]ProgrammeLinkedSO, error)
+
 	GetAllPO(programmeId string) ([]ProgramOutcome, error)
 	GetAllPLO(programmeId string) ([]ProgramLearningOutcome, error)
 	GetAllSO(programmeId string) ([]StudentOutcome, error)
@@ -78,6 +82,7 @@ type Programme struct {
 	DegreeShortTH string `json:"degree_short_th" gorm:"not null"`
 	DegreeShortEN string `json:"degree_short_en" gorm:"not null"`
 	Year          string `json:"year" gorm:"not null"`
+	AcademicYear  string `json:"academic_year" gorm:"not null"`
 
 	Structure datatypes.JSON `json:"structure" gorm:"type:json"`
 
@@ -151,45 +156,48 @@ type CourseOutcomes struct {
 }
 
 type ProgrammeLinkedPO struct {
-	ProgrammeName   string
-	ProgrammeYear   string
-	AllPOs          []string
-	AllCourse       []string
-	CourseLinkedPOs []CourseLinkedPO
+	ProgrammeName   string           `json:"programme_name"`
+	ProgrammeYear   string           `json:"programme_year"`
+	CourseLinkedPOs []CourseLinkedPO `json:"outcomes"`
+	AllPOs          []string         `json:"all_pos"`
+	AllCourse       []string         `json:"all_course"`
 }
 
 type ProgrammeLinkedPLO struct {
-	ProgrammeName    string
-	ProgrammeYear    string
-	AllPLOs          map[string][]string
-	AllCourse        []string
-	CourseLinkedPLOs []CourseLinkedPLO
+	ProgrammeName    string              `json:"programme_name"`
+	ProgrammeYear    string              `json:"programme_year"`
+	CourseLinkedPLOs []CourseLinkedPLO   `json:"outcomes"`
+	AllPLOs          map[string][]string `json:"all_plos"`
+	AllCourse        []string            `json:"all_course"`
 }
 
 type ProgrammeLinkedSO struct {
-	ProgrammeName   string
-	ProgrammeYear   string
-	AllSOs          map[string][]string
-	AllCourse       []string
-	CourseLinkedSOs []CourseLinkedSO
+	ProgrammeName   string              `json:"programme_name"`
+	ProgrammeYear   string              `json:"programme_year"`
+	CourseLinkedSOs []CourseLinkedSO    `json:"outcomes"`
+	AllSOs          map[string][]string `json:"all_sos"`
+	AllCourse       []string            `json:"all_course"`
 }
 
 type CourseLinkedPO struct {
-	CourseCode string
-	CourseName string
-	POs        []string
+	CourseCode      string   `json:"course_code"`
+	CourseName      string   `json:"course_name"`
+	Outcomes        []string `json:"outcomes"`
+	SurveyQuestions []string `json:"survey_questions"`
 }
 
 type CourseLinkedPLO struct {
-	CourseCode string
-	CourseName string
-	PLOs       map[string][]string
+	CourseCode      string              `json:"course_code"`
+	CourseName      string              `json:"course_name"`
+	Outcomes        map[string][]string `json:"outcomes"`
+	SurveyQuestions map[string][]string `json:"survey_questions"`
 }
 
 type CourseLinkedSO struct {
-	CourseCode string
-	CourseName string
-	SOs        map[string][]string
+	CourseCode      string              `json:"course_code"`
+	CourseName      string              `json:"course_name"`
+	Outcomes        map[string][]string `json:"outcomes"`
+	SurveyQuestions map[string][]string `json:"survey_questions"`
 }
 
 type LinkProgrammePO struct {
@@ -202,4 +210,8 @@ type LinkProgrammePLO struct {
 
 type LinkProgrammeSO struct {
 	SOIds []string `json:"so_ids" validate:"required"`
+}
+
+type ProgrammeIds struct {
+	ProgrammeIds []string `json:"programme_ids" validate:"required"`
 }
