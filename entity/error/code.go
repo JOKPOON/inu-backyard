@@ -142,4 +142,10 @@ const (
 	ErrQueryCourseStream    = 21802
 	ErrUpdateCourseStream   = 21803
 	ErrCourseStreamNotFound = 21804
+
+	ErrSurveyNotFound = 21900
+	ErrCreateSurvey   = 21901
+	ErrUpdateSurvey   = 21902
+	ErrDeleteSurvey   = 21903
+	ErrQuerySurvey    = 21904
 )

@@ -13,6 +13,7 @@
     "Gorm",
     "GPAX",
     "healthcheck",
+    "IFNULL",
     "jokpoon",
     "kmutt",
     "mysqladmin",

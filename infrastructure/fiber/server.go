@@ -44,6 +44,7 @@ type fiberServer struct {
 	courseStreamRepository           entity.CourseStreamRepository
 	importerRepository               repository.ImporterRepositoryGorm
 	mailRepository                   entity.MailRepository
+	surveyRepository                 entity.SurveyRepository
 
 	studentUseCase                entity.StudentUseCase
 	courseUseCase                 entity.CourseUseCase
@@ -66,6 +67,7 @@ type fiberServer struct {
 	predictionUseCase             entity.PredictionUseCase
 	courseStreamUseCase           entity.CourseStreamsUseCase
 	importerUseCase               usecase.ImporterUseCase
+	surveyUseCase                 entity.SurveyUseCase
 
 	mailUseCase entity.MailUseCase
 }
@@ -117,6 +119,7 @@ func (f *fiberServer) initRepository() {
 	f.courseStreamRepository = repository.NewCourseStreamRepository(f.gorm)
 	f.importerRepository = repository.NewImporterRepositoryGorm(f.gorm)
 	f.mailRepository = repository.NewMailRepository(f.session)
+	f.surveyRepository = repository.NewSurveyRepositoryGorm(f.gorm)
 }
 
 func (f *fiberServer) initUseCase() {
@@ -144,6 +147,7 @@ func (f *fiberServer) initUseCase() {
 	f.coursePortfolioUseCase = usecase.NewCoursePortfolioUseCase(f.coursePortfolioRepository, f.courseUseCase, f.userUseCase, f.enrollmentUseCase, f.assignmentUseCase, f.scoreUseCase, f.studentUseCase, f.courseLearningOutcomeUseCase, f.courseStreamUseCase)
 	f.importerUseCase = usecase.NewImporterUseCase(f.importerRepository, f.courseUseCase, f.enrollmentUseCase, f.assignmentUseCase, f.programOutcomeUseCase, f.programLearningOutcomeUseCase, f.courseLearningOutcomeUseCase, f.userUseCase)
 	f.predictionUseCase = usecase.NewPredictionUseCase(f.config)
+	f.surveyUseCase = usecase.NewSurveyUseCase(f.surveyRepository)
 }
 
 func (f *fiberServer) initController() error {
@@ -182,6 +186,7 @@ func (f *fiberServer) initController() error {
 	coursePortfolioController := controller.NewCoursePortfolioController(validator, f.coursePortfolioUseCase)
 	courseStreamController := controller.NewCourseStreamController(validator, f.courseStreamUseCase)
 	importerController := controller.NewImporterController(validator, f.importerUseCase)
+	surveyController := controller.NewSurveyController(validator, f.surveyUseCase)
 	authController := controller.NewAuthController(validator, f.config.Client.Auth, *f.turnstile, f.authUseCase, f.userUseCase)
 
 	api := app.Group("/")
@@ -416,8 +421,24 @@ func (f *fiberServer) initController() error {
 
 	// prediction
 	prediction := api.Group("/prediction", authMiddleware)
-
 	prediction.Post("/predict", predictionController.Predict)
+
+	// survey
+	survey := api.Group("/surveys", authMiddleware)
+
+	survey.Get("/", surveyController.GetAll)
+	survey.Get("/courses/outcome", surveyController.GetSurveysWithCourseAndOutcomes)
+	survey.Post("/", surveyController.Create)
+	survey.Get("/:surveyId", surveyController.GetById)
+	survey.Get("/:surveyId/questions", surveyController.GetQuestionBySurveyId)
+	survey.Patch("/:surveyId", surveyController.Update)
+	survey.Delete("/:surveyId", surveyController.Delete)
+
+	question := api.Group("/questions", authMiddleware)
+	question.Post("/:surveyId", surveyController.CreateQuestion)
+	question.Get("/:questionId", surveyController.GetQuestionById)
+	question.Patch("/:questionId", surveyController.UpdateQuestion)
+	question.Delete("/:questionId", surveyController.DeleteQuestion)
 
 	// authentication route
 	auth := app.Group("/auth")

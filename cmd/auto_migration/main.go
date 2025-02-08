@@ -12,8 +12,8 @@ func main() {
 	gormDB, err := database.NewGorm(&database.GormConfig{
 		User:         "root",
 		Password:     "root",
-		Host:         "10.35.29.114",
-		DatabaseName: "inu_2",
+		Host:         "mysql",
+		DatabaseName: "inu",
 		Port:         "3306",
 	})
 	if err != nil {
