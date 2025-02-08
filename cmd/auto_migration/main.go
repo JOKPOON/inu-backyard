@@ -12,7 +12,7 @@ func main() {
 	gormDB, err := database.NewGorm(&database.GormConfig{
 		User:         "root",
 		Password:     "root",
-		Host:         "localhost",
+		Host:         "10.35.29.114",
 		DatabaseName: "inu_2",
 		Port:         "3306",
 	})
@@ -45,6 +45,9 @@ func main() {
 		&entity.StudentOutcome{},
 		&entity.Student{},
 		&entity.SubProgramLearningOutcome{},
+		&entity.Survey{},
+		&entity.Question{},
+		&entity.QScore{},
 	)
 
 	fmt.Println(err)
