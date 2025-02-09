@@ -19,32 +19,30 @@ func NewUserRepositoryGorm(gorm *gorm.DB) entity.UserRepository {
 func (r userRepositoryGorm) GetAll(query string, offset int, limit int) (*entity.Pagination, error) {
 	var users []entity.User
 	var pagination entity.Pagination
+	var total int64
 
-	err := r.gorm.Model(&entity.User{}).Count(&pagination.Total).Error
-	if err != nil {
+	queryBuilder := r.gorm.Model(&entity.User{})
+
+	if query != "" {
+		queryBuilder = queryBuilder.Where("first_name_th LIKE ? OR last_name_th LIKE ? OR first_name_en LIKE ? OR last_name_en LIKE ?",
+			"%"+query+"%", "%"+query+"%", "%"+query+"%", "%"+query+"%")
+	}
+
+	// Get total count for pagination
+	if err := queryBuilder.Count(&total).Error; err != nil {
 		return nil, fmt.Errorf("cannot count users: %w", err)
 	}
 
-	pagination.TotalPage = int(math.Ceil(float64(pagination.Total) / float64(limit)))
-
-	if query == "" {
-		err = r.gorm.Offset(offset).Limit(limit).Find(&users).Error
-	} else {
-		err = r.gorm.Where("first_name_th LIKE ? OR last_name_th LIKE ? OR first_name_en LIKE ? OR last_name_en LIKE ?",
-			"%"+query+"%", "%"+query+"%", "%"+query+"%", "%"+query+"%").
-			Offset(offset).
-			Limit(limit).
-			Find(&users).
-			Error
-	}
-	if err == gorm.ErrRecordNotFound {
-		return nil, nil
-	} else if err != nil {
-		return nil, fmt.Errorf("cannot query to get all users: %w", err)
+	// Fetch paginated data
+	if err := queryBuilder.Offset(offset).Limit(limit).Find(&users).Error; err != nil {
+		return nil, fmt.Errorf("cannot query users: %w", err)
 	}
 
+	// Set pagination data
+	pagination.Total = total
 	pagination.Size = limit
 	pagination.Page = offset/limit + 1
+	pagination.TotalPage = int(math.Ceil(float64(total) / float64(limit)))
 	pagination.Data = users
 
 	return &pagination, nil
