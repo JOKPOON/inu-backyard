@@ -49,14 +49,12 @@ type Survey struct {
 }
 
 type Question struct {
-	Id          string `json:"id" gorm:"primaryKey;type:char(255)"`
-	Title       string `json:"title"`
-	Description string `json:"description"`
-	Question    string `json:"question"`
-	POId        string `json:"po_id"`
-	PLOId       string `json:"plo_id"`
-	SOId        string `json:"so_id"`
-	SurveyId    string `json:"survey_id" gorm:"index"`
+	Id       string `json:"id" gorm:"primaryKey;type:char(255)"`
+	Question string `json:"question"`
+	POId     string `json:"po_id"`
+	PLOId    string `json:"plo_id"`
+	SOId     string `json:"so_id"`
+	SurveyId string `json:"survey_id" gorm:"index"`
 
 	Scores []QScore `json:"q_scores" gorm:"foreignKey:QuestionId;constraint:OnDelete:CASCADE;"`
 }
@@ -84,21 +82,17 @@ type UpdateSurveyRequest struct {
 }
 
 type CreateQuestionRequest struct {
-	Title       string `json:"title"`
-	Description string `json:"description"`
-	Question    string `json:"question"`
-	POId        string `json:"po_id"`
-	PLOId       string `json:"plo_id"`
-	SOId        string `json:"so_id"`
+	Question string `json:"question"`
+	POId     string `json:"po_id"`
+	PLOId    string `json:"plo_id"`
+	SOId     string `json:"so_id"`
 }
 
 type UpdateQuestionRequest struct {
-	Title       string `json:"title,omitempty"`
-	Description string `json:"description,omitempty"`
-	Question    string `json:"question,omitempty"`
-	POId        string `json:"po_id,omitempty"`
-	PLOId       string `json:"plo_id,omitempty"`
-	SOId        string `json:"so_id,omitempty"`
+	Question string `json:"question,omitempty"`
+	POId     string `json:"po_id,omitempty"`
+	PLOId    string `json:"plo_id,omitempty"`
+	SOId     string `json:"so_id,omitempty"`
 }
 
 type SurveyWithCourseAndOutcomes struct {

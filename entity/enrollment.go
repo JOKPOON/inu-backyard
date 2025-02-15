@@ -10,7 +10,7 @@ const (
 type EnrollmentRepository interface {
 	GetAll() ([]Enrollment, error)
 	GetById(id string) (*Enrollment, error)
-	GetByCourseId(courseId string) ([]Enrollment, error)
+	GetByCourseId(courseId string, query string) ([]Enrollment, error)
 	GetByStudentId(studentId string) ([]Enrollment, error)
 	Create(enrollment *Enrollment) error
 	CreateMany(enrollments []Enrollment) error
@@ -23,7 +23,7 @@ type EnrollmentRepository interface {
 type EnrollmentUseCase interface {
 	GetAll() ([]Enrollment, error)
 	GetById(id string) (*Enrollment, error)
-	GetByCourseId(courseId string) ([]Enrollment, error)
+	GetByCourseId(courseId string, query string) ([]Enrollment, error)
 	GetByStudentId(studentId string) ([]Enrollment, error)
 	CreateMany(CreateEnrollmentsPayload) error
 	Update(id string, status EnrollmentStatus) error

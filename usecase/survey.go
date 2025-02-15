@@ -35,6 +35,10 @@ func (u surveyUseCase) GetAll() ([]entity.Survey, error) {
 }
 
 func (u surveyUseCase) Create(request *entity.CreateSurveyRequest) error {
+	for idx := range request.Questions {
+		request.Questions[idx].Id = ulid.Make().String()
+	}
+
 	survey := &entity.Survey{
 		Id:          ulid.Make().String(),
 		Title:       request.Title,
@@ -128,14 +132,12 @@ func (u surveyUseCase) CreateQuestion(surveyId string, question *entity.CreateQu
 	}
 
 	questionToCreate := &entity.Question{
-		Id:          ulid.Make().String(),
-		Title:       question.Title,
-		Description: question.Description,
-		Question:    question.Question,
-		POId:        question.POId,
-		PLOId:       question.PLOId,
-		SOId:        question.SOId,
-		SurveyId:    surveyId,
+		Id:       ulid.Make().String(),
+		Question: question.Question,
+		POId:     question.POId,
+		PLOId:    question.PLOId,
+		SOId:     question.SOId,
+		SurveyId: surveyId,
 	}
 
 	err = u.surveyRepo.AddQuestion(questionToCreate)
@@ -155,13 +157,11 @@ func (u surveyUseCase) UpdateQuestion(questionId string, question *entity.Update
 	}
 
 	questionToUpdate := &entity.Question{
-		Id:          questionId,
-		Title:       question.Title,
-		Description: question.Description,
-		Question:    question.Question,
-		POId:        question.POId,
-		PLOId:       question.PLOId,
-		SOId:        question.SOId,
+		Id:       questionId,
+		Question: question.Question,
+		POId:     question.POId,
+		PLOId:    question.PLOId,
+		SOId:     question.SOId,
 	}
 
 	err = u.surveyRepo.UpdateQuestion(questionToUpdate)

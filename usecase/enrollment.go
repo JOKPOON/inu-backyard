@@ -39,7 +39,7 @@ func (u enrollmentUseCase) GetById(id string) (*entity.Enrollment, error) {
 	return enrollment, nil
 }
 
-func (u enrollmentUseCase) GetByCourseId(courseId string) ([]entity.Enrollment, error) {
+func (u enrollmentUseCase) GetByCourseId(courseId string, query string) ([]entity.Enrollment, error) {
 	course, err := u.courseUseCase.GetById(courseId)
 	if err != nil {
 		return nil, errs.New(errs.SameCode, "cannot get course id %s while get enrollments", course, err)
@@ -47,7 +47,7 @@ func (u enrollmentUseCase) GetByCourseId(courseId string) ([]entity.Enrollment, 
 		return nil, errs.New(errs.ErrEnrollmentNotFound, "course id %s not found while getting enrollments", courseId, err)
 	}
 
-	enrollment, err := u.enrollmentRepo.GetByCourseId(courseId)
+	enrollment, err := u.enrollmentRepo.GetByCourseId(courseId, query)
 	if err != nil {
 		return nil, errs.New(errs.ErrQueryEnrollment, "cannot get enrollment by course id %s", courseId, err)
 	}

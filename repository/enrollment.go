@@ -52,20 +52,26 @@ func (r enrollmentRepositoryGorm) GetById(id string) (*entity.Enrollment, error)
 	return enrollments, nil
 }
 
-func (r enrollmentRepositoryGorm) GetByCourseId(courseId string) ([]entity.Enrollment, error) {
+func (r enrollmentRepositoryGorm) GetByCourseId(courseId, query string) ([]entity.Enrollment, error) {
 	var enrollments []entity.Enrollment
-	err := r.gorm.
-		Model(&enrollments).
-		Select("enrollment.*, student.first_name, student.last_name, student.email").
-		Joins("LEFT JOIN student on student.id = enrollment.student_id").
-		Where("enrollment.course_id = ?", courseId).
-		Scan(&enrollments).
-		Error
 
-	if err == gorm.ErrRecordNotFound {
-		return nil, nil
-	} else if err != nil {
-		return nil, fmt.Errorf("cannot query to get enrollment by id: %w", err)
+	tx := r.gorm.
+		Model(&entity.Enrollment{}).
+		Select("enrollment.*, student.first_name, student.last_name, student.email").
+		Joins("LEFT JOIN student ON student.id = enrollment.student_id").
+		Where("enrollment.course_id = ?", courseId)
+
+	if query != "" {
+		search := "%" + query + "%"
+		tx = tx.Where("student.id LIKE ? OR student.first_name LIKE ? OR student.last_name LIKE ?", search, search, search)
+	}
+
+	err := tx.Find(&enrollments).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("cannot query enrollments by course ID: %w", err)
 	}
 
 	return enrollments, nil

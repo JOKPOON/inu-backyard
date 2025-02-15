@@ -70,7 +70,7 @@ func (u scoreUseCase) GetByAssignmentId(assignmentId string) (*entity.Assignment
 		return nil, errs.New(errs.SameCode, "cannot get all scores", err)
 	}
 
-	enrollments, err := u.enrollmentUseCase.GetByCourseId(assignmentGroup.CourseId)
+	enrollments, err := u.enrollmentUseCase.GetByCourseId(assignmentGroup.CourseId, "")
 	if err != nil {
 		return nil, errs.New(errs.SameCode, "cannot get enrollments when finding score", err)
 	}

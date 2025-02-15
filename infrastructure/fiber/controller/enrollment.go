@@ -45,8 +45,9 @@ func (c EnrollmentController) GetById(ctx *fiber.Ctx) error {
 
 func (c EnrollmentController) GetByCourseId(ctx *fiber.Ctx) error {
 	enrollmentId := ctx.Params("courseId")
+	query := ctx.Query("query")
 
-	enrollments, err := c.EnrollmentUseCase.GetByCourseId(enrollmentId)
+	enrollments, err := c.EnrollmentUseCase.GetByCourseId(enrollmentId, query)
 	if err != nil {
 		return err
 	}

@@ -18,7 +18,11 @@ func NewAssignmentRepositoryGorm(gorm *gorm.DB) entity.AssignmentRepository {
 func (r assignmentRepositoryGorm) GetAll() ([]entity.Assignment, error) {
 	var assignments []entity.Assignment
 
-	err := r.gorm.Find(&assignments).Error
+	err := r.gorm.
+		Select("assignment.*, assignment_group.course_id").
+		Joins("JOIN assignment_group ON assignment.assignment_group_id = assignment_group.id").
+		Find(&assignments).Error
+
 	if err != nil {
 		return nil, fmt.Errorf("cannot query to get all assignments: %w", err)
 	}
@@ -40,16 +44,23 @@ func (r assignmentRepositoryGorm) GetById(id string) (*entity.Assignment, error)
 }
 
 func (r assignmentRepositoryGorm) GetByCourseId(courseId string) ([]entity.Assignment, error) {
-	var clos []entity.Assignment
-	err := r.gorm.Raw("SELECT DISTINCT a.*, clo.course_id FROM clo_assignment AS clo_a INNER JOIN course_learning_outcome AS clo ON clo_a.course_learning_outcome_id = clo.id INNER JOIN assignment AS a ON a.id = clo_a.assignment_id WHERE clo.course_id = ?", courseId).Scan(&clos).Error
+	var assignments []entity.Assignment
 
-	if err == gorm.ErrRecordNotFound {
-		return nil, nil
-	} else if err != nil {
-		return nil, fmt.Errorf("cannot query to get assignment by course id: %w", err)
+	err := r.gorm.
+		Select("DISTINCT assignment.*, assignment_group.course_id").
+		Joins("JOIN assignment_group ON assignment.assignment_group_id = assignment_group.id"). // Correctly join assignment_groups
+		Joins("LEFT JOIN clo_assignment ON clo_assignment.assignment_id = assignment.id").
+		Where("assignment_group.course_id = ?", courseId). // Filter by course_id from assignment_groups
+		Find(&assignments).Error
+
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("cannot query to get assignments by course id: %w", err)
 	}
 
-	return clos, nil
+	return assignments, nil
 }
 
 func (r assignmentRepositoryGorm) GetByGroupId(groupId string) ([]entity.Assignment, error) {
