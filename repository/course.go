@@ -54,7 +54,10 @@ func (r courseRepositoryGorm) GetById(id string) (*entity.Course, error) {
 
 func (r courseRepositoryGorm) GetByUserId(userId string, query string, year string, program string) ([]entity.Course, error) {
 	var courses []entity.Course
-	db := r.gorm.Where("user_id = ?", userId)
+	db := r.gorm.
+		Preload("Lecturers").Preload("Semester").Preload("Programme").
+		Joins("JOIN course_lecturer cl ON cl.course_id = course.id").
+		Where("user_id = ?", userId)
 
 	if query != "" {
 		db = db.Where("name LIKE ?", "%"+query+"%")

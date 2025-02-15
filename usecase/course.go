@@ -94,9 +94,10 @@ func (u courseUseCase) GetByUserId(userId string, query string, year string, pro
 			lec = append(lec, entity.Lecturer{
 				Id:     l.Id,
 				NameTH: l.TitleTHShort + l.FirstNameTH + " " + l.LastNameTH,
-				NameEN: l.TitleEN + l.FirstNameEN + " " + l.LastNameEN,
+				NameEN: l.TitleENShort + l.FirstNameEN + " " + l.LastNameEN,
 			})
 		}
+
 		res.Courses = append(res.Courses, entity.CourseSimpleData{
 			Id:           c.Id,
 			Name:         c.Name,
