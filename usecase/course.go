@@ -26,21 +26,25 @@ func NewCourseUseCase(
 	}
 }
 
-func (u courseUseCase) GetAll() (*entity.GetAllCourseResponse, error) {
-	courses, err := u.courseRepo.GetAll()
+func (u courseUseCase) GetAll(query string, year string, program string) (*entity.GetAllCourseResponse, error) {
+	courses, err := u.courseRepo.GetAll(query, year, program)
 	if err != nil {
 		return nil, errs.New(errs.ErrQueryStudent, "cannot get all courses", err)
-	}
-
-	lec := []string{}
-	for _, c := range courses {
-		for _, l := range c.Lecturers {
-			lec = append(lec, l.Id)
-		}
+	} else if len(courses) == 0 {
+		return nil, errs.New(errs.ErrCourseNotFound, "no course found")
 	}
 
 	res := entity.GetAllCourseResponse{}
 	for _, c := range courses {
+		var lec []entity.Lecturer
+		for _, l := range c.Lecturers {
+			lec = append(lec, entity.Lecturer{
+				Id:     l.Id,
+				NameTH: l.TitleTHShort + l.FirstNameTH + " " + l.LastNameTH,
+				NameEN: l.TitleENShort + l.FirstNameEN + " " + l.LastNameEN,
+			})
+		}
+
 		res.Courses = append(res.Courses, entity.CourseSimpleData{
 			Id:           c.Id,
 			Name:         c.Name,
@@ -49,8 +53,12 @@ func (u courseUseCase) GetAll() (*entity.GetAllCourseResponse, error) {
 			AcademicYear: c.AcademicYear,
 			GraduateYear: c.GraduateYear,
 			Description:  c.Description,
-			ProgramName:  c.Programme.NameTH + ", " + c.Programme.NameEN,
-			Lecturers:    lec,
+			Program: entity.Program{
+				Id:     c.Programme.Id,
+				NameTH: c.Programme.NameTH,
+				NameEN: c.Programme.NameEN,
+			},
+			Lecturers: lec,
 		})
 	}
 
@@ -66,7 +74,7 @@ func (u courseUseCase) GetById(id string) (*entity.Course, error) {
 	return course, nil
 }
 
-func (u courseUseCase) GetByUserId(userId string) (*entity.GetAllCourseResponse, error) {
+func (u courseUseCase) GetByUserId(userId string, query string, year string, program string) (*entity.GetAllCourseResponse, error) {
 	user, err := u.userUseCase.GetById(userId)
 	if err != nil {
 		return nil, errs.New(errs.SameCode, "cannot get user id %s while get scores", user, err)
@@ -74,20 +82,21 @@ func (u courseUseCase) GetByUserId(userId string) (*entity.GetAllCourseResponse,
 		return nil, errs.New(errs.ErrQueryCourse, "user id %s not found while getting scores", userId, err)
 	}
 
-	courses, err := u.courseRepo.GetByUserId(userId)
+	courses, err := u.courseRepo.GetByUserId(userId, query, year, program)
 	if err != nil {
 		return nil, errs.New(errs.ErrQueryCourse, "cannot get score by user id %s", userId, err)
 	}
 
-	lec := []string{}
-	for _, c := range courses {
-		for _, l := range c.Lecturers {
-			lec = append(lec, l.Id)
-		}
-	}
-
 	res := entity.GetAllCourseResponse{}
 	for _, c := range courses {
+		var lec []entity.Lecturer
+		for _, l := range c.Lecturers {
+			lec = append(lec, entity.Lecturer{
+				Id:     l.Id,
+				NameTH: l.TitleTHShort + l.FirstNameTH + " " + l.LastNameTH,
+				NameEN: l.TitleEN + l.FirstNameEN + " " + l.LastNameEN,
+			})
+		}
 		res.Courses = append(res.Courses, entity.CourseSimpleData{
 			Id:           c.Id,
 			Name:         c.Name,
@@ -96,8 +105,12 @@ func (u courseUseCase) GetByUserId(userId string) (*entity.GetAllCourseResponse,
 			AcademicYear: c.AcademicYear,
 			GraduateYear: c.GraduateYear,
 			Description:  c.Description,
-			ProgramName:  c.Programme.NameTH + ", " + c.Programme.NameEN,
-			Lecturers:    lec,
+			Program: entity.Program{
+				Id:     c.Programme.Id,
+				NameTH: c.Programme.NameTH,
+				NameEN: c.Programme.NameEN,
+			},
+			Lecturers: lec,
 		})
 	}
 

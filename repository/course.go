@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/team-inu/inu-backyard/entity"
+	errs "github.com/team-inu/inu-backyard/entity/error"
 	"gorm.io/gorm"
 )
 
@@ -15,13 +16,25 @@ func NewCourseRepositoryGorm(gorm *gorm.DB) entity.CourseRepository {
 	return &courseRepositoryGorm{gorm: gorm}
 }
 
-func (r courseRepositoryGorm) GetAll() ([]entity.Course, error) {
+func (r courseRepositoryGorm) GetAll(query, year, program string) ([]entity.Course, error) {
 	var courses []entity.Course
-	err := r.gorm.Preload("Lecturers").Preload("Semester").Preload("Programme").Find(&courses).Error
+	db := r.gorm.Preload("Lecturers").Preload("Semester").Preload("Programme")
+
+	if query != "" {
+		db = db.Where("name LIKE ?", "%"+query+"%")
+	}
+	if year != "" {
+		db = db.Where("academic_year = ?", year)
+	}
+	if program != "" {
+		db = db.Where("programme_id = ?", program)
+	}
+
+	err := db.Find(&courses).Error
 	if err == gorm.ErrRecordNotFound {
-		return nil, nil
+		return nil, errs.New(errs.ErrCourseNotFound, "no course found")
 	} else if err != nil {
-		return nil, fmt.Errorf("cannot query to get courses: %w", err)
+		return nil, fmt.Errorf("cannot query to get all courses: %w", err)
 	}
 
 	return courses, nil
@@ -29,7 +42,7 @@ func (r courseRepositoryGorm) GetAll() ([]entity.Course, error) {
 
 func (r courseRepositoryGorm) GetById(id string) (*entity.Course, error) {
 	var course entity.Course
-	err := r.gorm.First(&course).Where("id = ?", id).Error
+	err := r.gorm.Preload("Lecturers").Preload("Semester").Preload("Programme").First(&course).Where("id = ?", id).Error
 	if err == gorm.ErrRecordNotFound {
 		return nil, nil
 	} else if err != nil {
@@ -39,10 +52,21 @@ func (r courseRepositoryGorm) GetById(id string) (*entity.Course, error) {
 	return &course, nil
 }
 
-func (r courseRepositoryGorm) GetByUserId(userId string) ([]entity.Course, error) {
+func (r courseRepositoryGorm) GetByUserId(userId string, query string, year string, program string) ([]entity.Course, error) {
 	var courses []entity.Course
-	err := r.gorm.Where("user_id = ?", userId).Find(&courses).Error
+	db := r.gorm.Where("user_id = ?", userId)
 
+	if query != "" {
+		db = db.Where("name LIKE ?", "%"+query+"%")
+	}
+	if year != "" {
+		db = db.Where("academic_year = ?", year)
+	}
+	if program != "" {
+		db = db.Where("programme_id = ?", program)
+	}
+
+	err := db.Find(&courses).Error
 	if err == gorm.ErrRecordNotFound {
 		return nil, nil
 	} else if err != nil {
@@ -57,8 +81,6 @@ func (r courseRepositoryGorm) Create(course *entity.Course) error {
 	if err != nil {
 		return fmt.Errorf("cannot create course: %w", err)
 	}
-	go cacheOutcomes(r.gorm, TabeeSelectorAllPloCourses)
-	go cacheOutcomes(r.gorm, TabeeSelectorAllPoCourses)
 
 	return nil
 }
@@ -68,8 +90,6 @@ func (r courseRepositoryGorm) Update(id string, course *entity.Course) error {
 	if err != nil {
 		return fmt.Errorf("cannot update course: %w", err)
 	}
-	go cacheOutcomes(r.gorm, TabeeSelectorAllPloCourses)
-	go cacheOutcomes(r.gorm, TabeeSelectorAllPoCourses)
 
 	return nil
 }
@@ -80,8 +100,6 @@ func (r courseRepositoryGorm) Delete(id string) error {
 	if err != nil {
 		return fmt.Errorf("cannot delete course: %w", err)
 	}
-	go cacheOutcomes(r.gorm, TabeeSelectorAllPloCourses)
-	go cacheOutcomes(r.gorm, TabeeSelectorAllPoCourses)
 
 	return nil
 }

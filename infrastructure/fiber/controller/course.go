@@ -29,10 +29,16 @@ func (c CourseController) GetAll(ctx *fiber.Ctx) error {
 	var courses *entity.GetAllCourseResponse
 	var err error
 
+	query := ctx.Query("query")
+	year := ctx.Query("year")
+	program := ctx.Query("program")
+
+	println(query, year, program)
+
 	if user.IsRoles([]entity.UserRole{entity.UserRoleHeadOfCurriculum, entity.UserRoleModerator, entity.UserRoleTABEEManager}) {
-		courses, err = c.CourseUseCase.GetAll()
+		courses, err = c.CourseUseCase.GetAll(query, year, program)
 	} else {
-		courses, err = c.CourseUseCase.GetByUserId(user.Id)
+		courses, err = c.CourseUseCase.GetByUserId(user.Id, query, year, program)
 	}
 
 	if err != nil {
@@ -59,8 +65,11 @@ func (c CourseController) GetById(ctx *fiber.Ctx) error {
 
 func (c CourseController) GetByUserId(ctx *fiber.Ctx) error {
 	userId := ctx.Params("userId")
+	query := ctx.Query("query")
+	year := ctx.Query("year")
+	program := ctx.Query("program")
 
-	courses, err := c.CourseUseCase.GetByUserId(userId)
+	courses, err := c.CourseUseCase.GetByUserId(userId, query, year, program)
 	if err != nil {
 		return err
 	}

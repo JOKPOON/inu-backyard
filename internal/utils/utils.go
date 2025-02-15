@@ -34,7 +34,7 @@ func ValidatePagination(pageIndex string, pageSize string) (int, int, error) {
 	case size > 100:
 		size = 100
 	case size <= 0:
-		size = 2
+		size = 100
 	}
 
 	offset := (page - 1) * size

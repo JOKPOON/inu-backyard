@@ -3,9 +3,9 @@ package entity
 import "gorm.io/datatypes"
 
 type CourseRepository interface {
-	GetAll() ([]Course, error)
+	GetAll(query string, year string, program string) ([]Course, error)
 	GetById(id string) (*Course, error)
-	GetByUserId(userId string) ([]Course, error)
+	GetByUserId(userId string, query string, year string, program string) ([]Course, error)
 	GetStudentsPassingCLOs(courseId string) (*StudentPassCLOResp, error)
 	Create(course *Course) error
 	Update(id string, course *Course) error
@@ -15,9 +15,9 @@ type CourseRepository interface {
 }
 
 type CourseUseCase interface {
-	GetAll() (*GetAllCourseResponse, error)
+	GetAll(query string, year string, program string) (*GetAllCourseResponse, error)
 	GetById(id string) (*Course, error)
-	GetByUserId(userId string) (*GetAllCourseResponse, error)
+	GetByUserId(userId string, query string, year string, program string) (*GetAllCourseResponse, error)
 	GetStudentsPassingCLOs(courseId string) (*StudentPassCLOResp, error)
 	Create(user User, payload CreateCoursePayload) error
 	Update(user User, id string, payload UpdateCoursePayload) error
@@ -32,18 +32,16 @@ type CriteriaGrade struct {
 	C  float64 `json:"criteria_grade_c" gorm:"column:criteria_grade_c" validate:"required"`
 	DP float64 `json:"criteria_grade_dp" gorm:"column:criteria_grade_dp" validate:"required"`
 	D  float64 `json:"criteria_grade_d" gorm:"column:criteria_grade_d" validate:"required"`
-	F  float64 `json:"criteria_grade_f" gorm:"column:criteria_grade_f" validate:"required"`
 }
 
 func (c CriteriaGrade) IsValid() bool {
-	return c.A >= c.BP &&
-		c.BP >= c.B &&
-		c.B >= c.CP &&
-		c.CP >= c.C &&
-		c.C >= c.DP &&
-		c.DP >= c.D &&
-		c.D >= c.F &&
-		c.F >= 0
+	return c.A > c.BP &&
+		c.BP > c.B &&
+		c.B > c.CP &&
+		c.CP > c.C &&
+		c.C > c.DP &&
+		c.DP > c.D &&
+		c.D >= 0
 }
 
 func (c CriteriaGrade) CalculateCriteriaWeight(maxScore float64) CriteriaGrade {
@@ -57,7 +55,6 @@ func (c CriteriaGrade) CalculateCriteriaWeight(maxScore float64) CriteriaGrade {
 		C:  c.C * percentage,
 		DP: c.DP * percentage,
 		D:  c.D * percentage,
-		F:  c.F * percentage,
 	}
 	return criteriaGrade
 }
@@ -136,16 +133,28 @@ type UpdateCoursePayload struct {
 	CriteriaGrade
 }
 
+type Lecturer struct {
+	Id     string `json:"id"`
+	NameTH string `json:"name_th"`
+	NameEN string `json:"name_en"`
+}
+
+type Program struct {
+	Id     string `json:"id"`
+	NameTH string `json:"name_th"`
+	NameEN string `json:"name_en"`
+}
+
 type CourseSimpleData struct {
-	Id           string   `json:"id"`
-	Code         string   `json:"code"`
-	Name         string   `json:"name"`
-	ProgramName  string   `json:"program_name"`
-	Lecturers    []string `json:"lecturers"`
-	Description  string   `json:"description"`
-	Credit       int      `json:"credit"`
-	AcademicYear string   `json:"academic_year"`
-	GraduateYear string   `json:"graduate_year"`
+	Id           string     `json:"id"`
+	Code         string     `json:"code"`
+	Name         string     `json:"name"`
+	Program      Program    `json:"program"`
+	Lecturers    []Lecturer `json:"lecturers"`
+	Description  string     `json:"description"`
+	Credit       int        `json:"credit"`
+	AcademicYear string     `json:"academic_year"`
+	GraduateYear string     `json:"graduate_year"`
 }
 
 type GetAllCourseResponse struct {

@@ -379,7 +379,7 @@ func (f *fiberServer) initController() error {
 	// programme.Get("/", programmeController.GetByName)
 	programme.Get("/", programmeController.GetAll)
 	programme.Patch("/:programmeName", programmeController.Update)
-	programme.Delete("/:programmeName", programmeController.Delete)
+	programme.Delete("/:programmeId", programmeController.Delete)
 
 	programme.Get("/:programmeId/outcome", programmeController.GetAllCourseOutcomeLinked)
 	programme.Get("/outcomes/po", programmeController.GetAllCourseLinkedPO)

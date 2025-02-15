@@ -82,11 +82,21 @@ type ScoreFrequency struct {
 	Frequency int    `json:"frequency"`
 }
 
+type Statistics struct {
+	Min    float64 `json:"min"`
+	Max    float64 `json:"max"`
+	Mean   float64 `json:"mean"`
+	Median float64 `json:"median"`
+	Mode   float64 `json:"mode"`
+	SD     float64 `json:"sd"`
+}
+
 type GradeDistribution struct {
 	StudentAmount    int              `json:"student_amount"`
 	GPA              float64          `json:"gpa"`
 	GradeFrequencies []GradeFrequency `json:"grade_frequencies"`
 	ScoreFrequencies []ScoreFrequency `json:"score_frequencies"`
+	Statistics       Statistics       `json:"statistics"`
 }
 
 type Outcome struct {

@@ -118,9 +118,9 @@ func (c ProgrammeController) Update(ctx *fiber.Ctx) error {
 }
 
 func (c ProgrammeController) Delete(ctx *fiber.Ctx) error {
-	name := ctx.Params("programmeName")
+	programmeId := ctx.Params("programmeId")
 
-	err := c.ProgrammeUseCase.Delete(name)
+	err := c.ProgrammeUseCase.Delete(programmeId)
 	if err != nil {
 		return err
 	}

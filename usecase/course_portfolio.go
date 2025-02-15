@@ -3,6 +3,8 @@ package usecase
 import (
 	"encoding/json"
 	"fmt"
+	"math"
+	"sort"
 
 	"github.com/team-inu/inu-backyard/entity"
 	errs "github.com/team-inu/inu-backyard/entity/error"
@@ -265,15 +267,79 @@ func (u coursePortfolioUseCase) CalculateGradeDistribution(courseId string) (*en
 	}
 
 	sumScoreByStudentId := make(map[string]float64, 0)
+	studentScores := []float64{}
+
 	for groupId, sumStudentScore := range sumStudentScoreByStudentIdByGroupId {
 		for studentId, score := range sumStudentScore {
 			studentScore := score / float64(sumGroupScoreByGroupId[groupId]) * float64(weightByGroupId[groupId])
 			sumScoreByStudentId[studentId] += studentScore
+			studentScores = append(studentScores, sumScoreByStudentId[studentId])
 		}
 	}
 
+	stat := entity.Statistics{
+		Min:    math.Inf(1),
+		Max:    math.Inf(-1),
+		Mean:   0,
+		Median: 0,
+		Mode:   0,
+		SD:     0,
+	}
+
+	if len(studentScores) > 0 {
+		sort.Float64s(studentScores)
+		stat.Min = studentScores[0]
+		stat.Max = studentScores[len(studentScores)-1]
+
+		// Mean
+		var sum float64
+		for _, score := range studentScores {
+			sum += score
+		}
+		stat.Mean = sum / float64(len(studentScores))
+
+		// Median
+		mid := len(studentScores) / 2
+		if len(studentScores)%2 == 0 {
+			stat.Median = (studentScores[mid-1] + studentScores[mid]) / 2
+		} else {
+			stat.Median = studentScores[mid]
+		}
+
+		// Mode
+		frequencyMap := make(map[float64]int)
+		maxFreq := 0
+		for _, score := range studentScores {
+			frequencyMap[score]++
+			if frequencyMap[score] > maxFreq {
+				maxFreq = frequencyMap[score]
+				stat.Mode = score
+			}
+		}
+
+		// Standard Deviation
+		var variance float64
+		for _, score := range studentScores {
+			variance += math.Pow(score-stat.Mean, 2)
+		}
+		variance /= float64(len(studentScores))
+		stat.SD = math.Sqrt(variance)
+	}
+
 	// score frequency
-	frequencyByScore := make(map[string]int, 0)
+	frequencyByScore := map[string]int{
+		"0-50":   0,
+		"51-55":  0,
+		"56-60":  0,
+		"61-65":  0,
+		"66-70":  0,
+		"71-75":  0,
+		"76-80":  0,
+		"81-85":  0,
+		"86-90":  0,
+		"91-95":  0,
+		"96-100": 0,
+	}
 	for _, score := range sumScoreByStudentId {
 		if score <= 50 {
 			frequencyByScore["0-50"] += 1
@@ -306,6 +372,15 @@ func (u coursePortfolioUseCase) CalculateGradeDistribution(courseId string) (*en
 			Score:     score,
 			Frequency: frequency,
 		})
+	}
+
+	//sort by score
+	for i := 0; i < len(scoreFrequencies); i++ {
+		for j := i + 1; j < len(scoreFrequencies); j++ {
+			if scoreFrequencies[i].Score > scoreFrequencies[j].Score {
+				scoreFrequencies[i], scoreFrequencies[j] = scoreFrequencies[j], scoreFrequencies[i]
+			}
+		}
 	}
 
 	// grade frequency
@@ -369,7 +444,7 @@ func (u coursePortfolioUseCase) CalculateGradeDistribution(courseId string) (*en
 		},
 		{
 			Name:       "F",
-			GradeScore: course.F,
+			GradeScore: 0,
 			Frequency:  frequenciesByGrade["F"],
 		},
 	}
@@ -392,6 +467,7 @@ func (u coursePortfolioUseCase) CalculateGradeDistribution(courseId string) (*en
 		ScoreFrequencies: scoreFrequencies,
 		GradeFrequencies: gradeFrequencies,
 		GPA:              gpa,
+		Statistics:       stat,
 	}
 
 	return x, nil

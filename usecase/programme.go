@@ -122,7 +122,6 @@ func (u programmeUseCase) Delete(id string) error {
 	}
 
 	err = u.programmeRepo.Delete(id)
-
 	if err != nil {
 		return errs.New(errs.ErrDeleteProgramme, "cannot delete programme by name %s", id, err)
 	}
