@@ -229,74 +229,60 @@ func (u coursePortfolioUseCase) Generate(courseId string) (*entity.CoursePortfol
 }
 
 func (u coursePortfolioUseCase) CalculateGradeDistribution(courseId string) (*entity.GradeDistribution, error) {
+	// Retrieve course details
 	course, err := u.CourseUseCase.GetById(courseId)
 	if err != nil {
-		return nil, errs.New(errs.SameCode, "cannot get course by id %s while calculate grade distribution", courseId, err)
+		return nil, errs.New(errs.SameCode, "cannot get course by id %s while calculating grade distribution", courseId, err)
 	} else if course == nil {
-		return nil, errs.New(errs.ErrCourseNotFound, "course id %s not found while calculate grade distribution", courseId)
+		return nil, errs.New(errs.ErrCourseNotFound, "course id %s not found while calculating grade distribution", courseId)
 	}
 
+	// Retrieve assignment groups for the course
 	assignmentGroups, err := u.AssignmentUseCase.GetGroupByCourseId(courseId, true)
 	if err != nil {
-		return nil, errs.New(errs.SameCode, "cannot get assignment group while calculate grade distribution")
+		return nil, errs.New(errs.SameCode, "cannot get assignment group while calculating grade distribution")
 	}
 
-	// calculate student score
-	weightByGroupId := make(map[string]int, 0)
-	sumGroupScoreByGroupId := make(map[string]int, 0)
-	sumStudentScoreByStudentIdByGroupId := make(map[string]map[string]float64, 0)
+	// Maps to store weight and scores
+	sumGroupScoreByGroupId := make(map[string]int)
+	sumScoreByStudentId := make(map[string]float64)
 
-	for _, assignmentGroup := range assignmentGroups {
-		weightByGroupId[assignmentGroup.Id] = assignmentGroup.Weight
+	for _, group := range assignmentGroups {
+		for _, assignment := range group.Assignments {
+			sumGroupScoreByGroupId[group.Id] += assignment.MaxScore
 
-		for _, assignment := range assignmentGroup.Assignments {
-			sumGroupScoreByGroupId[assignmentGroup.Id] += assignment.MaxScore
-
-			assignmentScore, _ := u.ScoreUseCase.GetByAssignmentId(assignment.Id)
-
-			for _, score := range assignmentScore.Scores {
-				_, ok := sumStudentScoreByStudentIdByGroupId[assignmentGroup.Id]
-				if !ok {
-					sumStudentScoreByStudentIdByGroupId[assignmentGroup.Id] = make(map[string]float64)
-				}
-
-				sumStudentScoreByStudentIdByGroupId[assignmentGroup.Id][score.StudentId] += score.Score
+			// Get scores for the assignment
+			assignmentScores, _ := u.ScoreUseCase.GetByAssignmentId(assignment.Id)
+			for _, score := range assignmentScores.Scores {
+				sumScoreByStudentId[score.StudentId] += (score.Score * float64(group.Weight)) / float64(assignment.MaxScore)
 			}
-
 		}
 	}
 
-	sumScoreByStudentId := make(map[string]float64, 0)
-	studentScores := []float64{}
-
-	for groupId, sumStudentScore := range sumStudentScoreByStudentIdByGroupId {
-		for studentId, score := range sumStudentScore {
-			studentScore := score / float64(sumGroupScoreByGroupId[groupId]) * float64(weightByGroupId[groupId])
-			sumScoreByStudentId[studentId] += studentScore
-			studentScores = append(studentScores, sumScoreByStudentId[studentId])
-		}
+	// Collect scores for statistics
+	studentScores := make([]float64, 0, len(sumScoreByStudentId))
+	for _, score := range sumScoreByStudentId {
+		studentScores = append(studentScores, score)
 	}
 
+	// Initialize statistics
 	stat := entity.Statistics{
-		Min:    math.Inf(1),
-		Max:    math.Inf(-1),
-		Mean:   0,
-		Median: 0,
-		Mode:   0,
-		SD:     0,
+		Min: 100, Max: 0, Mean: 0, Median: 0, Mode: 0, SD: 0,
 	}
 
 	if len(studentScores) > 0 {
 		sort.Float64s(studentScores)
+
+		// Min & Max
 		stat.Min = studentScores[0]
 		stat.Max = studentScores[len(studentScores)-1]
 
 		// Mean
-		var sum float64
+		totalScore := 0.0
 		for _, score := range studentScores {
-			sum += score
+			totalScore += score
 		}
-		stat.Mean = sum / float64(len(studentScores))
+		stat.Mean = totalScore / float64(len(studentScores))
 
 		// Median
 		mid := len(studentScores) / 2
@@ -322,155 +308,104 @@ func (u coursePortfolioUseCase) CalculateGradeDistribution(courseId string) (*en
 		for _, score := range studentScores {
 			variance += math.Pow(score-stat.Mean, 2)
 		}
-		variance /= float64(len(studentScores))
-		stat.SD = math.Sqrt(variance)
+		stat.SD = math.Sqrt(variance / float64(len(studentScores)))
 	}
 
-	// score frequency
-	frequencyByScore := map[string]int{
-		"0-50":   0,
-		"51-55":  0,
-		"56-60":  0,
-		"61-65":  0,
-		"66-70":  0,
-		"71-75":  0,
-		"76-80":  0,
-		"81-85":  0,
-		"86-90":  0,
-		"91-95":  0,
-		"96-100": 0,
-	}
+	// Score Frequency Distribution
+	scoreRanges := []string{"0-50", "51-55", "56-60", "61-65", "66-70", "71-75", "76-80", "81-85", "86-90", "91-95", "96-100"}
+	frequencyByScore := make(map[string]int)
+
 	for _, score := range sumScoreByStudentId {
-		if score <= 50 {
-			frequencyByScore["0-50"] += 1
-		} else if score <= 55 {
-			frequencyByScore["51-55"] += 1
-		} else if score <= 60 {
-			frequencyByScore["56-60"] += 1
-		} else if score <= 65 {
-			frequencyByScore["61-65"] += 1
-		} else if score <= 70 {
-			frequencyByScore["66-70"] += 1
-		} else if score <= 75 {
-			frequencyByScore["71-75"] += 1
-		} else if score <= 80 {
-			frequencyByScore["76-80"] += 1
-		} else if score <= 85 {
-			frequencyByScore["81-85"] += 1
-		} else if score <= 90 {
-			frequencyByScore["86-90"] += 1
-		} else if score <= 95 {
-			frequencyByScore["91-95"] += 1
-		} else {
-			frequencyByScore["96-100"] += 1
+		switch {
+		case score <= 50:
+			frequencyByScore["0-50"]++
+		case score <= 55:
+			frequencyByScore["51-55"]++
+		case score <= 60:
+			frequencyByScore["56-60"]++
+		case score <= 65:
+			frequencyByScore["61-65"]++
+		case score <= 70:
+			frequencyByScore["66-70"]++
+		case score <= 75:
+			frequencyByScore["71-75"]++
+		case score <= 80:
+			frequencyByScore["76-80"]++
+		case score <= 85:
+			frequencyByScore["81-85"]++
+		case score <= 90:
+			frequencyByScore["86-90"]++
+		case score <= 95:
+			frequencyByScore["91-95"]++
+		default:
+			frequencyByScore["96-100"]++
 		}
 	}
 
 	scoreFrequencies := make([]entity.ScoreFrequency, 0, len(frequencyByScore))
-	for score, frequency := range frequencyByScore {
+	for _, rangeLabel := range scoreRanges {
 		scoreFrequencies = append(scoreFrequencies, entity.ScoreFrequency{
-			Score:     score,
-			Frequency: frequency,
+			Score:     rangeLabel,
+			Frequency: frequencyByScore[rangeLabel],
 		})
 	}
 
-	//sort by score
-	for i := 0; i < len(scoreFrequencies); i++ {
-		for j := i + 1; j < len(scoreFrequencies); j++ {
-			if scoreFrequencies[i].Score > scoreFrequencies[j].Score {
-				scoreFrequencies[i], scoreFrequencies[j] = scoreFrequencies[j], scoreFrequencies[i]
-			}
-		}
-	}
-
-	// grade frequency
-	frequenciesByGrade := make(map[string]int)
-	for _, studentScore := range sumScoreByStudentId {
+	// Grade Frequency Distribution
+	gradeFrequencies := map[string]int{}
+	for _, score := range sumScoreByStudentId {
 		switch {
-		case studentScore >= course.A:
-			frequenciesByGrade["A"] += 1
-		case studentScore >= course.BP:
-			frequenciesByGrade["BP"] += 1
-		case studentScore >= course.B:
-			frequenciesByGrade["B"] += 1
-		case studentScore >= course.CP:
-			frequenciesByGrade["CP"] += 1
-		case studentScore >= course.C:
-			frequenciesByGrade["C"] += 1
-		case studentScore >= course.DP:
-			frequenciesByGrade["DP"] += 1
-		case studentScore >= course.D:
-			frequenciesByGrade["D"] += 1
+		case score >= course.A:
+			gradeFrequencies["A"]++
+		case score >= course.BP:
+			gradeFrequencies["BP"]++
+		case score >= course.B:
+			gradeFrequencies["B"]++
+		case score >= course.CP:
+			gradeFrequencies["CP"]++
+		case score >= course.C:
+			gradeFrequencies["C"]++
+		case score >= course.DP:
+			gradeFrequencies["DP"]++
+		case score >= course.D:
+			gradeFrequencies["D"]++
 		default:
-			frequenciesByGrade["F"] += 1
+			gradeFrequencies["F"]++
 		}
 	}
 
-	gradeFrequencies := []entity.GradeFrequency{
-		{
-			Name:       "A",
-			GradeScore: course.A,
-			Frequency:  frequenciesByGrade["A"],
-		},
-		{
-			Name:       "BP",
-			GradeScore: course.BP,
-			Frequency:  frequenciesByGrade["BP"],
-		},
-		{
-			Name:       "B",
-			GradeScore: course.B,
-			Frequency:  frequenciesByGrade["B"],
-		},
-		{
-			Name:       "CP",
-			GradeScore: course.CP,
-			Frequency:  frequenciesByGrade["CP"],
-		},
-		{
-			Name:       "C",
-			GradeScore: course.C,
-			Frequency:  frequenciesByGrade["C"],
-		},
-		{
-			Name:       "DP",
-			GradeScore: course.DP,
-			Frequency:  frequenciesByGrade["DP"],
-		},
-		{
-			Name:       "D",
-			GradeScore: course.D,
-			Frequency:  frequenciesByGrade["D"],
-		},
-		{
-			Name:       "F",
-			GradeScore: 0,
-			Frequency:  frequenciesByGrade["F"],
-		},
+	// Convert to structured format
+	gradeFrequenciesList := []entity.GradeFrequency{
+		{Name: "A", GradeScore: course.A, Frequency: gradeFrequencies["A"]},
+		{Name: "BP", GradeScore: course.BP, Frequency: gradeFrequencies["BP"]},
+		{Name: "B", GradeScore: course.B, Frequency: gradeFrequencies["B"]},
+		{Name: "CP", GradeScore: course.CP, Frequency: gradeFrequencies["CP"]},
+		{Name: "C", GradeScore: course.C, Frequency: gradeFrequencies["C"]},
+		{Name: "DP", GradeScore: course.DP, Frequency: gradeFrequencies["DP"]},
+		{Name: "D", GradeScore: course.D, Frequency: gradeFrequencies["D"]},
+		{Name: "F", GradeScore: 0, Frequency: gradeFrequencies["F"]},
 	}
 
-	// gpa
+	// GPA Calculation
+	totalStudentGPA := 0.0
 	studentAmount := len(sumScoreByStudentId)
 
-	totalStudentGPA := 0.0
-	for grade, frequency := range frequenciesByGrade {
+	for grade, frequency := range gradeFrequencies {
 		totalStudentGPA += float64(frequency) * course.CriteriaGrade.GradeToGPA(grade)
 	}
 
 	gpa := 0.0
-	if totalStudentGPA != 0.0 {
+	if studentAmount > 0 {
 		gpa = totalStudentGPA / float64(studentAmount)
 	}
 
-	x := &entity.GradeDistribution{
+	// Final Grade Distribution Struct
+	return &entity.GradeDistribution{
 		StudentAmount:    studentAmount,
 		ScoreFrequencies: scoreFrequencies,
-		GradeFrequencies: gradeFrequencies,
+		GradeFrequencies: gradeFrequenciesList,
 		GPA:              gpa,
 		Statistics:       stat,
-	}
-
-	return x, nil
+	}, nil
 }
 
 func (u coursePortfolioUseCase) EvaluateTabeeOutcomes(courseId string) ([]entity.TabeeOutcome, error) {
