@@ -30,8 +30,10 @@ type StudentUseCase interface {
 
 type Student struct {
 	Id             string  `gorm:"primaryKey;type:char(255)" json:"id"`
-	FirstName      string  `json:"first_name"`
-	LastName       string  `json:"last_name"`
+	FirstNameTH    string  `json:"first_name_th"`
+	LastNameTH     string  `json:"last_name_th"`
+	FirstNameEN    string  `json:"first_name_en"`
+	LastNameEN     string  `json:"last_name_en"`
 	Email          string  `json:"email"`
 	ProgrammeId    string  `json:"programme_id"`
 	DepartmentName string  `json:"department_name"`
@@ -54,19 +56,21 @@ type CreateBulkStudentsPayload struct {
 }
 
 type CreateStudentPayload struct {
-	Id        string   `json:"id" validate:"required"`
-	FirstName string   `json:"first_name" validate:"required"`
-	LastName  string   `json:"last_name" validate:"required"`
-	GPAX      *float64 `json:"gpax" validate:"required"`
-	MathGPA   *float64 `json:"math_gpa" validate:"required"`
-	EngGPA    *float64 `json:"eng_gpa" validate:"required"`
-	SciGPA    *float64 `json:"sci_gpa" validate:"required"`
-	School    string   `json:"school" validate:"required"`
-	City      string   `json:"city" validate:"required"`
-	Email     string   `json:"email" validate:"required"`
-	Year      string   `json:"year" validate:"required"`
-	Admission string   `json:"admission" validate:"required"`
-	Remark    string   `json:"remark"`
+	Id          string   `json:"id" validate:"required"`
+	FirstNameTH string   `json:"first_name_th" validate:"required"`
+	LastNameTH  string   `json:"last_name_th" validate:"required"`
+	FirstNameEN string   `json:"first_name_en" validate:"required"`
+	LastNameEN  string   `json:"last_name_en" validate:"required"`
+	GPAX        *float64 `json:"gpax" validate:"required"`
+	MathGPA     *float64 `json:"math_gpa" validate:"required"`
+	EngGPA      *float64 `json:"eng_gpa" validate:"required"`
+	SciGPA      *float64 `json:"sci_gpa" validate:"required"`
+	School      string   `json:"school" validate:"required"`
+	City        string   `json:"city" validate:"required"`
+	Email       string   `json:"email" validate:"required"`
+	Year        string   `json:"year" validate:"required"`
+	Admission   string   `json:"admission" validate:"required"`
+	Remark      string   `json:"remark"`
 
 	ProgrammeId    string `json:"programme_id" validate:"required"`
 	DepartmentName string `json:"department_name" validate:"required"`
@@ -79,19 +83,21 @@ type GetStudentsByParamsPayload struct {
 }
 
 type UpdateStudentPayload struct {
-	Id        string   `json:"id" validate:"required"`
-	FirstName string   `json:"first_name" validate:"required"`
-	LastName  string   `json:"last_name" validate:"required"`
-	GPAX      *float64 `json:"gpax" validate:"required"`
-	MathGPA   *float64 `json:"math_gpa" validate:"required"`
-	EngGPA    *float64 `json:"eng_gpa" validate:"required"`
-	SciGPA    *float64 `json:"sci_gpa" validate:"required"`
-	School    string   `json:"school" validate:"required"`
-	City      string   `json:"city" validate:"required"`
-	Email     string   `json:"email" validate:"required"`
-	Year      string   `json:"year" validate:"required"`
-	Admission string   `json:"admission" validate:"required"`
-	Remark    *string  `json:"remark" validate:"required"`
+	Id          string   `json:"id" validate:"required"`
+	FirstNameTH string   `json:"first_name_th" validate:"required"`
+	LastNameTH  string   `json:"last_name_th" validate:"required"`
+	FirstNameEN string   `json:"first_name_en" validate:"required"`
+	LastNameEN  string   `json:"last_name_en" validate:"required"`
+	GPAX        *float64 `json:"gpax" validate:"required"`
+	MathGPA     *float64 `json:"math_gpa" validate:"required"`
+	EngGPA      *float64 `json:"eng_gpa" validate:"required"`
+	SciGPA      *float64 `json:"sci_gpa" validate:"required"`
+	School      string   `json:"school" validate:"required"`
+	City        string   `json:"city" validate:"required"`
+	Email       string   `json:"email" validate:"required"`
+	Year        string   `json:"year" validate:"required"`
+	Admission   string   `json:"admission" validate:"required"`
+	Remark      *string  `json:"remark" validate:"required"`
 
 	ProgrammeId    string `json:"programme_id" validate:"required"`
 	DepartmentName string `json:"department_name" validate:"required"`

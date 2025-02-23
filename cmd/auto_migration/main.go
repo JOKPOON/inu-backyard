@@ -13,7 +13,7 @@ func main() {
 		User:         "root",
 		Password:     "root",
 		Host:         "mysql",
-		DatabaseName: "inu",
+		DatabaseName: "inu_2",
 		Port:         "3306",
 	})
 	if err != nil {

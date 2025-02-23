@@ -77,8 +77,8 @@ func (r studentRepositoryGorm) CreateMany(students []entity.Student) error {
 func (r studentRepositoryGorm) Update(id string, student *entity.Student) error {
 	err := r.gorm.Model(&entity.Student{}).Where("id = ?", id).Updates(map[string]interface{}{
 		"id":              student.Id,
-		"first_name":      student.FirstName,
-		"last_name":       student.LastName,
+		"first_name":      student.FirstNameTH,
+		"last_name":       student.LastNameTH,
 		"gpax":            student.GPAX,
 		"math_gpa":        student.MathGPA,
 		"eng_gpa":         student.EngGPA,

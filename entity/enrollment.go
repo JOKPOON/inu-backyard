@@ -32,13 +32,15 @@ type EnrollmentUseCase interface {
 }
 
 type Enrollment struct {
-	Id        string           `json:"id" gorm:"primaryKey;type:char(255)"`
-	CourseId  string           `json:"course_id"`
-	StudentId string           `json:"student_id"`
-	Status    EnrollmentStatus `json:"status" gorm:"type:enum('ENROLL','WITHDRAW')"`
-	Email     string           `json:"email" gorm:"->;-:migration"`
-	FirstName string           `json:"first_name" gorm:"->;-:migration"`
-	LastName  string           `json:"last_name" gorm:"->;-:migration"`
+	Id          string           `json:"id" gorm:"primaryKey;type:char(255)"`
+	CourseId    string           `json:"course_id"`
+	StudentId   string           `json:"student_id"`
+	Status      EnrollmentStatus `json:"status" gorm:"type:enum('ENROLL','WITHDRAW')"`
+	Email       string           `json:"email" gorm:"->;-:migration"`
+	FirstNameTH string           `json:"first_name_th" gorm:"->;-:migration"`
+	LastNameTH  string           `json:"last_name_th" gorm:"->;-:migration"`
+	FirstNameEN string           `json:"first_name_en" gorm:"->;-:migration"`
+	LastNameEN  string           `json:"last_name_en" gorm:"->;-:migration"`
 
 	Course  Course  `json:"-"`
 	Student Student `json:"-"`

@@ -32,9 +32,11 @@ type Score struct {
 	UserId       string  `json:"user_id"`
 	AssignmentId string  `json:"assignment_id"`
 
-	Email     string `json:"email" gorm:"->;-:migration"`
-	FirstName string `json:"first_name" gorm:"->;-:migration"`
-	LastName  string `json:"last_name" gorm:"->;-:migration"`
+	Email       string `json:"email" gorm:"->;-:migration"`
+	FirstNameTH string `json:"first_name_th" gorm:"->;-:migration"`
+	LastNameTH  string `json:"last_name_th" gorm:"->;-:migration"`
+	FirstNameEN string `json:"first_name_en" gorm:"->;-:migration"`
+	LastNameEN  string `json:"last_name_en" gorm:"->;-:migration"`
 
 	Student    Student    `json:"-"`
 	User       User       `json:"-"`

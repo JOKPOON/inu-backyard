@@ -20,7 +20,7 @@ func (r enrollmentRepositoryGorm) GetAll() ([]entity.Enrollment, error) {
 
 	err := r.gorm.
 		Model(&enrollments).
-		Select("enrollment.*, student.first_name, student.last_name, student.email").
+		Select("enrollment.*, student.first_name_th, student.last_name_th, student.first_name_en, student.last_name_en, student.email").
 		Joins("LEFT JOIN student on student.id = enrollment.student_id").
 		Scan(&enrollments).
 		Error
@@ -39,7 +39,7 @@ func (r enrollmentRepositoryGorm) GetById(id string) (*entity.Enrollment, error)
 
 	err := r.gorm.
 		First(&enrollments, "id = ?", id).
-		Select("enrollment.*, student.first_name, student.last_name, student.email").
+		Select("enrollment.*, student.first_name_th, student.last_name_th, student.first_name_en, student.last_name_en, student.email").
 		Joins("LEFT JOIN student on student.id = enrollment.student_id").
 		Error
 
@@ -57,13 +57,13 @@ func (r enrollmentRepositoryGorm) GetByCourseId(courseId, query string) ([]entit
 
 	tx := r.gorm.
 		Model(&entity.Enrollment{}).
-		Select("enrollment.*, student.first_name, student.last_name, student.email").
+		Select("enrollment.*, student.first_name_th, student.last_name_th, student.first_name_en, student.last_name_en, student.email").
 		Joins("LEFT JOIN student ON student.id = enrollment.student_id").
 		Where("enrollment.course_id = ?", courseId)
 
 	if query != "" {
 		search := "%" + query + "%"
-		tx = tx.Where("student.id LIKE ? OR student.first_name LIKE ? OR student.last_name LIKE ?", search, search, search)
+		tx = tx.Where("student.id LIKE ? OR student.first_name_th LIKE ? OR student.last_name_th LIKE ? OR student.first_name_en LIKE ? OR student.last_name_en LIKE ?", search, search, search, search, search)
 	}
 
 	err := tx.Find(&enrollments).Error

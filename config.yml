@@ -1,8 +1,8 @@
 database:
-  host: 10.35.29.114
+  host: mysql
   port: 3306
-  user: inu
-  password: inu
+  user: root
+  password: root
   databaseName: inu_2
 client:
   auth:

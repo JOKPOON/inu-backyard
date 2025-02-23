@@ -98,8 +98,10 @@ func (u studentUseCase) CreateMany(students []entity.CreateStudentPayload) error
 	for _, student := range students {
 		studentsToCreate = append(studentsToCreate, entity.Student{
 			Id:             student.Id,
-			FirstName:      student.FirstName,
-			LastName:       student.LastName,
+			FirstNameTH:    student.FirstNameTH,
+			LastNameTH:     student.LastNameTH,
+			FirstNameEN:    student.FirstNameEN,
+			LastNameEN:     student.LastNameEN,
 			Email:          student.Email,
 			ProgrammeId:    student.ProgrammeId,
 			DepartmentName: student.DepartmentName,
@@ -134,8 +136,10 @@ func (u studentUseCase) Update(id string, student *entity.UpdateStudentPayload) 
 	err = u.studentRepo.Update(id,
 		&entity.Student{
 			Id:             student.Id,
-			FirstName:      student.FirstName,
-			LastName:       student.LastName,
+			FirstNameTH:    student.FirstNameTH,
+			LastNameTH:     student.LastNameTH,
+			FirstNameEN:    student.FirstNameEN,
+			LastNameEN:     student.LastNameEN,
 			Email:          student.Email,
 			ProgrammeId:    student.ProgrammeId,
 			DepartmentName: student.DepartmentName,

@@ -19,7 +19,7 @@ func (r scoreRepository) GetAll() ([]entity.Score, error) {
 	var scores []entity.Score
 	err := r.gorm.
 		Model(&scores).
-		Select("score.*, student.first_name, student.last_name, student.email").
+		Select("score.*, student.first_name_th, student.last_name_th, student.first_name_en, student.last_name_en, student.email").
 		Joins("LEFT JOIN student on student.id = score.student_id").
 		Find(&scores).
 		Error
@@ -35,7 +35,7 @@ func (r scoreRepository) GetById(id string) (*entity.Score, error) {
 	var score entity.Score
 	result := r.gorm.
 		Model(&score).
-		Select("score.*, student.first_name, student.last_name, student.email").
+		Select("score.*, student.first_name_th, student.last_name_th, student.first_name_en, student.last_name_en, student.email").
 		Joins("LEFT JOIN student on student.id = score.student_id").
 		Where("score.id = ?", id).
 		Find(&score)
@@ -57,7 +57,7 @@ func (r scoreRepository) GetByAssignmentId(assignmentId string) ([]entity.Score,
 
 	err := r.gorm.
 		Model(&scores).
-		Select("score.*, student.first_name, student.last_name, student.email").
+		Select("score.*, student.first_name_th, student.last_name_th, student.first_name_en, student.last_name_en, student.email").
 		Joins("LEFT JOIN student on student.id = score.student_id").
 		Where("assignment_id = ?", assignmentId).
 		Find(&scores).
