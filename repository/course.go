@@ -42,7 +42,7 @@ func (r courseRepositoryGorm) GetAll(query, year, program string) ([]entity.Cour
 
 func (r courseRepositoryGorm) GetById(id string) (*entity.Course, error) {
 	var course entity.Course
-	err := r.gorm.Preload("Lecturers").Preload("Semester").Preload("Programme").First(&course).Where("id = ?", id).Error
+	err := r.gorm.Preload("Lecturers").Preload("Semester").Preload("Programme").Where("id = ?", id).First(&course).Error
 	if err == gorm.ErrRecordNotFound {
 		return nil, nil
 	} else if err != nil {
@@ -115,12 +115,43 @@ func (r courseRepositoryGorm) CreateLinkWithLecturer(courseId string, lecturerId
 
 	query = query[:len(query)-1]
 
-	err := r.gorm.Exec(fmt.Sprintf("INSERT INTO `course_lecturer` (user_id, course_id) VALUES %s", query)).Error
+	err := r.gorm.Exec(fmt.Sprintf("INSERT IGNORE INTO `course_lecturer` (user_id, course_id) VALUES %s", query)).Error
 	if err != nil {
 		return fmt.Errorf("cannot create link between lecturer and course: %w", err)
 	}
 
 	return nil
+}
+
+func (r courseRepositoryGorm) ReplaceLecturersForCourse(courseId string, lecturerIds []string) error {
+	tx := r.gorm.Begin() // Start transaction
+
+	// Step 1: Delete lecturers who are no longer in the list
+	if err := tx.Exec(`
+		DELETE FROM course_lecturer
+		WHERE course_id = ? AND user_id NOT IN (?)`, courseId, lecturerIds).Error; err != nil {
+		tx.Rollback()
+		return fmt.Errorf("failed to delete old lecturers: %w", err)
+	}
+
+	// Step 2: Insert new lecturers (Ignore duplicates to avoid errors)
+	if len(lecturerIds) > 0 {
+		query := ""
+		for _, lecturerId := range lecturerIds {
+			query += fmt.Sprintf("('%s', '%s'),", lecturerId, courseId)
+		}
+
+		query = query[:len(query)-1] // Remove trailing comma
+
+		if err := tx.Exec(fmt.Sprintf(`
+			INSERT IGNORE INTO course_lecturer (user_id, course_id) VALUES %s`, query)).Error; err != nil {
+			tx.Rollback()
+			return fmt.Errorf("failed to insert new lecturers: %w", err)
+		}
+	}
+
+	// Commit transaction
+	return tx.Commit().Error
 }
 
 func (r courseRepositoryGorm) DeleteLinkWithLecturer(courseId string, lecturerIds []string) error {

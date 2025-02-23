@@ -186,6 +186,11 @@ func (u courseUseCase) Update(user entity.User, id string, payload entity.Update
 		}
 	}
 
+	err = u.courseRepo.ReplaceLecturersForCourse(id, payload.LecturerIds)
+	if err != nil {
+		return errs.New(errs.ErrCreateCourse, "cannot create link with lecturer", err)
+	}
+
 	if !payload.CriteriaGrade.IsValid() {
 		return errs.New(errs.ErrCreateCourse, "invalid criteria grade")
 	}

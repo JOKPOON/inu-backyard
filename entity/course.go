@@ -12,6 +12,7 @@ type CourseRepository interface {
 	Delete(id string) error
 	CreateLinkWithLecturer(courseId string, lecturerId []string) error
 	DeleteLinkWithLecturer(courseId string, lecturerId []string) error
+	ReplaceLecturersForCourse(courseId string, lecturerIds []string) error
 }
 
 type CourseUseCase interface {
