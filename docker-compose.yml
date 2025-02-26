@@ -15,7 +15,9 @@ services:
       SMTP_USERNAME: ${SMTP_USERNAME}
       SMTP_PASSWORD: ${SMTP_PASSWORD}
     expose:
-      - 3001
+      - 443  # Expose HTTPS port
+    volumes:
+      - ./certs:/app/certs  # Mount SSL certificates
     depends_on:
       mysql:
         condition: service_healthy

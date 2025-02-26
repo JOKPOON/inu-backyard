@@ -31,3 +31,5 @@ config.dev.yml
 .env
 
 session.txt
+
+certs/*

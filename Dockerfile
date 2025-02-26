@@ -16,7 +16,7 @@
 FROM golang:1.22 AS builder
 WORKDIR /app
 
-COPY . . 
+COPY . .
 RUN go mod download
 
 RUN GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build \
@@ -31,20 +31,13 @@ RUN GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build \
 FROM alpine:3.19 AS runner
 WORKDIR /app
 
-# Install python and necessary packages
-RUN apk add python3 py3-pip
-RUN apk add py3-scipy py3-scikit-learn
-
-# Copy over the requirements file and install Python dependencies
-COPY --from=builder /app/requirements.txt .
-RUN pip3 install $(grep -vE "scikit_learn|scipy" /app/requirements.txt) --break-system-packages
-
 # Copy binaries and other necessary files from the builder stage
 COPY --from=builder /app/inu-backyard /app/inu-backyard
-COPY --from=builder /app/predict.py /app/predict.py
 COPY --from=builder /app/config.yml /app/config.yml
 COPY --from=builder /app/auto_migration /app/auto_migration
 
-EXPOSE 3001
+COPY certs /app/certs
+
+EXPOSE 443
 
 ENTRYPOINT [ "/app/inu-backyard" ]
