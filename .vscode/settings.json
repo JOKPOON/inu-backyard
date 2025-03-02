@@ -6,6 +6,7 @@
     "AUNQA",
     "cpus",
     "datatypes",
+    "devcontainers",
     "foreignkey",
     "godotenv",
     "gofiber",
