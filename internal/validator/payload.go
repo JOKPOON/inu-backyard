@@ -65,35 +65,29 @@ func (v *payloadValidator) Validate(payload interface{}, ctx *fiber.Ctx) (bool, 
 }
 
 func (v *payloadValidator) validateStruct(payload interface{}) []errs.ValidationErrorDetail {
-	var errDetails []errs.ValidationErrorDetail
-	if errors := v.validator.Struct(payload); errors != nil {
-		for _, err := range errors.(validator.ValidationErrors) {
-			jsonFieldName := getJSONFieldName(payload, err.Field())
-
-			detail := &errs.ValidationErrorDetail{
-				Field: jsonFieldName,
-				Type:  err.Tag(),
-			}
-			errDetails = append(errDetails, *detail)
-		}
+	v.validator.RegisterTagNameFunc(getJSONFieldName)
+	err := v.validator.Struct(payload)
+	if err == nil {
+		return nil
 	}
-	return errDetails
+
+	errors := err.(validator.ValidationErrors)
+	var validationErrors []errs.ValidationErrorDetail
+	for _, e := range errors {
+		validationErrors = append(validationErrors, errs.ValidationErrorDetail{
+			Field: e.Field(),
+			Tag:   e.Tag(),
+		})
+	}
+	return validationErrors
 }
 
-func getJSONFieldName(payload interface{}, fieldName string) string {
-	val := reflect.ValueOf(payload)
-	field, ok := val.Type().Elem().FieldByName(fieldName)
-	if !ok {
-		return fieldName
+func getJSONFieldName(fld reflect.StructField) string {
+	name := strings.SplitN(fld.Tag.Get("json"), ",", 2)[0]
+	if name == "" {
+		return ""
 	}
-
-	// Get the `json` tag
-	jsonTag := field.Tag.Get("json")
-	if jsonTag == "" {
-		return fieldName
-	}
-
-	return strings.Split(jsonTag, ",")[0]
+	return name
 }
 
 func fileParser(payload interface{}, ctx *fiber.Ctx) error {

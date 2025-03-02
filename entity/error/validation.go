@@ -2,7 +2,7 @@ package errs
 
 type ValidationErrorDetail struct {
 	Field string `json:"field"`
-	Type  string `json:"type"`
+	Tag   string `json:"tag"`
 }
 
 func NewValidationErr(code int, message string, details []ValidationErrorDetail) *DomainError {
