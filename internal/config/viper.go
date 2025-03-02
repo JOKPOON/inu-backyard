@@ -10,6 +10,9 @@ import (
 func SetConfig(class interface{}) {
 	//Get the config path from the environment
 	name := os.Getenv("CONFIG_NAME")
+	if name == "" {
+		name = "config"
+	}
 	viper.SetConfigName(name)
 	viper.AddConfigPath(".")
 
