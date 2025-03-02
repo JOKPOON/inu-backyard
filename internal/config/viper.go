@@ -2,12 +2,15 @@ package config
 
 import (
 	"log"
+	"os"
 
 	"github.com/spf13/viper"
 )
 
 func SetConfig(class interface{}) {
-	viper.SetConfigName("config")
+	//Get the config path from the environment
+	name := os.Getenv("CONFIG_NAME")
+	viper.SetConfigName(name)
 	viper.AddConfigPath(".")
 
 	if err := viper.ReadInConfig(); err != nil {
