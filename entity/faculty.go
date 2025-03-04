@@ -17,7 +17,8 @@ type FacultyUseCase interface {
 }
 
 type Faculty struct {
-	Name string `json:"name" gorm:"primaryKey;type:char(255)"`
+	Name        string       `json:"name" gorm:"primaryKey;type:char(255)"`
+	Departments []Department `gorm:"foreignKey:FacultyName" json:"departments"`
 }
 
 type CreateFacultyRequestPayload struct {

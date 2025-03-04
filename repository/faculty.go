@@ -36,7 +36,8 @@ func (r FacultyRepositoryGorm) Delete(name string) error {
 
 func (r FacultyRepositoryGorm) GetAll() ([]entity.Faculty, error) {
 	var faculties []entity.Faculty
-	err := r.gorm.Find(&faculties).Error
+	err := r.gorm.Preload("Departments").
+		Preload("Departments.Programmes").Find(&faculties).Error
 	if err != nil {
 		return nil, errs.New(errs.ErrQueryFaculty, "cannot get all faculties", err)
 	}
