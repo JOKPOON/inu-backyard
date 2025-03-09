@@ -30,7 +30,7 @@ func (c CourseController) GetAll(ctx *fiber.Ctx) error {
 	var err error
 
 	query := ctx.Query("query")
-	year := ctx.Query("year")
+	year := ctx.Query("serm")
 	program := ctx.Query("program")
 
 	println(query, year, program)

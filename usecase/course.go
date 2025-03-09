@@ -26,8 +26,8 @@ func NewCourseUseCase(
 	}
 }
 
-func (u courseUseCase) GetAll(query string, year string, program string) (*entity.GetAllCourseResponse, error) {
-	courses, err := u.courseRepo.GetAll(query, year, program)
+func (u courseUseCase) GetAll(query string, serm string, program string) (*entity.GetAllCourseResponse, error) {
+	courses, err := u.courseRepo.GetAll(query, serm, program)
 	if err != nil {
 		return nil, errs.New(errs.ErrQueryStudent, "cannot get all courses", err)
 	} else if len(courses) == 0 {

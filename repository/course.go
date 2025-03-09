@@ -16,21 +16,21 @@ func NewCourseRepositoryGorm(gorm *gorm.DB) entity.CourseRepository {
 	return &courseRepositoryGorm{gorm: gorm}
 }
 
-func (r courseRepositoryGorm) GetAll(query, year, program string) ([]entity.Course, error) {
+func (r courseRepositoryGorm) GetAll(query, serm, program string) ([]entity.Course, error) {
 	var courses []entity.Course
-	db := r.gorm.Preload("Lecturers").Preload("Semester").Preload("Programme")
+	tx := r.gorm.Preload("Lecturers").Preload("Semester").Preload("Programme")
 
 	if query != "" {
-		db = db.Where("name LIKE ?", "%"+query+"%")
+		tx = tx.Where("name LIKE ? OR code LIKE ?", "%"+query+"%", "%"+query+"%")
 	}
-	if year != "" {
-		db = db.Where("academic_year = ?", year)
+	if serm != "" {
+		tx = tx.Where("semester_id = ?", serm)
 	}
 	if program != "" {
-		db = db.Where("programme_id = ?", program)
+		tx = tx.Where("programme_id = ?", program)
 	}
 
-	err := db.Find(&courses).Error
+	err := tx.Find(&courses).Error
 	if err == gorm.ErrRecordNotFound {
 		return nil, errs.New(errs.ErrCourseNotFound, "no course found")
 	} else if err != nil {
@@ -292,9 +292,12 @@ func (r courseRepositoryGorm) GetStudentsPassingOutcomes(
 	type RawQueryResult struct {
 		StudentID                    int     `json:"student_id"`
 		CloId                        string  `json:"clo_id"`
-		PoId, PoCode                 string  `json:"po_id", "po_code"`
-		PloId, PloCode               string  `json:"plo_id", "plo_code"`
-		SoId, SoCode                 string  `json:"so_id", "so_code"`
+		PoId                         string  `json:"po_id"`
+		PoCode                       string  `json:"po_code"`
+		PloId                        string  `json:"plo_id"`
+		PloCode                      string  `json:"plo_code"`
+		SoId                         string  `json:"so_id"`
+		SoCode                       string  `json:"so_code"`
 		ExpectedPassingCLOPercentage float64 `json:"expected_passing_clo_percentage"`
 	}
 
