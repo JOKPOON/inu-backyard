@@ -226,6 +226,7 @@ func (f *fiberServer) initController() error {
 	course.Patch("/:courseId/portfolio", coursePortfolioController.Update)
 	course.Get("/:courseId/assignments", assignmentController.GetByCourseId)
 	course.Get("/:courseId/assignment-groups", assignmentController.GetGroupByCourseId)
+	course.Get("/:courseId/survey", surveyController.GetByCourseId)
 	course.Get("/:courseId", courseController.GetById)
 
 	// course learning outcome route

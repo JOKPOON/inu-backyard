@@ -45,6 +45,21 @@ func (c SurveyController) GetById(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusOK, survey)
 }
 
+func (c SurveyController) GetByCourseId(ctx *fiber.Ctx) error {
+	courseId := ctx.Params("courseId")
+
+	survey, err := c.SurveyUseCase.GetByCourseId(courseId)
+	if err != nil {
+		return err
+	}
+
+	if survey == nil {
+		return response.NewSuccessResponse(ctx, fiber.StatusNotFound, survey)
+	}
+
+	return response.NewSuccessResponse(ctx, fiber.StatusOK, survey)
+}
+
 // Create handles creating a new survey
 func (c SurveyController) Create(ctx *fiber.Ctx) error {
 	var payload entity.CreateSurveyRequest
