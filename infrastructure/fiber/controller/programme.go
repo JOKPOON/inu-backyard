@@ -56,6 +56,21 @@ func (c ProgrammeController) GetAll(ctx *fiber.Ctx) error {
 	}
 }
 
+func (c ProgrammeController) GetById(ctx *fiber.Ctx) error {
+	programmeId := ctx.Params("programmeId")
+
+	programme, err := c.ProgrammeUseCase.GetById(programmeId)
+	if err != nil {
+		return err
+	}
+
+	if programme == nil {
+		return response.NewSuccessResponse(ctx, fiber.StatusNotFound, programme)
+	}
+
+	return response.NewSuccessResponse(ctx, fiber.StatusOK, programme)
+}
+
 // func (c ProgrammeController) GetByName(ctx *fiber.Ctx) error {
 // 	nameTH := ctx.Query("nameTH")
 // 	nameEN := ctx.Query("nameEN")

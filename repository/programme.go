@@ -31,7 +31,7 @@ func (r programmeRepositoryGorm) GetAll() ([]entity.Programme, error) {
 func (r programmeRepositoryGorm) GetById(id string) (*entity.Programme, error) {
 	var programme *entity.Programme
 
-	err := r.gorm.Where("id = ?", id).First(&programme).Error
+	err := r.gorm.Where("id = ?", id).Preload("ProgramOutcomes").Preload("ProgramLearningOutcomes").Preload("StudentOutcomes").First(&programme).Error
 
 	if err == gorm.ErrRecordNotFound {
 		return nil, nil
