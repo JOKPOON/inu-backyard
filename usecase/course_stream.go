@@ -1,6 +1,8 @@
 package usecase
 
 import (
+	"time"
+
 	"github.com/oklog/ulid/v2"
 	"github.com/team-inu/inu-backyard/entity"
 	errs "github.com/team-inu/inu-backyard/entity/error"
@@ -42,6 +44,8 @@ func (u *courseStreamUseCase) Create(payload entity.CreateCourseStreamPayload) e
 		TargetCourseId: payload.TargetCourseId,
 		StreamType:     payload.StreamType,
 		Comment:        payload.Comment,
+		SenderId:       payload.SenderId,
+		CreatedAt:      time.Now(),
 	}
 
 	err = u.courseStreamRepository.Create(&courseStream)

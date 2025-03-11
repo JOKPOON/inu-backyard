@@ -1,6 +1,10 @@
 package entity
 
-import errs "github.com/team-inu/inu-backyard/entity/error"
+import (
+	"time"
+
+	errs "github.com/team-inu/inu-backyard/entity/error"
+)
 
 type CourseStreamType string
 
@@ -30,9 +34,12 @@ type CourseStream struct {
 	Id             string           `json:"id"`
 	StreamType     CourseStreamType `json:"stream_type"`
 	Comment        string           `json:"comment"`
+	SenderId       string           `json:"sender_id"`
 	FromCourseId   string           `json:"from_course_id"`
 	TargetCourseId string           `json:"target_course_id"`
+	CreatedAt      time.Time        `json:"created_at"`
 
+	User         User   `json:"user" gorm:"foreignKey:SenderId"`
 	FromCourse   Course `json:"from_course" gorm:"foreignKey:FromCourseId"`
 	TargetCourse Course `json:"target_course" gorm:"foreignKey:TargetCourseId"`
 }
@@ -42,6 +49,7 @@ type CreateCourseStreamPayload struct {
 	TargetCourseId string           `json:"target_course_id" validate:"required"`
 	StreamType     CourseStreamType `json:"stream_type" validate:"required"`
 	Comment        string           `json:"comment" validate:"required"`
+	SenderId       string           `json:"sender_id" validate:"required"`
 }
 
 type GetCourseStreamPayload struct {
