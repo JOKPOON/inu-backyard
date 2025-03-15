@@ -32,7 +32,6 @@ func NewPayloadValidator(config *config.AuthConfig) PayloadValidator {
 }
 
 func (v *payloadValidator) ValidateAuth(ctx *fiber.Ctx) (string, error) {
-	log.Println(v.config.Session.CookieName)
 	sid := ctx.Cookies(v.config.Session.CookieName) // TODO: move cookie name to constant
 	if sid == "" {
 		return "", errs.New(errs.ErrAuthHeader, "missing auth header")
