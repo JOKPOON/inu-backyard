@@ -459,6 +459,6 @@ func (f *fiberServer) initController() error {
 		return c.SendStatus(404)
 	})
 
-	err := app.ListenTLS(":443", "certs/localhost.crt", "certs/localhost.key")
+	err := app.Listen(":3001")
 	return err
 }

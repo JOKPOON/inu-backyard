@@ -6,7 +6,7 @@ services:
     volumes:
       - ../:/workspace
     ports:
-      - 443:443
+      - 3001:3001
 
   mysql:
     image: mysql:8.1.0

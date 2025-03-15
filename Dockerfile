@@ -36,8 +36,6 @@ COPY --from=builder /app/inu-backyard /app/inu-backyard
 COPY --from=builder /app/config.yml /app/config.yml
 COPY --from=builder /app/auto_migration /app/auto_migration
 
-COPY certs /app/certs
-
-EXPOSE 443
+EXPOSE 3001
 
 ENTRYPOINT [ "/app/inu-backyard" ]
