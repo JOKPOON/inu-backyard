@@ -42,8 +42,8 @@ func (u studentUseCase) GetAll() ([]entity.Student, error) {
 	return students, nil
 }
 
-func (u studentUseCase) GetByParams(params *entity.Student, limit int, offset int) ([]entity.Student, error) {
-	students, err := u.studentRepo.GetByParams(params, limit, offset)
+func (u studentUseCase) GetByParams(query string, params *entity.Student, limit int, offset int) ([]entity.Student, error) {
+	students, err := u.studentRepo.GetByParams(query, params, limit, offset)
 
 	if err != nil {
 		return nil, errs.New(errs.ErrQueryStudent, "cannot get student by params", err)

@@ -46,16 +46,22 @@ func (c StudentController) GetById(ctx *fiber.Ctx) error {
 
 func (c StudentController) GetStudents(ctx *fiber.Ctx) error {
 	var payload entity.GetStudentsByParamsPayload
-
 	if ok, err := c.Validator.Validate(&payload, ctx); !ok {
 		return err
 	}
 
-	students, err := c.StudentUseCase.GetByParams(&entity.Student{
-		ProgrammeId:    payload.ProgrammeId,
-		DepartmentName: payload.DepartmentName,
-		Year:           payload.Year,
-	}, -1, -1)
+	query := ctx.Query("query")
+
+	students, err := c.StudentUseCase.GetByParams(
+		query,
+		&entity.Student{
+			ProgrammeId:    payload.ProgrammeId,
+			Year:           payload.Year,
+			DepartmentName: payload.DepartmentName,
+		},
+		10,
+		0,
+	)
 
 	if err != nil {
 		return err

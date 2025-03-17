@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 
 	"github.com/team-inu/inu-backyard/entity"
@@ -43,14 +44,35 @@ func (r studentRepositoryGorm) GetAll() ([]entity.Student, error) {
 	return students, nil
 }
 
-func (r studentRepositoryGorm) GetByParams(params *entity.Student, limit int, offset int) ([]entity.Student, error) {
+func (r studentRepositoryGorm) GetByParams(query string, params *entity.Student, limit, offset int) ([]entity.Student, error) {
 	var students []entity.Student
 
-	err := r.gorm.Where(params).Limit(limit).Offset(offset).Find(&students).Error
-	if err == gorm.ErrRecordNotFound {
-		return nil, nil
-	} else if err != nil {
-		return nil, fmt.Errorf("cannot query to get student by params: %w", err)
+	db := r.gorm
+
+	if params != nil {
+		if params.ProgrammeId != "" {
+			db = db.Where("programme_id = ?", params.ProgrammeId)
+		}
+		if params.Year != "" {
+			db = db.Where("year = ?", params.Year)
+		}
+		if params.DepartmentName != "" {
+			db = db.Where("department_name = ?", params.DepartmentName)
+		}
+	}
+
+	if query != "" {
+		searchPattern := "%" + query + "%"
+		db = db.Where("first_name_th LIKE ? OR last_name_th LIKE ? OR first_name_en LIKE ? OR last_name_en LIKE ? OR id LIKE ?",
+			searchPattern, searchPattern, searchPattern, searchPattern, searchPattern)
+	}
+
+	err := db.Limit(limit).Offset(offset).Find(&students).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("cannot query students: %w", err)
 	}
 
 	return students, nil

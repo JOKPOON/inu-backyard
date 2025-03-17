@@ -3,7 +3,7 @@ package entity
 type StudentRepository interface {
 	GetById(id string) (*Student, error)
 	GetAll() ([]Student, error)
-	GetByParams(params *Student, limit int, offset int) ([]Student, error)
+	GetByParams(query string, params *Student, limit int, offset int) ([]Student, error)
 	Create(student *Student) error
 	CreateMany(student []Student) error
 	Update(id string, student *Student) error
@@ -17,7 +17,7 @@ type StudentRepository interface {
 type StudentUseCase interface {
 	GetById(id string) (*Student, error)
 	GetAll() ([]Student, error)
-	GetByParams(params *Student, limit int, offset int) ([]Student, error)
+	GetByParams(query string, params *Student, limit int, offset int) ([]Student, error)
 	CreateMany(student []CreateStudentPayload) error
 	Update(id string, student *UpdateStudentPayload) error
 	Delete(id string) error
