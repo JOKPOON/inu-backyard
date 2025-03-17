@@ -28,6 +28,30 @@ func (r programmeRepositoryGorm) GetAll() ([]entity.Programme, error) {
 	return programs, nil
 }
 
+func (r programmeRepositoryGorm) GetBy(params *entity.Programme) ([]entity.Programme, error) {
+	var programmes []entity.Programme
+
+	db := r.gorm
+
+	if params != nil {
+		if params.DepartmentName != "" {
+			db = db.Where("department_name = ?", params.DepartmentName)
+		}
+		if params.Year != "" {
+			db = db.Where("year = ?", params.Year)
+		}
+	}
+
+	err := db.Preload("ProgramOutcomes").Preload("ProgramLearningOutcomes").Preload("StudentOutcomes").Find(&programmes).Error
+	if err == gorm.ErrRecordNotFound {
+		return nil, nil
+	} else if err != nil {
+		return nil, fmt.Errorf("cannot query to get programmes by params: %w", err)
+	}
+
+	return programmes, nil
+}
+
 func (r programmeRepositoryGorm) GetById(id string) (*entity.Programme, error) {
 	var programme *entity.Programme
 

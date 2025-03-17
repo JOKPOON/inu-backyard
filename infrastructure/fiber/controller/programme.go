@@ -56,6 +56,23 @@ func (c ProgrammeController) GetAll(ctx *fiber.Ctx) error {
 	}
 }
 
+func (c ProgrammeController) GetByParams(ctx *fiber.Ctx) error {
+	departmentName := ctx.Query("department_name")
+	year := ctx.Query("year")
+
+	programmes, err := c.ProgrammeUseCase.GetBy(
+		&entity.Programme{
+			Year:           year,
+			DepartmentName: departmentName,
+		},
+	)
+	if err != nil {
+		return err
+	}
+
+	return response.NewSuccessResponse(ctx, fiber.StatusOK, programmes)
+}
+
 func (c ProgrammeController) GetById(ctx *fiber.Ctx) error {
 	programmeId := ctx.Params("programmeId")
 

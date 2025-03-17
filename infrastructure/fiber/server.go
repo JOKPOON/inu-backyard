@@ -378,7 +378,7 @@ func (f *fiberServer) initController() error {
 
 	// programme.Get("/", programmeController.GetByNameAndYear)
 	// programme.Get("/", programmeController.GetByName)
-	programme.Get("/", programmeController.GetAll)
+	programme.Get("/", programmeController.GetByParams)
 	programme.Get("/:programmeId", programmeController.GetById)
 	programme.Patch("/:programmeName", programmeController.Update)
 	programme.Delete("/:programmeId", programmeController.Delete)

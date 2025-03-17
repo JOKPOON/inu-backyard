@@ -4,6 +4,7 @@ import "gorm.io/datatypes"
 
 type ProgrammeRepository interface {
 	GetAll() ([]Programme, error)
+	GetBy(params *Programme) ([]Programme, error)
 	GetByName(nameTH string, nameEN string) ([]Programme, error)
 	GetByNameAndYear(nameTH string, nameEN string, year string) (*Programme, error)
 	GetById(id string) (*Programme, error)
@@ -32,6 +33,7 @@ type ProgrammeRepository interface {
 
 type ProgrammeUseCase interface {
 	GetAll() ([]Programme, error)
+	GetBy(params *Programme) ([]Programme, error)
 	GetByName(nameTH string, nameEN string) ([]Programme, error)
 	GetByNameAndYear(nameTH string, nameEN string, year string) (*Programme, error)
 	GetById(id string) (*Programme, error)
@@ -104,6 +106,11 @@ type CreateProgrammePayload struct {
 	DepartmentName string `json:"department_name" validate:"required"`
 
 	Structure ProgrammeStructure `json:"structure" validate:"required"`
+}
+
+type GetProgrammesByParamsPayload struct {
+	Year           string `json:"year"`
+	DepartmentName string `json:"department_name"`
 }
 
 type UpdateProgrammePayload struct {

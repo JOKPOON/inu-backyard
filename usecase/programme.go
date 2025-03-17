@@ -26,6 +26,15 @@ func (u programmeUseCase) GetAll() ([]entity.Programme, error) {
 	return programme, nil
 }
 
+func (u programmeUseCase) GetBy(params *entity.Programme) ([]entity.Programme, error) {
+	programme, err := u.programmeRepo.GetBy(params)
+	if err != nil {
+		return nil, errs.New(errs.ErrQueryProgramme, "cannot get programme by params", err)
+	}
+
+	return programme, nil
+}
+
 func (u programmeUseCase) GetByName(namesTH string, nameEN string) ([]entity.Programme, error) {
 	programme, err := u.programmeRepo.GetByName(namesTH, nameEN)
 	if err != nil {
