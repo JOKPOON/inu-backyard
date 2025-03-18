@@ -49,6 +49,7 @@ func (r studentRepositoryGorm) GetByParams(query string, params *entity.Student,
 
 	db := r.gorm
 
+	fmt.Println(params)
 	if params != nil {
 		if params.ProgrammeId != "" {
 			db = db.Where("programme_id = ?", params.ProgrammeId)
