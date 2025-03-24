@@ -14,10 +14,12 @@ type CourseLearningOutcomeRepository interface {
 	DeleteLinkSubProgramLearningOutcome(id string, subProgramLearningOutcomeId string) error
 	DeleteLinkSubStudentOutcome(id string, subStudentOutcomeId string) error
 	FilterExisted(ids []string) ([]string, error)
+	GetProgramLearningOutcomesBySubProgramLearningOutcomeId(subProgramLearningOutcomeIds []string) ([]ProgramLearningOutcome, error)
+	GetStudentOutcomesBySubStudentOutcomeId(subStudentOutcomeIds []string) ([]StudentOutcome, error)
 }
 
 type CourseLearningOutcomeUseCase interface {
-	GetAll() ([]CourseLearningOutcome, error)
+	GetAll() ([]GetCloResponse, error)
 	GetById(id string) (*CourseLearningOutcome, error)
 	GetByCourseId(courseId string) ([]CourseLearningOutcomeWithPO, error)
 	Create(dto CreateCourseLearningOutcomePayload) error
@@ -154,4 +156,17 @@ type CLOResult struct {
 	MaxScore                         int     `json:"max_score"`
 	ExpectedPassingAssignmentPercent float64 `gorm:"column:expected_passing_assignment_percentage" json:"expected_passing_assignment_percentage"`
 	ExpectedScorePercent             float64 `gorm:"column:expected_score_percentage" json:"expected_score_percentage"`
+}
+
+type GetCloResponse struct {
+	Id                                  string  `json:"id" gorm:"primaryKey;type:char(255)"`
+	Code                                string  `json:"code"`
+	Description                         string  `json:"description"`
+	ExpectedPassingAssignmentPercentage float64 `json:"expected_passing_assignment_percentage"`
+	ExpectedPassingStudentPercentage    float64 `json:"expected_passing_student_percentage"`
+	Status                              string  `json:"status"`
+
+	ProgramOutcomes         []*ProgramOutcome        ` json:"program_outcomes"`
+	ProgramLearningOutcomes []ProgramLearningOutcome `json:"program_learning_outcomes"`
+	SubStudentOutcomes      []StudentOutcome         ` json:"student_outcomes"`
 }

@@ -193,3 +193,49 @@ func (r courseLearningOutcomeRepositoryGorm) FilterExisted(ids []string) ([]stri
 
 	return existedIds, nil
 }
+
+func (r courseLearningOutcomeRepositoryGorm) GetProgramLearningOutcomesBySubProgramLearningOutcomeId(subProgramLearningOutcomeIds []string) ([]entity.ProgramLearningOutcome, error) {
+	var plos []entity.ProgramLearningOutcome
+
+	// Preload SubProgramLearningOutcomes and filter by SubProgramLearningOutcomeIds
+	if err := r.gorm.Preload("SubProgramLearningOutcomes", "id IN ?", subProgramLearningOutcomeIds).
+		Where("id IN (?)", r.gorm.Model(&entity.SubProgramLearningOutcome{}).Select("program_learning_outcome_id")).
+		Find(&plos).Error; err != nil {
+		return nil, err
+	}
+
+	// Create a new slice to hold the filtered ProgramLearningOutcomes
+	var filteredPlos []entity.ProgramLearningOutcome
+
+	// Iterate over the ProgramLearningOutcomes and include only those with SubProgramLearningOutcomes
+	for _, plo := range plos {
+		if len(plo.SubProgramLearningOutcomes) > 0 {
+			filteredPlos = append(filteredPlos, plo)
+		}
+	}
+
+	return filteredPlos, nil
+}
+
+func (r courseLearningOutcomeRepositoryGorm) GetStudentOutcomesBySubStudentOutcomeId(subStudentOutcomeIds []string) ([]entity.StudentOutcome, error) {
+	var sos []entity.StudentOutcome
+
+	// Preload SubStudentOutcomes and filter by SubStudentOutcomeIds
+	if err := r.gorm.Preload("SubStudentOutcomes", "id IN ?", subStudentOutcomeIds).
+		Where("id IN (?)", r.gorm.Model(&entity.SubStudentOutcome{}).Select("student_outcome_id")).
+		Find(&sos).Error; err != nil {
+		return nil, err
+	}
+
+	// Create a new slice to hold the filtered StudentOutcomes
+	var filteredSos []entity.StudentOutcome
+
+	// Iterate over the StudentOutcomes and include only those with SubStudentOutcomes
+	for _, so := range sos {
+		if len(so.SubStudentOutcomes) > 0 {
+			filteredSos = append(filteredSos, so)
+		}
+	}
+
+	return filteredSos, nil
+}

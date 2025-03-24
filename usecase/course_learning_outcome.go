@@ -34,13 +34,50 @@ func NewCourseLearningOutcomeUseCase(
 	}
 }
 
-func (u courseLearningOutcomeUseCase) GetAll() ([]entity.CourseLearningOutcome, error) {
+func (u courseLearningOutcomeUseCase) GetAll() ([]entity.GetCloResponse, error) {
 	clos, err := u.courseLearningOutcomeRepo.GetAll()
 	if err != nil {
 		return nil, errs.New(errs.ErrQueryCLO, "cannot get all CLOs", err)
 	}
 
-	return clos, nil
+	splos := []string{}
+	ssos := []string{}
+	for _, clo := range clos {
+		for _, plo := range clo.SubProgramLearningOutcomes {
+			splos = append(splos, plo.Id)
+		}
+
+		for _, so := range clo.SubStudentOutcomes {
+			ssos = append(ssos, so.Id)
+		}
+	}
+
+	plos, err := u.courseLearningOutcomeRepo.GetProgramLearningOutcomesBySubProgramLearningOutcomeId(splos)
+	if err != nil {
+		return nil, errs.New(errs.ErrQueryCLO, "cannot get all PLOs by subPLOs", err)
+	}
+
+	sos, err := u.courseLearningOutcomeRepo.GetStudentOutcomesBySubStudentOutcomeId(ssos)
+	if err != nil {
+		return nil, errs.New(errs.ErrQueryCLO, "cannot get all SOs by subSOs", err)
+	}
+
+	res := []entity.GetCloResponse{}
+	for _, clo := range clos {
+		res = append(res, entity.GetCloResponse{
+			Id:                                  clo.Id,
+			Code:                                clo.Code,
+			Description:                         clo.Description,
+			Status:                              clo.Status,
+			ExpectedPassingAssignmentPercentage: clo.ExpectedPassingAssignmentPercentage,
+			ExpectedPassingStudentPercentage:    clo.ExpectedPassingStudentPercentage,
+			ProgramOutcomes:                     clo.ProgramOutcomes,
+			ProgramLearningOutcomes:             plos,
+			SubStudentOutcomes:                  sos,
+		})
+	}
+
+	return res, nil
 }
 
 func (u courseLearningOutcomeUseCase) GetById(id string) (*entity.CourseLearningOutcome, error) {
