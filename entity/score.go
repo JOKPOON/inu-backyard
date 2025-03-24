@@ -44,9 +44,9 @@ type Score struct {
 }
 
 type AssessmentClos struct {
-	CLOId          string `json:"clo_id"`
-	CLOCode        string `json:"clo_code"`
-	CLODescription string `json:"clo_description"`
+	Id          string `json:"id"`
+	Code        string `json:"code"`
+	Description string `json:"description"`
 }
 
 type AssignmentScore struct {

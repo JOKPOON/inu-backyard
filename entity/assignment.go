@@ -50,6 +50,7 @@ type Assignment struct {
 	Name                             string                   `json:"name"`
 	Description                      string                   `json:"description"`
 	MaxScore                         int                      `json:"max_score"`
+	Weight                           int                      `json:"weight"`
 	ExpectedScorePercentage          float64                  `json:"expected_score_percentage"`
 	ExpectedPassingStudentPercentage float64                  `json:"expected_passing_student_percentage"`
 	IsIncludedInClo                  *bool                    `json:"is_included_in_clo"`
@@ -84,9 +85,10 @@ type CreateAssignmentPayload struct {
 	Name                             string   `json:"name" validate:"required"`
 	Description                      string   `json:"description"`
 	MaxScore                         *int     `json:"max_score" validate:"required"`
+	Weight                           *int     `json:"weight" validate:"required"`
 	ExpectedScorePercentage          *float64 `json:"expected_score_percentage" validate:"required"`
 	ExpectedPassingStudentPercentage *float64 `json:"expected_passing_student_percentage" validate:"required"`
-	CourseLearningOutcomeIds         []string `json:"course_learning_outcome_ids" validate:"required"`
+	CourseLearningOutcomeIds         []string `json:"course_learning_outcome_ids" `
 	IsIncludedInClo                  *bool    `json:"is_included_in_clo" validate:"required"`
 	AssignmentGroupId                string   `json:"assignment_group_id" validate:"required"`
 }
@@ -107,6 +109,7 @@ type UpdateAssignmentPayload struct {
 	Name                             string   `json:"name"`
 	Description                      string   `json:"description"`
 	MaxScore                         *int     `json:"maxScore"`
+	Weight                           *int     `json:"weight"`
 	ExpectedPassingStudentPercentage *float64 `json:"expected_passing_student_percentage"`
 	ExpectedScorePercentage          *float64 `json:"expected_score_percentage"`
 	IsIncludedInClo                  *bool    `json:"is_included_in_clo"`

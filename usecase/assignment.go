@@ -92,27 +92,25 @@ func (u assignmentUseCase) Create(payload entity.CreateAssignmentPayload) error 
 		return errs.New(errs.ErrAssignmentNotFound, "assignment group id %s not found while creating assignment", payload.AssignmentGroupId)
 	}
 
-	if len(payload.CourseLearningOutcomeIds) == 0 {
-		return errs.New(errs.ErrCreateAssignment, "assignment must have at least one clo")
-	}
-
-	duplicateCloIds := slice.GetDuplicateValue(payload.CourseLearningOutcomeIds)
-	if len(duplicateCloIds) != 0 {
-		return errs.New(errs.ErrCreateAssignment, "duplicate clo ids %v", duplicateCloIds)
-	}
-
-	nonExistedCloIds, err := u.courseLearningOutcomeUseCase.FilterNonExisted(payload.CourseLearningOutcomeIds)
-	if err != nil {
-		return errs.New(errs.SameCode, "cannot get non existed clo ids while creating assignment")
-	} else if len(nonExistedCloIds) != 0 {
-		return errs.New(errs.ErrCreateAssignment, "there are non exist clo ids %v", nonExistedCloIds)
-	}
-
 	courseLeaningOutcomes := []*entity.CourseLearningOutcome{}
-	for _, id := range payload.CourseLearningOutcomeIds {
-		courseLeaningOutcomes = append(courseLeaningOutcomes, &entity.CourseLearningOutcome{
-			Id: id,
-		})
+	if len(payload.CourseLearningOutcomeIds) > 0 {
+		duplicateCloIds := slice.GetDuplicateValue(payload.CourseLearningOutcomeIds)
+		if len(duplicateCloIds) != 0 {
+			return errs.New(errs.ErrCreateAssignment, "duplicate clo ids %v", duplicateCloIds)
+		}
+
+		nonExistedCloIds, err := u.courseLearningOutcomeUseCase.FilterNonExisted(payload.CourseLearningOutcomeIds)
+		if err != nil {
+			return errs.New(errs.SameCode, "cannot get non existed clo ids while creating assignment")
+		} else if len(nonExistedCloIds) != 0 {
+			return errs.New(errs.ErrCreateAssignment, "there are non exist clo ids %v", nonExistedCloIds)
+		}
+
+		for _, id := range payload.CourseLearningOutcomeIds {
+			courseLeaningOutcomes = append(courseLeaningOutcomes, &entity.CourseLearningOutcome{
+				Id: id,
+			})
+		}
 	}
 
 	assignment := entity.Assignment{
@@ -120,6 +118,7 @@ func (u assignmentUseCase) Create(payload entity.CreateAssignmentPayload) error 
 		Name:                             payload.Name,
 		Description:                      payload.Description,
 		MaxScore:                         *payload.MaxScore,
+		Weight:                           *payload.Weight,
 		ExpectedScorePercentage:          *payload.ExpectedScorePercentage,
 		ExpectedPassingStudentPercentage: *payload.ExpectedPassingStudentPercentage,
 		CourseLearningOutcomes:           courseLeaningOutcomes,

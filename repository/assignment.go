@@ -21,6 +21,7 @@ func (r assignmentRepositoryGorm) GetAll() ([]entity.Assignment, error) {
 	err := r.gorm.
 		Select("assignment.*, assignment_group.course_id").
 		Joins("JOIN assignment_group ON assignment.assignment_group_id = assignment_group.id").
+		Preload("CourseLearningOutcomes").
 		Find(&assignments).Error
 
 	if err != nil {
@@ -51,6 +52,7 @@ func (r assignmentRepositoryGorm) GetByCourseId(courseId string) ([]entity.Assig
 		Joins("JOIN assignment_group ON assignment.assignment_group_id = assignment_group.id"). // Correctly join assignment_groups
 		Joins("LEFT JOIN clo_assignment ON clo_assignment.assignment_id = assignment.id").
 		Where("assignment_group.course_id = ?", courseId). // Filter by course_id from assignment_groups
+		Preload("CourseLearningOutcomes").
 		Find(&assignments).Error
 
 	if err != nil {

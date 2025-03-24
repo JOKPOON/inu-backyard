@@ -83,9 +83,9 @@ func (u scoreUseCase) GetByAssignmentId(assignmentId string) (*entity.Assignment
 	assignmentClos := []entity.AssessmentClos{}
 	for _, clo := range clos {
 		assignmentClos = append(assignmentClos, entity.AssessmentClos{
-			CLOId:          clo.Id,
-			CLOCode:        clo.Code,
-			CLODescription: clo.Description,
+			Id:          clo.Id,
+			Code:        clo.Code,
+			Description: clo.Description,
 		})
 	}
 
