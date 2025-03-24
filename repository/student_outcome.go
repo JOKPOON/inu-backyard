@@ -15,12 +15,18 @@ func NewStudentOutcomeRepositoryGorm(gorm *gorm.DB) entity.StudentOutcomeReposit
 	return &StudentOutcomeRepositoryGorm{gorm: gorm}
 }
 
-func (r StudentOutcomeRepositoryGorm) GetAll() ([]entity.StudentOutcome, error) {
+func (r StudentOutcomeRepositoryGorm) GetAll(programId string) ([]entity.StudentOutcome, error) {
 	var sos []entity.StudentOutcome
-	err := r.gorm.Preload("SubStudentOutcomes").Find(&sos).Error
-
-	if err == gorm.ErrRecordNotFound {
-		return nil, nil
+	if programId != "" {
+		err := r.gorm.Preload("SubStudentOutcomes").Where("program_id = ?", programId).Find(&sos).Error
+		if err != nil {
+			return nil, fmt.Errorf("cannot query student_outcome: %w", err)
+		}
+	} else {
+		err := r.gorm.Preload("SubStudentOutcomes").Find(&sos).Error
+		if err != nil {
+			return nil, fmt.Errorf("cannot query student_outcome: %w", err)
+		}
 	}
 
 	return sos, nil

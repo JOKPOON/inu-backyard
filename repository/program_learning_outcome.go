@@ -15,9 +15,14 @@ func NewProgramLearningOutcomeRepositoryGorm(gorm *gorm.DB) entity.ProgramLearni
 	return &programLearningOutcomeRepositoryGorm{gorm: gorm}
 }
 
-func (r programLearningOutcomeRepositoryGorm) GetAll() ([]entity.ProgramLearningOutcome, error) {
+func (r programLearningOutcomeRepositoryGorm) GetAll(programId string) ([]entity.ProgramLearningOutcome, error) {
 	var plos []entity.ProgramLearningOutcome
-	err := r.gorm.Preload("SubProgramLearningOutcomes").Find(&plos).Error
+	err := error(nil)
+	if programId != "" {
+		err = r.gorm.Preload("SubProgramLearningOutcomes").Where("program_id = ?", programId).Find(&plos).Error
+	} else {
+		err = r.gorm.Preload("SubProgramLearningOutcomes").Find(&plos).Error
+	}
 
 	if err == gorm.ErrRecordNotFound {
 		return nil, nil

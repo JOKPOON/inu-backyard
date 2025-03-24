@@ -1,7 +1,7 @@
 package entity
 
 type ProgramLearningOutcomeRepository interface {
-	GetAll() ([]ProgramLearningOutcome, error)
+	GetAll(programId string) ([]ProgramLearningOutcome, error)
 	GetById(id string) (*ProgramLearningOutcome, error)
 	Create(programLearningOutcome *ProgramLearningOutcome) error
 	CreateMany(programLearningOutcome []ProgramLearningOutcome) error
@@ -20,7 +20,7 @@ type ProgramLearningOutcomeRepository interface {
 }
 
 type ProgramLearningOutcomeUseCase interface {
-	GetAll() ([]ProgramLearningOutcome, error)
+	GetAll(programId string) ([]ProgramLearningOutcome, error)
 	GetById(id string) (*ProgramLearningOutcome, error)
 	Create(dto []CreateProgramLearningOutcome) error
 	Update(id string, programLearningOutcome *ProgramLearningOutcome) error
@@ -42,6 +42,7 @@ type ProgramLearningOutcome struct {
 	Code            string `json:"code"`
 	DescriptionThai string `json:"description_thai"`
 	DescriptionEng  string `json:"description_eng"`
+	ProgramId       string `json:"program_id" gorm:"type:char(255)"`
 
 	SubProgramLearningOutcomes []SubProgramLearningOutcome `json:"sub_program_learning_outcomes"`
 }
@@ -65,6 +66,7 @@ type CreateProgramLearningOutcome struct {
 	Code                       string                            `validate:"required" json:"code"`
 	DescriptionThai            string                            `validate:"required" json:"description_thai"`
 	DescriptionEng             string                            `json:"description_eng"`
+	ProgramId                  string                            `validate:"required" json:"program_id"`
 	SubProgramLearningOutcomes []CreateSubProgramLearningOutcome `json:"sub_program_learning_outcomes"`
 }
 
@@ -73,10 +75,11 @@ type CreateProgramLearningOutcomePayload struct {
 }
 
 type UpdateProgramLearningOutcomePayload struct {
-	Code            string  `json:"code" validate:"required"`
-	DescriptionThai string  `json:"description_thai" validate:"required"`
-	DescriptionEng  *string `json:"description_eng" validate:"required"`
-	ProgrammeId     string  `json:"programme_id" validate:"required"`
+	Id              string  `json:"id" validate:"required" `
+	Code            string  `json:"code"`
+	DescriptionThai string  `json:"description_thai"`
+	DescriptionEng  *string `json:"description_eng"`
+	ProgramId       string  `json:"program_id"`
 }
 
 type CreateSubProgramLearningOutcome struct {
@@ -91,10 +94,11 @@ type CreateSubProgramLearningOutcomePayload struct {
 }
 
 type UpdateSubProgramLearningOutcome struct {
-	Code                     string  `validate:"required" json:"code"`
-	DescriptionThai          string  `validate:"required" json:"description_thai"`
-	DescriptionEng           *string `validate:"required" json:"description_eng"`
-	ProgramLearningOutcomeId string  `validate:"required" json:"program_learning_outcome_id"`
+	Id                       string  `json:"id" validate:"required"`
+	Code                     string  `json:"code"`
+	DescriptionThai          string  `json:"description_thai"`
+	DescriptionEng           *string `json:"description_eng"`
+	ProgramLearningOutcomeId string  `json:"program_learning_outcome_id"`
 }
 
 type UpdateSubProgramLearningOutcomePayload struct {

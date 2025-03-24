@@ -21,8 +21,8 @@ func NewProgramOutcomeUseCase(programOutcomeRepo entity.ProgramOutcomeRepository
 	}
 }
 
-func (u programOutcomeUseCase) GetAll() ([]entity.ProgramOutcome, error) {
-	pos, err := u.programOutcomeRepo.GetAll()
+func (u programOutcomeUseCase) GetAll(programId string) ([]entity.ProgramOutcome, error) {
+	pos, err := u.programOutcomeRepo.GetAll(programId)
 	if err != nil {
 		return nil, errs.New(errs.ErrQueryPO, "cannot get all POs", err)
 	}
@@ -58,6 +58,7 @@ func (u programOutcomeUseCase) Create(dto []entity.CreateProgramOutcome) error {
 			Name:        po.Name,
 			Description: po.Description,
 			Category:    po.Category,
+			ProgramId:   po.ProgramId,
 		})
 	}
 	err := u.programOutcomeRepo.CreateMany(pos)

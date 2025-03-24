@@ -1,7 +1,7 @@
 package entity
 
 type StudentOutcomeRepository interface {
-	GetAll() ([]StudentOutcome, error)
+	GetAll(programId string) ([]StudentOutcome, error)
 	GetById(id string) (*StudentOutcome, error)
 	Create(studentOutcome *StudentOutcome) error
 	CreateMany(studentOutcome []*StudentOutcome) error
@@ -19,7 +19,7 @@ type StudentOutcomeRepository interface {
 }
 
 type StudentOutcomeUseCase interface {
-	GetAll() ([]StudentOutcome, error)
+	GetAll(programId string) ([]StudentOutcome, error)
 	GetById(id string) (*StudentOutcome, error)
 	Create(payload []CreateStudentOutcome) error
 	Update(id string, payload *UpdateStudentOutcomePayload) error
@@ -39,6 +39,7 @@ type StudentOutcome struct {
 	Code            string `validate:"required" json:"code"`
 	DescriptionThai string `validate:"required" json:"description_thai"`
 	DescriptionEng  string `json:"description_eng"`
+	ProgramId       string `json:"program_id" gorm:"type:char(255)"`
 
 	SubStudentOutcomes []SubStudentOutcome `json:"sub_student_outcomes"`
 }
@@ -67,6 +68,7 @@ type CreateStudentOutcome struct {
 	DescriptionThai    string                    `validate:"required" json:"description_thai"`
 	DescriptionEng     string                    `json:"description_eng"`
 	SubStudentOutcomes []CreateSubStudentOutcome `json:"sub_student_outcomes" validate:"required,dive"`
+	ProgramId          string                    `json:"program_id" validate:"required"`
 }
 
 type CreateStudentOutcomePayload struct {
@@ -74,10 +76,11 @@ type CreateStudentOutcomePayload struct {
 }
 
 type UpdateStudentOutcomePayload struct {
+	Id              string `json:"id" validate:"required"`
 	Code            string `json:"code"`
 	DescriptionThai string `json:"description_thai"`
 	DescriptionEng  string `json:"description_eng"`
-	ProgrammeId     string `json:"programme_id"`
+	ProgramId       string `json:"program_id"`
 }
 
 type UpdateSubStudentOutcomePayload struct {

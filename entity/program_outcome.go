@@ -1,7 +1,7 @@
 package entity
 
 type ProgramOutcomeRepository interface {
-	GetAll() ([]ProgramOutcome, error)
+	GetAll(programId string) ([]ProgramOutcome, error)
 	GetById(id string) (*ProgramOutcome, error)
 	GetByCode(code string) (*ProgramOutcome, error)
 	Create(programOutcome *ProgramOutcome) error
@@ -12,7 +12,7 @@ type ProgramOutcomeRepository interface {
 }
 
 type ProgramOutcomeUseCase interface {
-	GetAll() ([]ProgramOutcome, error)
+	GetAll(programId string) ([]ProgramOutcome, error)
 	GetById(id string) (*ProgramOutcome, error)
 	GetByCode(code string) (*ProgramOutcome, error)
 	Create(programOutcome []CreateProgramOutcome) error
@@ -27,6 +27,7 @@ type ProgramOutcome struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	Category    string `json:"category"`
+	ProgramId   string `json:"program_id" gorm:"type:char(255)"`
 }
 
 type CreateProgramOutcome struct {
@@ -34,6 +35,7 @@ type CreateProgramOutcome struct {
 	Name        string `json:"name" validate:"required"`
 	Description string `json:"description" validate:"required"`
 	Category    string `json:"category" validate:"required"`
+	ProgramId   string `json:"program_id" validate:"required"`
 }
 
 type CreateProgramOutcomePayload struct {
@@ -41,7 +43,10 @@ type CreateProgramOutcomePayload struct {
 }
 
 type UpdateProgramOutcomePayload struct {
-	Code        string `json:"code" validate:"required"`
-	Name        string `json:"name" validate:"required"`
-	Description string `json:"description" validate:"required"`
+	Id          string `json:"id" validate:"required"`
+	Code        string `json:"code" `
+	Name        string `json:"name" `
+	Description string `json:"description" `
+	Category    string `json:"category" `
+	ProgramId   string `json:"program_id" `
 }

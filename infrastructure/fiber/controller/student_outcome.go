@@ -20,7 +20,8 @@ func NewStudentOutcomeController(validator validator.PayloadValidator, studentOu
 }
 
 func (c StudentOutcomeController) GetAll(ctx *fiber.Ctx) error {
-	plos, err := c.StudentOutcomeUsecase.GetAll()
+	programId := ctx.Query("program_id")
+	plos, err := c.StudentOutcomeUsecase.GetAll(programId)
 	if err != nil {
 		return err
 	}

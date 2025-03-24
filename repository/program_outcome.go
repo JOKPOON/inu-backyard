@@ -15,17 +15,22 @@ func NewProgramOutcomeRepositoryGorm(gorm *gorm.DB) entity.ProgramOutcomeReposit
 	return &programOutcomeRepositoryGorm{gorm: gorm}
 }
 
-func (r programOutcomeRepositoryGorm) GetAll() ([]entity.ProgramOutcome, error) {
+func (r programOutcomeRepositoryGorm) GetAll(programId string) ([]entity.ProgramOutcome, error) {
 	var pos []entity.ProgramOutcome
-	err := r.gorm.Find(&pos).Error
 
-	if err == gorm.ErrRecordNotFound {
-		return nil, nil
-	} else if err != nil {
-		return nil, fmt.Errorf("cannot query to get POs: %w", err)
+	if programId != "" {
+		err := r.gorm.Where("program_id = ?", programId).Find(&pos).Error
+		if err != nil {
+			return nil, fmt.Errorf("cannot query to get POs: %w", err)
+		}
+	} else {
+		err := r.gorm.Find(&pos).Error
+		if err != nil {
+			return nil, fmt.Errorf("cannot query to get POs: %w", err)
+		}
 	}
 
-	return pos, err
+	return pos, nil
 }
 
 func (r programOutcomeRepositoryGorm) GetById(id string) (*entity.ProgramOutcome, error) {

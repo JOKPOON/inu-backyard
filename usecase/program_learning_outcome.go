@@ -22,8 +22,8 @@ func NewProgramLearningOutcomeUseCase(
 	}
 }
 
-func (u programLearningOutcomeUseCase) GetAll() ([]entity.ProgramLearningOutcome, error) {
-	plos, err := u.programLearningOutcomeRepo.GetAll()
+func (u programLearningOutcomeUseCase) GetAll(programId string) ([]entity.ProgramLearningOutcome, error) {
+	plos, err := u.programLearningOutcomeRepo.GetAll(programId)
 	if err != nil {
 		return nil, errs.New(errs.ErrQueryPLO, "cannot get all PLOs", err)
 	}
@@ -52,6 +52,7 @@ func (u programLearningOutcomeUseCase) Create(payload []entity.CreateProgramLear
 			Code:            plo.Code,
 			DescriptionThai: plo.DescriptionThai,
 			DescriptionEng:  plo.DescriptionEng,
+			ProgramId:       plo.ProgramId,
 		})
 
 		for _, subPlo := range plo.SubProgramLearningOutcomes {

@@ -16,8 +16,8 @@ func NewStudentOutcomeUseCase(studentOutcomeRepo entity.StudentOutcomeRepository
 	return &StudentOutcomeUsecase{studentOutcomeRepo: studentOutcomeRepo, programmeUseCase: programmeUseCase}
 }
 
-func (u StudentOutcomeUsecase) GetAll() ([]entity.StudentOutcome, error) {
-	plos, err := u.studentOutcomeRepo.GetAll()
+func (u StudentOutcomeUsecase) GetAll(programId string) ([]entity.StudentOutcome, error) {
+	plos, err := u.studentOutcomeRepo.GetAll(programId)
 	if err != nil {
 		return nil, errs.New(errs.ErrQuerySO, "cannot get all SOs", err)
 	}
@@ -39,12 +39,12 @@ func (u StudentOutcomeUsecase) Create(payload []entity.CreateStudentOutcome) err
 	ssos := []*entity.SubStudentOutcome{}
 	for _, so := range payload {
 		id := ulid.Make().String()
-
 		sos = append(sos, &entity.StudentOutcome{
 			Id:              id,
 			Code:            so.Code,
 			DescriptionThai: so.DescriptionThai,
 			DescriptionEng:  so.DescriptionEng,
+			ProgramId:       so.ProgramId,
 		})
 
 		for _, sso := range so.SubStudentOutcomes {
@@ -86,6 +86,7 @@ func (u StudentOutcomeUsecase) Update(id string, payload *entity.UpdateStudentOu
 		Code:            payload.Code,
 		DescriptionThai: payload.DescriptionThai,
 		DescriptionEng:  payload.DescriptionEng,
+		ProgramId:       payload.ProgramId,
 	})
 
 	if err != nil {

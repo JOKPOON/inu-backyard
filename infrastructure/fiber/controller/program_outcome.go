@@ -20,7 +20,8 @@ func NewProgramOutcomeController(validator validator.PayloadValidator, programOu
 }
 
 func (c ProgramOutcomeController) GetAll(ctx *fiber.Ctx) error {
-	pos, err := c.ProgramOutcomeUseCase.GetAll()
+	programId := ctx.Query("program_id")
+	pos, err := c.ProgramOutcomeUseCase.GetAll(programId)
 	if err != nil {
 		return err
 	}
