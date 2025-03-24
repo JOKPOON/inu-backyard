@@ -41,10 +41,9 @@ func (r courseLearningOutcomeRepositoryGorm) GetById(id string) (*entity.CourseL
 	return &clo, nil
 }
 
-func (r courseLearningOutcomeRepositoryGorm) GetByCourseId(courseId string) ([]entity.CourseLearningOutcomeWithPO, error) {
-	var clos []entity.CourseLearningOutcomeWithPO
-	err := r.gorm.Raw(`
-  `, courseId).Scan(&clos).Error
+func (r courseLearningOutcomeRepositoryGorm) GetByCourseId(courseId string) ([]entity.CourseLearningOutcome, error) {
+	var clos []entity.CourseLearningOutcome
+	err := r.gorm.Preload("ProgramOutcomes").Preload("SubProgramLearningOutcomes").Preload("SubStudentOutcomes").Where("course_id = ?", courseId).Find(&clos).Error
 
 	if err == gorm.ErrRecordNotFound {
 		return nil, nil

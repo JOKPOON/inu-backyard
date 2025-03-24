@@ -141,30 +141,30 @@ func (u coursePortfolioUseCase) Generate(courseId string) (*entity.CoursePortfol
 		Programme:   course.Programme.NameTH + " " + course.Programme.NameEN,
 	}
 
-	gradeDistribution, err := u.CalculateGradeDistribution(courseId)
-	if err != nil {
-		return nil, errs.New(errs.SameCode, "cannot calculate grade distribution while generate course portfolio", err)
-	}
+	// gradeDistribution, err := u.CalculateGradeDistribution(courseId)
+	// if err != nil {
+	// 	return nil, errs.New(errs.SameCode, "cannot calculate grade distribution while generate course portfolio", err)
+	// }
 
-	tabeeOutcomes, err := u.EvaluateTabeeOutcomes(courseId)
-	if err != nil {
-		return nil, errs.New(errs.SameCode, "cannot evaluate tabee outcomes while generate course portfolio", err)
-	}
+	// tabeeOutcomes, err := u.EvaluateTabeeOutcomes(courseId)
+	// if err != nil {
+	// 	return nil, errs.New(errs.SameCode, "cannot evaluate tabee outcomes while generate course portfolio", err)
+	// }
 
-	closWithPos, err := u.CourseLearningOutcomeUseCase.GetByCourseId(courseId)
-	if err != nil {
-		return nil, errs.New(errs.SameCode, "cannot get clo while evaluate tabee outcome", err)
-	}
+	// closWithPos, err := u.CourseLearningOutcomeUseCase.GetByCourseId(courseId)
+	// if err != nil {
+	// 	return nil, errs.New(errs.SameCode, "cannot get clo while evaluate tabee outcome", err)
+	// }
 
-	plos, clos, pos := generateOutcome(closWithPos)
+	// plos, clos, pos := generateOutcome(closWithPos)
 
-	courseResult := entity.CourseResult{
-		Plos:              plos,
-		Clos:              clos,
-		Pos:               pos,
-		GradeDistribution: *gradeDistribution,
-		TabeeOutcomes:     tabeeOutcomes,
-	}
+	// courseResult := entity.CourseResult{
+	// 	Plos:              plos,
+	// 	Clos:              clos,
+	// 	Pos:               pos,
+	// 	GradeDistribution: *gradeDistribution,
+	// 	TabeeOutcomes:     tabeeOutcomes,
+	// }
 
 	courseStreams, err := u.CourseStreamUseCase.GetByTargetCourseId(courseId)
 	if err != nil {
@@ -218,8 +218,8 @@ func (u coursePortfolioUseCase) Generate(courseId string) (*entity.CoursePortfol
 	}
 
 	coursePortfolio := &entity.CoursePortfolio{
-		CourseInfo:        courseInfo,
-		CourseResult:      courseResult,
+		CourseInfo: courseInfo,
+		//CourseResult:      courseResult,
 		CourseSummary:     courseSummary,
 		CourseDevelopment: courseDevelopment,
 		Raw:               course.PortfolioData,

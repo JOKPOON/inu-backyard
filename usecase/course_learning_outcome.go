@@ -89,7 +89,7 @@ func (u courseLearningOutcomeUseCase) GetById(id string) (*entity.CourseLearning
 	return clo, nil
 }
 
-func (u courseLearningOutcomeUseCase) GetByCourseId(courseId string) ([]entity.CourseLearningOutcomeWithPO, error) {
+func (u courseLearningOutcomeUseCase) GetByCourseId(courseId string) ([]entity.CourseLearningOutcome, error) {
 	course, err := u.courseUseCase.GetById(courseId)
 	if err != nil {
 		return nil, errs.New(errs.SameCode, "cannot get course id %s while querying clo", courseId, err)

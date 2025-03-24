@@ -3,7 +3,7 @@ package entity
 type CourseLearningOutcomeRepository interface {
 	GetAll() ([]CourseLearningOutcome, error)
 	GetById(id string) (*CourseLearningOutcome, error)
-	GetByCourseId(courseId string) ([]CourseLearningOutcomeWithPO, error)
+	GetByCourseId(courseId string) ([]CourseLearningOutcome, error)
 	Create(courseLearningOutcome *CourseLearningOutcome) error
 	CreateLinkProgramOutcome(id string, programOutcomeIds []string) error
 	CreateLinkSubProgramLearningOutcome(id string, subProgramLearningOutcomeIds []string) error
@@ -21,7 +21,7 @@ type CourseLearningOutcomeRepository interface {
 type CourseLearningOutcomeUseCase interface {
 	GetAll() ([]GetCloResponse, error)
 	GetById(id string) (*CourseLearningOutcome, error)
-	GetByCourseId(courseId string) ([]CourseLearningOutcomeWithPO, error)
+	GetByCourseId(courseId string) ([]CourseLearningOutcome, error)
 	Create(dto CreateCourseLearningOutcomePayload) error
 	CreateLinkProgramOutcome(id string, programOutcomeIds []string) error
 	CreateLinkSubProgramLearningOutcome(id string, subProgramLearningOutcomeIds []string) error
