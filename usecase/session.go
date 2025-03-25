@@ -89,7 +89,7 @@ func (u sessionUseCase) Create(
 		SameSite: "None",
 		Value:    signedId,
 		HTTPOnly: true,
-		Secure:   true,
+		Secure:   false,
 		Expires:  expiredAt,
 	}
 	return cookie, nil
