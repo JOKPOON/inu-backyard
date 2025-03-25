@@ -87,11 +87,11 @@ func (u sessionUseCase) Create(
 	cookie := &fiber.Cookie{
 		Name:     u.config.Session.CookieName,
 		SameSite: "None",
-		Domain:   ".localhost",
+		Domain:   "localhost",
 		Path:     "/",
 		Value:    signedId,
 		HTTPOnly: true,
-		Secure:   true,
+		Secure:   false,
 		Expires:  expiredAt,
 	}
 	return cookie, nil
