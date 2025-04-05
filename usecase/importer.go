@@ -197,7 +197,7 @@ func (u ImporterUseCase) UpdateOrCreate(
 		courseLearningOutcomes = append(courseLearningOutcomes, entity.CourseLearningOutcome{
 			Id:                                  id,
 			Code:                                clo.Code,
-			Description:                         clo.Description,
+			DescriptionTH:                       clo.Description,
 			Status:                              clo.Status,
 			ExpectedPassingAssignmentPercentage: clo.ExpectedPassingAssignmentPercentage,
 			ExpectedPassingStudentPercentage:    clo.ExpectedPassingStudentPercentage,

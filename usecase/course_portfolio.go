@@ -92,7 +92,7 @@ func generateOutcome(cloWithPos []entity.CourseLearningOutcomeWithPO) ([]entity.
 
 		closByCloId[c.Code] = entity.Outcome{
 			Code: c.Code,
-			Name: c.Description,
+			Name: c.DescriptionTH,
 		}
 
 		posByPoId[c.ProgramOutcomeName] = entity.Outcome{

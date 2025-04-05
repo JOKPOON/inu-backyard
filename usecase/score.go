@@ -85,7 +85,7 @@ func (u scoreUseCase) GetByAssignmentId(assignmentId string) (*entity.Assignment
 		assignmentClos = append(assignmentClos, entity.AssessmentClos{
 			Id:          clo.Id,
 			Code:        clo.Code,
-			Description: clo.Description,
+			Description: clo.DescriptionTH,
 		})
 	}
 

@@ -37,7 +37,9 @@ type CourseLearningOutcomeUseCase interface {
 type CourseLearningOutcome struct {
 	Id                                  string  `json:"id" gorm:"primaryKey;type:char(255)"`
 	Code                                string  `json:"code"`
-	Description                         string  `json:"description"`
+	DescriptionTH                       string  `json:"description_th"`
+	DescriptionEN                       string  `json:"description_en"`
+	Type                                string  `json:"type"`
 	ExpectedPassingAssignmentPercentage float64 `json:"expected_passing_assignment_percentage"`
 	ExpectedPassingStudentPercentage    float64 `json:"expected_passing_student_percentage"`
 	Status                              string  `json:"status"`
@@ -84,7 +86,9 @@ type CourseLearningOutcomeWithPO struct {
 
 type CreateCourseLearningOutcomeDto struct {
 	Code                                string   `json:"code" validate:"required"`
-	Description                         string   `json:"description" validate:"required"`
+	DescriptionTH                       string   `json:"description_th"`
+	DescriptionEN                       string   `json:"description_en"`
+	Type                                string   `json:"type" validate:"required"`
 	ExpectedPassingAssignmentPercentage float64  `json:"expected_passing_assignment_percentage" validate:"required"`
 	ExpectedPassingStudentPercentage    float64  `json:"expected_passing_student_percentage" validate:"required"`
 	Status                              string   `json:"status"`
@@ -96,7 +100,9 @@ type CreateCourseLearningOutcomeDto struct {
 
 type UpdateCourseLeaningOutcomeDto struct {
 	Code                                string
-	Description                         string
+	DescriptionTH                       string
+	DescriptionEN                       string
+	Type                                string
 	ExpectedPassingAssignmentPercentage float64
 	ExpectedPassingStudentPercentage    float64
 	Status                              string
@@ -105,7 +111,9 @@ type UpdateCourseLeaningOutcomeDto struct {
 
 type CreateCourseLearningOutcomePayload struct {
 	Code                                string   `json:"code" validate:"required"`
-	Description                         string   `json:"description" validate:"required"`
+	DescriptionTH                       string   `json:"description_th"`
+	DescriptionEN                       string   `json:"description_en"`
+	Type                                string   `json:"type" validate:"required"`
 	ExpectedPassingAssignmentPercentage float64  `json:"expected_passing_assignment_percentage" validate:"required"`
 	ExpectedPassingStudentPercentage    float64  `json:"expected_passing_student_percentage" validate:"required"`
 	Status                              string   `json:"status"`
@@ -117,7 +125,9 @@ type CreateCourseLearningOutcomePayload struct {
 
 type UpdateCourseLearningOutcomePayload struct {
 	Code                                string  `json:"code"`
-	Description                         string  `json:"description"`
+	DescriptionTH                       string  `json:"description_th"`
+	DescriptionEN                       string  `json:"description_en"`
+	Type                                string  `json:"type"`
 	ExpectedPassingAssignmentPercentage float64 `json:"expected_passing_assignment_percentage"`
 	ExpectedPassingStudentPercentage    float64 `json:"expected_passing_student_percentage"`
 	Status                              string  `json:"status"`
@@ -161,7 +171,9 @@ type CLOResult struct {
 type GetCloResponse struct {
 	Id                                  string  `json:"id" gorm:"primaryKey;type:char(255)"`
 	Code                                string  `json:"code"`
-	Description                         string  `json:"description"`
+	DescriptionTH                       string  `json:"description_th"`
+	DescriptionEN                       string  `json:"description_en"`
+	Type                                string  `json:"type"`
 	ExpectedPassingAssignmentPercentage float64 `json:"expected_passing_assignment_percentage"`
 	ExpectedPassingStudentPercentage    float64 `json:"expected_passing_student_percentage"`
 	Status                              string  `json:"status"`

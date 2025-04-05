@@ -67,7 +67,9 @@ func (u courseLearningOutcomeUseCase) GetAll() ([]entity.GetCloResponse, error) 
 		res = append(res, entity.GetCloResponse{
 			Id:                                  clo.Id,
 			Code:                                clo.Code,
-			Description:                         clo.Description,
+			DescriptionTH:                       clo.DescriptionTH,
+			DescriptionEN:                       clo.DescriptionEN,
+			Type:                                clo.Type,
 			Status:                              clo.Status,
 			ExpectedPassingAssignmentPercentage: clo.ExpectedPassingAssignmentPercentage,
 			ExpectedPassingStudentPercentage:    clo.ExpectedPassingStudentPercentage,
@@ -170,7 +172,9 @@ func (u courseLearningOutcomeUseCase) Create(payload entity.CreateCourseLearning
 	clo := entity.CourseLearningOutcome{
 		Id:                                  ulid.Make().String(),
 		Code:                                payload.Code,
-		Description:                         payload.Description,
+		DescriptionTH:                       payload.DescriptionTH,
+		DescriptionEN:                       payload.DescriptionEN,
+		Type:                                payload.Type,
 		Status:                              payload.Status,
 		ExpectedPassingAssignmentPercentage: payload.ExpectedPassingAssignmentPercentage,
 		ExpectedPassingStudentPercentage:    payload.ExpectedPassingStudentPercentage,
@@ -316,7 +320,9 @@ func (u courseLearningOutcomeUseCase) Update(id string, payload entity.UpdateCou
 
 	err = u.courseLearningOutcomeRepo.Update(id, &entity.CourseLearningOutcome{
 		Code:                                payload.Code,
-		Description:                         payload.Description,
+		DescriptionTH:                       payload.DescriptionTH,
+		DescriptionEN:                       payload.DescriptionEN,
+		Type:                                payload.Type,
 		ExpectedPassingAssignmentPercentage: payload.ExpectedPassingAssignmentPercentage,
 		ExpectedPassingStudentPercentage:    payload.ExpectedPassingStudentPercentage,
 		Status:                              payload.Status,
