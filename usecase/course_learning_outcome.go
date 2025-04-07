@@ -91,7 +91,7 @@ func (u courseLearningOutcomeUseCase) GetById(id string) (*entity.CourseLearning
 	return clo, nil
 }
 
-func (u courseLearningOutcomeUseCase) GetByCourseId(courseId string) ([]entity.CourseLearningOutcome, error) {
+func (u courseLearningOutcomeUseCase) GetByCourseId(courseId string) ([]entity.GetCloResponse, error) {
 	course, err := u.courseUseCase.GetById(courseId)
 	if err != nil {
 		return nil, errs.New(errs.SameCode, "cannot get course id %s while querying clo", courseId, err)
@@ -99,12 +99,50 @@ func (u courseLearningOutcomeUseCase) GetByCourseId(courseId string) ([]entity.C
 		return nil, errs.New(errs.ErrCourseNotFound, "course id %s not found while querying clo", courseId)
 	}
 
-	clo, err := u.courseLearningOutcomeRepo.GetByCourseId(courseId)
+	clos, err := u.courseLearningOutcomeRepo.GetByCourseId(courseId)
 	if err != nil {
 		return nil, errs.New(errs.ErrQueryCLO, "cannot get CLO by course id %s", courseId, err)
 	}
+	splos := []string{}
+	ssos := []string{}
+	for _, clo := range clos {
+		for _, plo := range clo.SubProgramLearningOutcomes {
+			splos = append(splos, plo.Id)
+		}
 
-	return clo, nil
+		for _, so := range clo.SubStudentOutcomes {
+			ssos = append(ssos, so.Id)
+		}
+	}
+
+	plos, err := u.courseLearningOutcomeRepo.GetProgramLearningOutcomesBySubProgramLearningOutcomeId(splos)
+	if err != nil {
+		return nil, errs.New(errs.ErrQueryCLO, "cannot get all PLOs by subPLOs", err)
+	}
+
+	sos, err := u.courseLearningOutcomeRepo.GetStudentOutcomesBySubStudentOutcomeId(ssos)
+	if err != nil {
+		return nil, errs.New(errs.ErrQueryCLO, "cannot get all SOs by subSOs", err)
+	}
+
+	res := []entity.GetCloResponse{}
+	for _, clo := range clos {
+		res = append(res, entity.GetCloResponse{
+			Id:                                  clo.Id,
+			Code:                                clo.Code,
+			DescriptionTH:                       clo.DescriptionTH,
+			DescriptionEN:                       clo.DescriptionEN,
+			Type:                                clo.Type,
+			Status:                              clo.Status,
+			ExpectedPassingAssignmentPercentage: clo.ExpectedPassingAssignmentPercentage,
+			ExpectedPassingStudentPercentage:    clo.ExpectedPassingStudentPercentage,
+			ProgramOutcomes:                     clo.ProgramOutcomes,
+			ProgramLearningOutcomes:             plos,
+			SubStudentOutcomes:                  sos,
+		})
+	}
+
+	return res, nil
 }
 
 func (u courseLearningOutcomeUseCase) Create(payload entity.CreateCourseLearningOutcomePayload) error {

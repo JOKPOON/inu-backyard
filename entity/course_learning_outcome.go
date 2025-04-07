@@ -21,7 +21,7 @@ type CourseLearningOutcomeRepository interface {
 type CourseLearningOutcomeUseCase interface {
 	GetAll() ([]GetCloResponse, error)
 	GetById(id string) (*CourseLearningOutcome, error)
-	GetByCourseId(courseId string) ([]CourseLearningOutcome, error)
+	GetByCourseId(courseId string) ([]GetCloResponse, error)
 	Create(dto CreateCourseLearningOutcomePayload) error
 	CreateLinkProgramOutcome(id string, programOutcomeIds []string) error
 	CreateLinkSubProgramLearningOutcome(id string, subProgramLearningOutcomeIds []string) error
