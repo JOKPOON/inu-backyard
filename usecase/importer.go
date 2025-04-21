@@ -118,7 +118,7 @@ func (u ImporterUseCase) UpdateOrCreate(
 		OldAssignmentIds = append(OldAssignmentIds, assignment.Id)
 	}
 
-	OldAssignmentGroups, err := u.assignmentUseCase.GetGroupByCourseId(courseId, false)
+	OldAssignmentGroups, err := u.assignmentUseCase.GetGroupByCourseId(courseId, "", false)
 	if err != nil {
 		return errs.New(errs.SameCode, "cannot get old assignment group while import course")
 	}

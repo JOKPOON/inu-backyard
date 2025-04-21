@@ -14,7 +14,7 @@ type CourseLearningOutcomeRepository interface {
 	DeleteLinkSubProgramLearningOutcome(id string, subProgramLearningOutcomeId string) error
 	DeleteLinkSubStudentOutcome(id string, subStudentOutcomeId string) error
 	FilterExisted(ids []string) ([]string, error)
-	GetProgramLearningOutcomesBySubProgramLearningOutcomeId(subProgramLearningOutcomeIds []string) ([]ProgramLearningOutcome, error)
+	GetProgramLearningOutcomesBySubProgramLearningOutcomeId(sploIds []string) ([]ProgramLearningOutcome, error)
 	GetStudentOutcomesBySubStudentOutcomeId(subStudentOutcomeIds []string) ([]StudentOutcome, error)
 }
 

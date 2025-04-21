@@ -18,8 +18,10 @@ func (c AssignmentController) GetAllGroup(ctx *fiber.Ctx) error {
 
 func (c AssignmentController) GetGroupByCourseId(ctx *fiber.Ctx) error {
 	courseId := ctx.Params("courseId")
+	groupId := ctx.Query("groupId")
+	withAssignment := ctx.Query("withAssignment")
 
-	assignmentGroups, err := c.AssignmentUseCase.GetGroupByCourseId(courseId, false)
+	assignmentGroups, err := c.AssignmentUseCase.GetGroupByCourseId(courseId, groupId, withAssignment == "true")
 	if err != nil {
 		return err
 	}

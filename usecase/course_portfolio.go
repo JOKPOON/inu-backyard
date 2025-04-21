@@ -238,7 +238,7 @@ func (u coursePortfolioUseCase) CalculateGradeDistribution(courseId string) (*en
 	}
 
 	// Retrieve assignment groups for the course
-	assignmentGroups, err := u.AssignmentUseCase.GetGroupByCourseId(courseId, true)
+	assignmentGroups, err := u.AssignmentUseCase.GetGroupByCourseId(courseId, "", true)
 	if err != nil {
 		return nil, errs.New(errs.SameCode, "cannot get assignment group while calculating grade distribution")
 	}

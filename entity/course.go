@@ -102,7 +102,7 @@ type Course struct {
 	SemesterId  string `json:"semester_id"`
 
 	Lecturers []*User   `gorm:"many2many:course_lecturer" json:"lecturers"`
-	Semester  Semester  `json:"semester"`
+	Semester  Semester  `json:"semester" gorm:"foreignKey:SemesterId"`
 	Programme Programme `json:"programme"`
 }
 

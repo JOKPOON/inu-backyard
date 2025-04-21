@@ -550,38 +550,9 @@ func (r programmeRepositoryGorm) GetAllCourseLinkedSO(programmeId string) (*enti
 
 func (r programmeRepositoryGorm) GetAllPLO(programmeId string) ([]entity.ProgramLearningOutcome, error) {
 	var plos []entity.ProgramLearningOutcome
-
-	err := r.gorm.Raw(`
-	SELECT
-		plo.*
-	FROM
-		programme_plo pplo
-	LEFT JOIN program_learning_outcome plo ON
-		plo.id = pplo.program_learning_outcome_id
-	WHERE
-		pplo.programme_id = ?;
-	`, programmeId).Scan(&plos).Error
+	err := r.gorm.Where("program_id = ?", programmeId).Preload("SubProgramLearningOutcomes").Find(&plos).Error
 	if err != nil {
 		return nil, err
-	}
-
-	var ploIds []string
-	for _, plo := range plos {
-		ploIds = append(ploIds, plo.Id)
-	}
-
-	var splos []entity.SubProgramLearningOutcome
-	err = r.gorm.Where("program_learning_outcome_id IN ?", ploIds).Find(&splos).Error
-	if err != nil {
-		return nil, err
-	}
-
-	for i, plo := range plos {
-		for _, splo := range splos {
-			if plo.Id == splo.ProgramLearningOutcomeId {
-				plos[i].SubProgramLearningOutcomes = append(plos[i].SubProgramLearningOutcomes, splo)
-			}
-		}
 	}
 
 	return plos, nil
@@ -590,37 +561,9 @@ func (r programmeRepositoryGorm) GetAllPLO(programmeId string) ([]entity.Program
 func (r programmeRepositoryGorm) GetAllSO(programmeId string) ([]entity.StudentOutcome, error) {
 	var sos []entity.StudentOutcome
 
-	err := r.gorm.Raw(`
-	SELECT
-		so.*
-	FROM
-		programme_so pso
-	LEFT JOIN student_outcome so ON
-		so.id = pso.student_outcome_id
-	WHERE
-		pso.programme_id = ?;
-	`, programmeId).Scan(&sos).Error
+	err := r.gorm.Where("program_id = ?", programmeId).Preload("SubStudentOutcomes").Find(&sos).Error
 	if err != nil {
 		return nil, err
-	}
-
-	var soIds []string
-	for _, so := range sos {
-		soIds = append(soIds, so.Id)
-	}
-
-	var ssos []entity.SubStudentOutcome
-	err = r.gorm.Where("student_outcome_id IN ?", soIds).Find(&ssos).Error
-	if err != nil {
-		return nil, err
-	}
-
-	for i, plo := range sos {
-		for _, splo := range ssos {
-			if plo.Id == splo.StudentOutcomeId {
-				sos[i].SubStudentOutcomes = append(sos[i].SubStudentOutcomes, splo)
-			}
-		}
 	}
 
 	return sos, nil
@@ -629,16 +572,7 @@ func (r programmeRepositoryGorm) GetAllSO(programmeId string) ([]entity.StudentO
 func (r programmeRepositoryGorm) GetAllPO(programmeId string) ([]entity.ProgramOutcome, error) {
 	var pos []entity.ProgramOutcome
 
-	err := r.gorm.Raw(`
-	SELECT
-		po.*
-	FROM
-		programme_po ppo
-	LEFT JOIN program_outcome po ON
-		po.id = ppo.program_outcome_id
-	WHERE
-		ppo.programme_id = ?;
-	`, programmeId).Scan(&pos).Error
+	err := r.gorm.Where("program_id = ?", programmeId).Find(&pos).Error
 	if err != nil {
 		return nil, err
 	}

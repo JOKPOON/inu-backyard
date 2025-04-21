@@ -24,15 +24,22 @@ func (u assignmentUseCase) GetGroupByGroupId(assignmentGroupId string) (*entity.
 	return assignmentGroup, nil
 }
 
-func (u assignmentUseCase) GetGroupByCourseId(courseId string, withAssignment bool) ([]entity.AssignmentGroup, error) {
+func (u assignmentUseCase) GetGroupByCourseId(courseId string, groupId string, withAssignment bool) ([]entity.AssignmentGroup, error) {
 	course, err := u.courseUseCase.GetById(courseId)
 	if err != nil {
 		return nil, errs.New(errs.SameCode, "cannot get course id %s while get assignments", course, err)
 	} else if course == nil {
 		return nil, errs.New(errs.ErrCourseNotFound, "course id %s not found while getting assignments", courseId, err)
 	}
+	query := entity.AssignmentGroup{}
+	if courseId != "" {
+		query.CourseId = courseId
+	}
+	if groupId != "" {
+		query.Id = groupId
+	}
 
-	assignmentGroup, err := u.assignmentRepo.GetGroupByQuery(entity.AssignmentGroup{CourseId: courseId}, withAssignment)
+	assignmentGroup, err := u.assignmentRepo.GetGroupByQuery(query, withAssignment)
 	if err != nil {
 		return nil, errs.New(errs.ErrQueryAssignment, "cannot get assignment group by course id %s", courseId, err)
 	}

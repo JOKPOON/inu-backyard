@@ -11,7 +11,7 @@ import (
 func (r assignmentRepositoryGorm) GetAllGroup() ([]entity.AssignmentGroup, error) {
 	var assignmentGroup []entity.AssignmentGroup
 
-	err := r.gorm.Find(&assignmentGroup).Error
+	err := r.gorm.Preload("Assignments").Find(&assignmentGroup).Error
 	if err != nil {
 		return nil, errors.New("cannot get assignment group")
 	}

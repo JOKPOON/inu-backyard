@@ -134,11 +134,25 @@ func (r courseLearningOutcomeRepositoryGorm) Update(id string, courseLearningOut
 }
 
 func (r courseLearningOutcomeRepositoryGorm) Delete(id string) error {
-	err := r.gorm.Delete(&entity.CourseLearningOutcome{Id: id}).Error
+	// Delete the courseLearningOutcome by ID in clo_po, clo_subplo, and clo_subso tables
+	err := r.gorm.Exec("DELETE FROM `clo_po` WHERE course_learning_outcome_id = ?", id).Error
+	if err != nil {
+		return fmt.Errorf("cannot delete link between CLO and PO: %w", err)
+	}
+	err = r.gorm.Exec("DELETE FROM `clo_subplo` WHERE course_learning_outcome_id = ?", id).Error
+	if err != nil {
+		return fmt.Errorf("cannot delete link between CLO and SPLO: %w", err)
+	}
+	err = r.gorm.Exec("DELETE FROM `clo_subso` WHERE course_learning_outcome_id = ?", id).Error
+	if err != nil {
+		return fmt.Errorf("cannot delete link between CLO and SSO: %w", err)
+	}
 
+	err = r.gorm.Exec("DELETE FROM `course_learning_outcome` WHERE id = ?", id).Error
 	if err != nil {
 		return fmt.Errorf("cannot delete courseLearningOutcome: %w", err)
 	}
+
 	// go cacheOutcomes(r.gorm, TabeeSelectorAllPloCourses)
 	// go cacheOutcomes(r.gorm, TabeeSelectorAllPoCourses)
 
@@ -193,13 +207,11 @@ func (r courseLearningOutcomeRepositoryGorm) FilterExisted(ids []string) ([]stri
 	return existedIds, nil
 }
 
-func (r courseLearningOutcomeRepositoryGorm) GetProgramLearningOutcomesBySubProgramLearningOutcomeId(subProgramLearningOutcomeIds []string) ([]entity.ProgramLearningOutcome, error) {
+func (r courseLearningOutcomeRepositoryGorm) GetProgramLearningOutcomesBySubProgramLearningOutcomeId(sploIds []string) ([]entity.ProgramLearningOutcome, error) {
 	var plos []entity.ProgramLearningOutcome
 
 	// Preload SubProgramLearningOutcomes and filter by SubProgramLearningOutcomeIds
-	if err := r.gorm.Preload("SubProgramLearningOutcomes", "id IN ?", subProgramLearningOutcomeIds).
-		Where("id IN (?)", r.gorm.Model(&entity.SubProgramLearningOutcome{}).Select("program_learning_outcome_id")).
-		Find(&plos).Error; err != nil {
+	if err := r.gorm.Preload("SubProgramLearningOutcomes", "id IN ?", sploIds).Find(&plos).Error; err != nil {
 		return nil, err
 	}
 
@@ -216,13 +228,11 @@ func (r courseLearningOutcomeRepositoryGorm) GetProgramLearningOutcomesBySubProg
 	return filteredPlos, nil
 }
 
-func (r courseLearningOutcomeRepositoryGorm) GetStudentOutcomesBySubStudentOutcomeId(subStudentOutcomeIds []string) ([]entity.StudentOutcome, error) {
+func (r courseLearningOutcomeRepositoryGorm) GetStudentOutcomesBySubStudentOutcomeId(ssoIds []string) ([]entity.StudentOutcome, error) {
 	var sos []entity.StudentOutcome
 
 	// Preload SubStudentOutcomes and filter by SubStudentOutcomeIds
-	if err := r.gorm.Preload("SubStudentOutcomes", "id IN ?", subStudentOutcomeIds).
-		Where("id IN (?)", r.gorm.Model(&entity.SubStudentOutcome{}).Select("student_outcome_id")).
-		Find(&sos).Error; err != nil {
+	if err := r.gorm.Preload("SubStudentOutcomes", "id IN ?", ssoIds).Find(&sos).Error; err != nil {
 		return nil, err
 	}
 

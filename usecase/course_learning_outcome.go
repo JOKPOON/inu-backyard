@@ -1,6 +1,8 @@
 package usecase
 
 import (
+	"fmt"
+
 	"github.com/oklog/ulid/v2"
 	"github.com/team-inu/inu-backyard/entity"
 	errs "github.com/team-inu/inu-backyard/entity/error"
@@ -40,9 +42,13 @@ func (u courseLearningOutcomeUseCase) GetAll() ([]entity.GetCloResponse, error) 
 		return nil, errs.New(errs.ErrQueryCLO, "cannot get all CLOs", err)
 	}
 
-	splos := []string{}
-	ssos := []string{}
+	res := []entity.GetCloResponse{}
 	for _, clo := range clos {
+		splos := []string{}
+		ssos := []string{}
+
+		fmt.Println(clo.Course.Code)
+		fmt.Println(clo.SubProgramLearningOutcomes)
 		for _, plo := range clo.SubProgramLearningOutcomes {
 			splos = append(splos, plo.Id)
 		}
@@ -50,20 +56,16 @@ func (u courseLearningOutcomeUseCase) GetAll() ([]entity.GetCloResponse, error) 
 		for _, so := range clo.SubStudentOutcomes {
 			ssos = append(ssos, so.Id)
 		}
-	}
 
-	plos, err := u.courseLearningOutcomeRepo.GetProgramLearningOutcomesBySubProgramLearningOutcomeId(splos)
-	if err != nil {
-		return nil, errs.New(errs.ErrQueryCLO, "cannot get all PLOs by subPLOs", err)
-	}
+		plos, err := u.courseLearningOutcomeRepo.GetProgramLearningOutcomesBySubProgramLearningOutcomeId(splos)
+		if err != nil {
+			return nil, errs.New(errs.ErrQueryCLO, "cannot get all PLOs by subPLOs", err)
+		}
 
-	sos, err := u.courseLearningOutcomeRepo.GetStudentOutcomesBySubStudentOutcomeId(ssos)
-	if err != nil {
-		return nil, errs.New(errs.ErrQueryCLO, "cannot get all SOs by subSOs", err)
-	}
-
-	res := []entity.GetCloResponse{}
-	for _, clo := range clos {
+		sos, err := u.courseLearningOutcomeRepo.GetStudentOutcomesBySubStudentOutcomeId(ssos)
+		if err != nil {
+			return nil, errs.New(errs.ErrQueryCLO, "cannot get all SOs by subSOs", err)
+		}
 		res = append(res, entity.GetCloResponse{
 			Id:                                  clo.Id,
 			Code:                                clo.Code,
@@ -103,9 +105,12 @@ func (u courseLearningOutcomeUseCase) GetByCourseId(courseId string) ([]entity.G
 	if err != nil {
 		return nil, errs.New(errs.ErrQueryCLO, "cannot get CLO by course id %s", courseId, err)
 	}
-	splos := []string{}
-	ssos := []string{}
+
+	res := []entity.GetCloResponse{}
 	for _, clo := range clos {
+		splos := []string{}
+		ssos := []string{}
+
 		for _, plo := range clo.SubProgramLearningOutcomes {
 			splos = append(splos, plo.Id)
 		}
@@ -113,20 +118,17 @@ func (u courseLearningOutcomeUseCase) GetByCourseId(courseId string) ([]entity.G
 		for _, so := range clo.SubStudentOutcomes {
 			ssos = append(ssos, so.Id)
 		}
-	}
 
-	plos, err := u.courseLearningOutcomeRepo.GetProgramLearningOutcomesBySubProgramLearningOutcomeId(splos)
-	if err != nil {
-		return nil, errs.New(errs.ErrQueryCLO, "cannot get all PLOs by subPLOs", err)
-	}
+		plos, err := u.courseLearningOutcomeRepo.GetProgramLearningOutcomesBySubProgramLearningOutcomeId(splos)
+		if err != nil {
+			return nil, errs.New(errs.ErrQueryCLO, "cannot get all PLOs by subPLOs", err)
+		}
 
-	sos, err := u.courseLearningOutcomeRepo.GetStudentOutcomesBySubStudentOutcomeId(ssos)
-	if err != nil {
-		return nil, errs.New(errs.ErrQueryCLO, "cannot get all SOs by subSOs", err)
-	}
+		sos, err := u.courseLearningOutcomeRepo.GetStudentOutcomesBySubStudentOutcomeId(ssos)
+		if err != nil {
+			return nil, errs.New(errs.ErrQueryCLO, "cannot get all SOs by subSOs", err)
+		}
 
-	res := []entity.GetCloResponse{}
-	for _, clo := range clos {
 		res = append(res, entity.GetCloResponse{
 			Id:                                  clo.Id,
 			Code:                                clo.Code,
@@ -294,6 +296,9 @@ func (u courseLearningOutcomeUseCase) CreateLinkSubProgramLearningOutcome(id str
 			allSPLOIds = append(allSPLOIds, splo.Id)
 		}
 	}
+
+	fmt.Println(allSPLOIds)
+	fmt.Println(subProgramLearningOutcomeIds)
 
 	useablePLOIds := slice.Intersection(subProgramLearningOutcomeIds, allSPLOIds)
 	if len(useablePLOIds) != len(subProgramLearningOutcomeIds) {
