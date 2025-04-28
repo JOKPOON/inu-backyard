@@ -151,15 +151,21 @@ type StudentPassCLOResp struct {
 }
 
 type StudentCLO struct {
-	StudentID int           `json:"student_id"`
-	CLOs      []PassOutcome `json:"clos"`
-	POs       []PassOutcome `json:"pos"`
-	PLOs      []PassOutcome `json:"plos"`
-	SOs       []PassOutcome `json:"sos"`
+	StudentID     int           `json:"student_id"`
+	StudentNameTH string        `json:"student_name_th"`
+	StudentNameEN string        `json:"student_name_en"`
+	CLOs          []PassOutcome `json:"clos"`
+	POs           []PassOutcome `json:"pos"`
+	PLOs          []PassOutcome `json:"plos"`
+	SOs           []PassOutcome `json:"sos"`
 }
 
 type CLOResult struct {
 	StudentId                        int     `json:"student_id"`
+	StudentFirstNameTH               string  `json:"student_first_name_th"`
+	StudentLastNameTH                string  `json:"student_last_name_th"`
+	StudentFirstNameEN               string  `json:"student_first_name_en"`
+	StudentLastNameEN                string  `json:"student_last_name_en"`
 	CLOId                            string  `json:"clo_id"` // Change to string
 	CLOCode                          string  `json:"clo_code"`
 	Score                            float64 `json:"score"`

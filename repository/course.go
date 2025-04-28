@@ -175,6 +175,10 @@ func (r courseRepositoryGorm) GetStudentsPassingCLOs(courseId string) (*entity.S
 	err := r.gorm.Raw(`
 	SELECT
 		s.id AS student_id,
+		s.first_name_th AS student_first_name_th,
+		s.last_name_th AS student_last_name_th,
+		s.first_name_en AS student_first_name_en,
+		s.last_name_en AS student_last_name_en,
 		clo.id AS clo_id,
 		clo.code AS clo_code,
 		clo.expected_passing_assignment_percentage,
@@ -264,6 +268,16 @@ func (r courseRepositoryGorm) GetStudentsPassingCLOs(courseId string) (*entity.S
 			StudentID: studentId,
 			CLOs:      clos,
 		})
+	}
+
+	for _, cloResult := range cloResults {
+		for id, result := range resp.Result {
+			if cloResult.StudentId == result.StudentID {
+				resp.Result[id].StudentNameEN = cloResult.StudentFirstNameEN + " " + cloResult.StudentLastNameEN
+				resp.Result[id].StudentNameTH = cloResult.StudentFirstNameTH + " " + cloResult.StudentLastNameTH
+				break
+			}
+		}
 	}
 
 	pass := r.GetStudentsPassingOutcomes(courseId, resp)
