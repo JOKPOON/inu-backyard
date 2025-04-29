@@ -83,6 +83,8 @@ func (u programmeUseCase) Create(payload entity.CreateProgrammePayload) error {
 		DegreeEN:      payload.DegreeEN,
 		DegreeShortTH: payload.DegreeShortTH,
 		DegreeShortEN: payload.DegreeShortEN,
+		DescriptionTH: payload.DescriptionTH,
+		DescriptionEN: payload.DescriptionEN,
 		Year:          payload.Year,
 		DepartmentId:  payload.DepartmentId,
 
@@ -112,6 +114,8 @@ func (u programmeUseCase) Update(id string, programme *entity.UpdateProgrammePay
 		DegreeEN:      programme.DegreeEN,
 		DegreeShortTH: programme.DegreeShortTH,
 		DegreeShortEN: programme.DegreeShortEN,
+		DescriptionTH: programme.DescriptionTH,
+		DescriptionEN: programme.DegreeShortEN,
 		Year:          programme.Year,
 		DepartmentId:  programme.DepartmentId,
 

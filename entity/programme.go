@@ -79,6 +79,8 @@ type Programme struct {
 	Id            string `json:"id" gorm:"primaryKey;type:char(255)"`
 	NameTH        string `json:"name_th" gorm:"not null"`
 	NameEN        string `json:"name_en" gorm:"not null"`
+	DescriptionTH string `json:"description_th" gorm:"not null"`
+	DescriptionEN string `json:"description_en" gorm:"not null"`
 	DegreeTH      string `json:"degree_th" gorm:"not null"`
 	DegreeEN      string `json:"degree_en" gorm:"not null"`
 	DegreeShortTH string `json:"degree_short_th" gorm:"not null"`
@@ -100,6 +102,8 @@ type CreateProgrammePayload struct {
 	NameEN        string `json:"name_en" validate:"required"`
 	DegreeTH      string `json:"degree_th" validate:"required"`
 	DegreeEN      string `json:"degree_en" validate:"required"`
+	DescriptionTH string `json:"description_th" gorm:"not null" validate:"required"`
+	DescriptionEN string `json:"description_en" gorm:"not null" validate:"required"`
 	DegreeShortTH string `json:"degree_short_th" validate:"required"`
 	DegreeShortEN string `json:"degree_short_en" validate:"required"`
 	Year          string `json:"year" validate:"required"`
@@ -118,6 +122,8 @@ type UpdateProgrammePayload struct {
 	NameEN        string `json:"name_en" validate:"required"`
 	DegreeTH      string `json:"degree_th" validate:"required"`
 	DegreeEN      string `json:"degree_en" validate:"required"`
+	DescriptionTH string `json:"description_th" gorm:"not null"`
+	DescriptionEN string `json:"description_en" gorm:"not null"`
 	DegreeShortTH string `json:"degree_short_th" validate:"required"`
 	DegreeShortEN string `json:"degree_short_en" validate:"required"`
 	Year          string `json:"year" validate:"required"`
