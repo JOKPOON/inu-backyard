@@ -308,18 +308,18 @@ func (f *fiberServer) initController() error {
 
 	faculty.Get("/", facultyController.GetAll)
 	faculty.Post("/", facultyController.Create)
-	faculty.Get("/:facultyName", facultyController.GetById)
-	faculty.Patch("/:facultyName", facultyController.Update)
-	faculty.Delete("/:facultyName", facultyController.Delete)
+	faculty.Get("/:facultyId", facultyController.GetById)
+	faculty.Patch("/:facultyId", facultyController.Update)
+	faculty.Delete("/:facultyId", facultyController.Delete)
 
 	// department route
 	department := api.Group("/departments", authMiddleware)
 
 	department.Get("/", departmentController.GetAll)
 	department.Post("/", departmentController.Create)
-	department.Get("/:departmentName", departmentController.GetByName)
-	department.Patch("/:departmentName", departmentController.Update)
-	department.Delete("/:departmentName", departmentController.Delete)
+	department.Get("/:departmentId", departmentController.GetByName)
+	department.Patch("/:departmentId", departmentController.Update)
+	department.Delete("/:departmentId", departmentController.Delete)
 
 	// score route
 	score := api.Group("/scores", authMiddleware)

@@ -29,23 +29,23 @@ type StudentUseCase interface {
 }
 
 type Student struct {
-	Id             string  `gorm:"primaryKey;type:char(255)" json:"id"`
-	FirstNameTH    string  `json:"first_name_th"`
-	LastNameTH     string  `json:"last_name_th"`
-	FirstNameEN    string  `json:"first_name_en"`
-	LastNameEN     string  `json:"last_name_en"`
-	Email          string  `json:"email"`
-	ProgrammeId    string  `json:"programme_id"`
-	DepartmentName string  `json:"department_name"`
-	GPAX           float64 `json:"gpax"`
-	MathGPA        float64 `json:"math_gpa"`
-	EngGPA         float64 `json:"eng_gpa"`
-	SciGPA         float64 `json:"sci_gpa"`
-	School         string  `json:"school"`
-	City           string  `json:"city"`
-	Year           string  `json:"year"`
-	Admission      string  `json:"admission"`
-	Remark         string  `json:"remark"`
+	Id           string  `gorm:"primaryKey;type:char(255)" json:"id"`
+	FirstNameTH  string  `json:"first_name_th"`
+	LastNameTH   string  `json:"last_name_th"`
+	FirstNameEN  string  `json:"first_name_en"`
+	LastNameEN   string  `json:"last_name_en"`
+	Email        string  `json:"email"`
+	ProgrammeId  string  `json:"programme_id"`
+	DepartmentId string  `json:"department_id"`
+	GPAX         float64 `json:"gpax"`
+	MathGPA      float64 `json:"math_gpa"`
+	EngGPA       float64 `json:"eng_gpa"`
+	SciGPA       float64 `json:"sci_gpa"`
+	School       string  `json:"school"`
+	City         string  `json:"city"`
+	Year         string  `json:"year"`
+	Admission    string  `json:"admission"`
+	Remark       string  `json:"remark"`
 
 	Programme  *Programme  `json:"programme,omitempty"`
 	Department *Department `json:"department,omitempty"`
@@ -72,14 +72,14 @@ type CreateStudentPayload struct {
 	Admission   string   `json:"admission" validate:"required"`
 	Remark      string   `json:"remark"`
 
-	ProgrammeId    string `json:"programme_id" validate:"required"`
-	DepartmentName string `json:"department_name" validate:"required"`
+	ProgrammeId  string `json:"programme_id" validate:"required"`
+	DepartmentId string `json:"department_id" validate:"required"`
 }
 
 type GetStudentsByParamsPayload struct {
-	Year           string `json:"year"`
-	ProgrammeId    string `json:"programme_id"`
-	DepartmentName string `json:"department_name"`
+	Year         string `json:"year"`
+	ProgrammeId  string `json:"programme_id"`
+	DepartmentId string `json:"department_id"`
 }
 
 type UpdateStudentPayload struct {
@@ -99,6 +99,6 @@ type UpdateStudentPayload struct {
 	Admission   string   `json:"admission" validate:"required"`
 	Remark      *string  `json:"remark" validate:"required"`
 
-	ProgrammeId    string `json:"programme_id" validate:"required"`
-	DepartmentName string `json:"department_name" validate:"required"`
+	ProgrammeId  string `json:"programme_id" validate:"required"`
+	DepartmentId string `json:"department_id" validate:"required"`
 }

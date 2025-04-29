@@ -2,33 +2,33 @@ package entity
 
 type FacultyRepository interface {
 	GetAll() ([]Faculty, error)
-	GetByName(id string) (*Faculty, error)
+	GetById(id string) (*Faculty, error)
 	Create(faculty *Faculty) error
-	Update(faculty *Faculty, newName string) error
+	Update(faculty *Faculty) error
 	Delete(name string) error
 }
 
 type FacultyUseCase interface {
 	GetAll() ([]Faculty, error)
-	GetByName(name string) (*Faculty, error)
+	GetById(id string) (*Faculty, error)
 	Create(faculty *Faculty) error
-	Update(faculty *Faculty, newName string) error
+	Update(faculty *Faculty) error
 	Delete(name string) error
 }
 
 type Faculty struct {
-	Name        string       `json:"name" gorm:"primaryKey;type:char(255)"`
-	Departments []Department `gorm:"foreignKey:FacultyName" json:"departments"`
+	Id          string       `json:"id" gorm:"primaryKey;type:char(255)"`
+	NameTH      string       `json:"name_th" gorm:"type:char(255)"`
+	NameEN      string       `json:"name_en" gorm:"type:char(255)"`
+	Departments []Department `gorm:"foreignKey:FacultyId" json:"departments"`
 }
 
 type CreateFacultyRequestPayload struct {
-	Name string `json:"name" validate:"required"`
+	NameTH string `json:"name_th" validate:"required"`
+	NameEN string `json:"name_en" validate:"required"`
 }
 
 type UpdateFacultyRequestPayload struct {
-	NewName string `json:"new_name" validate:"required"`
-}
-
-type DeleteFacultyRequestPayload struct {
-	Name string `json:"name" validate:"required"`
+	NameTH string `json:"name_th" validate:"required"`
+	NameEN string `json:"name_en" validate:"required"`
 }

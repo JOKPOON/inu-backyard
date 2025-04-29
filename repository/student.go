@@ -57,8 +57,8 @@ func (r studentRepositoryGorm) GetByParams(query string, params *entity.Student,
 		if params.Year != "" {
 			db = db.Where("year = ?", params.Year)
 		}
-		if params.DepartmentName != "" {
-			db = db.Where("department_name = ?", params.DepartmentName)
+		if params.DepartmentId != "" {
+			db = db.Where("department_name = ?", params.DepartmentId)
 		}
 	}
 
@@ -113,7 +113,7 @@ func (r studentRepositoryGorm) Update(id string, student *entity.Student) error 
 		"admission":       student.Admission,
 		"remark":          student.Remark,
 		"programme_id":    student.ProgrammeId,
-		"department_name": student.DepartmentName,
+		"department_name": student.DepartmentId,
 	}).Error
 	if err != nil {
 		return fmt.Errorf("cannot update student: %w", err)

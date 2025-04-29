@@ -76,34 +76,34 @@ type ProgrammeStructure struct {
 }
 
 type Programme struct {
-	Id             string `json:"id" gorm:"primaryKey;type:char(255)"`
-	NameTH         string `json:"name_th" gorm:"not null"`
-	NameEN         string `json:"name_en" gorm:"not null"`
-	DegreeTH       string `json:"degree_th" gorm:"not null"`
-	DegreeEN       string `json:"degree_en" gorm:"not null"`
-	DegreeShortTH  string `json:"degree_short_th" gorm:"not null"`
-	DegreeShortEN  string `json:"degree_short_en" gorm:"not null"`
-	Year           string `json:"year" gorm:"not null"`
-	AcademicYear   string `json:"academic_year" gorm:"not null"`
-	DepartmentName string `json:"department_name" gorm:"not null"`
+	Id            string `json:"id" gorm:"primaryKey;type:char(255)"`
+	NameTH        string `json:"name_th" gorm:"not null"`
+	NameEN        string `json:"name_en" gorm:"not null"`
+	DegreeTH      string `json:"degree_th" gorm:"not null"`
+	DegreeEN      string `json:"degree_en" gorm:"not null"`
+	DegreeShortTH string `json:"degree_short_th" gorm:"not null"`
+	DegreeShortEN string `json:"degree_short_en" gorm:"not null"`
+	Year          string `json:"year" gorm:"not null"`
+	AcademicYear  string `json:"academic_year" gorm:"not null"`
+	DepartmentId  string `json:"department_id" gorm:"not null"`
 
 	Structure datatypes.JSON `json:"structure" gorm:"type:json"`
 
-	Department              Department                `gorm:"foreignKey:DepartmentName" json:"-"`
+	Department              Department                `gorm:"foreignKey:DepartmentId" json:"-"`
 	ProgramOutcomes         []*ProgramOutcome         `gorm:"many2many:programme_po" json:"program_outcomes"`
 	ProgramLearningOutcomes []*ProgramLearningOutcome `gorm:"many2many:programme_plo" json:"program_learning_outcomes"`
 	StudentOutcomes         []*StudentOutcome         `gorm:"many2many:programme_so" json:"student_outcomes"`
 }
 
 type CreateProgrammePayload struct {
-	NameTH         string `json:"name_th" validate:"required"`
-	NameEN         string `json:"name_en" validate:"required"`
-	DegreeTH       string `json:"degree_th" validate:"required"`
-	DegreeEN       string `json:"degree_en" validate:"required"`
-	DegreeShortTH  string `json:"degree_short_th" validate:"required"`
-	DegreeShortEN  string `json:"degree_short_en" validate:"required"`
-	Year           string `json:"year" validate:"required"`
-	DepartmentName string `json:"department_name" validate:"required"`
+	NameTH        string `json:"name_th" validate:"required"`
+	NameEN        string `json:"name_en" validate:"required"`
+	DegreeTH      string `json:"degree_th" validate:"required"`
+	DegreeEN      string `json:"degree_en" validate:"required"`
+	DegreeShortTH string `json:"degree_short_th" validate:"required"`
+	DegreeShortEN string `json:"degree_short_en" validate:"required"`
+	Year          string `json:"year" validate:"required"`
+	DepartmentId  string `json:"department_id" validate:"required"`
 
 	Structure ProgrammeStructure `json:"structure" validate:"required"`
 }
@@ -114,14 +114,14 @@ type GetProgrammesByParamsPayload struct {
 }
 
 type UpdateProgrammePayload struct {
-	NameTH         string `json:"name_th" validate:"required"`
-	NameEN         string `json:"name_en" validate:"required"`
-	DegreeTH       string `json:"degree_th" validate:"required"`
-	DegreeEN       string `json:"degree_en" validate:"required"`
-	DegreeShortTH  string `json:"degree_short_th" validate:"required"`
-	DegreeShortEN  string `json:"degree_short_en" validate:"required"`
-	Year           string `json:"year" validate:"required"`
-	DepartmentName string `json:"department_name" validate:"required"`
+	NameTH        string `json:"name_th" validate:"required"`
+	NameEN        string `json:"name_en" validate:"required"`
+	DegreeTH      string `json:"degree_th" validate:"required"`
+	DegreeEN      string `json:"degree_en" validate:"required"`
+	DegreeShortTH string `json:"degree_short_th" validate:"required"`
+	DegreeShortEN string `json:"degree_short_en" validate:"required"`
+	Year          string `json:"year" validate:"required"`
+	DepartmentId  string `json:"department_id" validate:"required"`
 
 	Structure ProgrammeStructure `json:"structure" validate:"required"`
 }

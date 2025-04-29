@@ -25,10 +25,12 @@ func (r FacultyRepositoryGorm) Create(faculty *entity.Faculty) error {
 	return nil
 }
 
-func (r FacultyRepositoryGorm) Delete(name string) error {
-	err := r.gorm.Where("name = ?", name).Delete(&entity.Faculty{}).Error
+func (r FacultyRepositoryGorm) Delete(id string) error {
+	err := r.gorm.Delete(&entity.Faculty{
+		Id: id,
+	}).Error
 	if err != nil {
-		return errs.New(errs.ErrDeleteFaculty, "cannot delete faculty by name %s", name, err)
+		return errs.New(errs.ErrDeleteFaculty, "cannot delete faculty by name %s", id, err)
 	}
 
 	return nil
@@ -45,10 +47,10 @@ func (r FacultyRepositoryGorm) GetAll() ([]entity.Faculty, error) {
 	return faculties, nil
 }
 
-func (r *FacultyRepositoryGorm) GetByName(name string) (*entity.Faculty, error) {
+func (r *FacultyRepositoryGorm) GetById(id string) (*entity.Faculty, error) {
 	var faculty *entity.Faculty
 
-	err := r.gorm.Where("name = ?", name).First(&faculty).Error
+	err := r.gorm.Where("id = ?", id).First(&faculty).Error
 	if err == gorm.ErrRecordNotFound {
 		return nil, nil
 	} else if err != nil {
@@ -58,18 +60,18 @@ func (r *FacultyRepositoryGorm) GetByName(name string) (*entity.Faculty, error) 
 	return faculty, nil
 }
 
-func (r *FacultyRepositoryGorm) Update(faculty *entity.Faculty, newName string) error {
+func (r *FacultyRepositoryGorm) Update(faculty *entity.Faculty) error {
 	//find old faculty by name
 	var oldFaculty *entity.Faculty
-	err := r.gorm.Where("name = ?", faculty.Name).First(&oldFaculty).Error
+	err := r.gorm.Where("id = ?", faculty.Id).First(&oldFaculty).Error
 	if err != nil {
-		return errs.New(errs.ErrQueryFaculty, "cannot get faculty by name %s", faculty.Name, err)
+		return errs.New(errs.ErrQueryFaculty, "cannot get faculty", err)
 	}
 
 	//update old faculty with new name
-	err = r.gorm.Model(&oldFaculty).Updates(&entity.Faculty{Name: newName}).Error
+	err = r.gorm.Model(&oldFaculty).Updates(faculty).Error
 	if err != nil {
-		return errs.New(errs.ErrUpdateFaculty, "cannot update faculty by name %s", faculty.Name, err)
+		return errs.New(errs.ErrUpdateFaculty, "cannot update faculty", err)
 	}
 
 	return nil

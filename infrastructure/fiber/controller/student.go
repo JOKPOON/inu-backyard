@@ -53,9 +53,9 @@ func (c StudentController) GetStudents(ctx *fiber.Ctx) error {
 	students, err := c.StudentUseCase.GetByParams(
 		query,
 		&entity.Student{
-			ProgrammeId:    programmeId,
-			Year:           year,
-			DepartmentName: departmentName,
+			ProgrammeId:  programmeId,
+			Year:         year,
+			DepartmentId: departmentName,
 		},
 		10,
 		0,

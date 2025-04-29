@@ -44,21 +44,21 @@ func (u DepartmentUseCase) GetAll() ([]entity.Department, error) {
 	return departments, nil
 }
 
-func (u DepartmentUseCase) GetByName(name string) (*entity.Department, error) {
-	department, err := u.DepartmentRepo.GetByName(name)
+func (u DepartmentUseCase) GetById(id string) (*entity.Department, error) {
+	department, err := u.DepartmentRepo.GetById(id)
 
 	if err != nil {
-		return nil, errs.New(errs.ErrQueryDepartment, "cannot get department by name %s", name, err)
+		return nil, errs.New(errs.ErrQueryDepartment, "cannot get department by name", err)
 	}
 
 	return department, nil
 }
 
-func (u DepartmentUseCase) Update(department *entity.Department, newName string) error {
-	err := u.DepartmentRepo.Update(department, newName)
+func (u DepartmentUseCase) Update(department *entity.Department) error {
+	err := u.DepartmentRepo.Update(department)
 
 	if err != nil {
-		return errs.New(errs.ErrUpdateDepartment, "cannot update student by name %s", department.Name, err)
+		return errs.New(errs.ErrUpdateDepartment, "cannot update department", err)
 	}
 
 	return nil

@@ -57,7 +57,7 @@ func (u studentUseCase) CreateMany(students []entity.CreateStudentPayload) error
 	programmeIds := []string{}
 	studentIds := []string{}
 	for _, student := range students {
-		departmentNames = append(departmentNames, student.DepartmentName)
+		departmentNames = append(departmentNames, student.DepartmentId)
 		programmeIds = append(programmeIds, student.ProgrammeId)
 		studentIds = append(studentIds, student.Id)
 	}
@@ -97,23 +97,23 @@ func (u studentUseCase) CreateMany(students []entity.CreateStudentPayload) error
 	studentsToCreate := make([]entity.Student, 0, len(students))
 	for _, student := range students {
 		studentsToCreate = append(studentsToCreate, entity.Student{
-			Id:             student.Id,
-			FirstNameTH:    student.FirstNameTH,
-			LastNameTH:     student.LastNameTH,
-			FirstNameEN:    student.FirstNameEN,
-			LastNameEN:     student.LastNameEN,
-			Email:          student.Email,
-			ProgrammeId:    student.ProgrammeId,
-			DepartmentName: student.DepartmentName,
-			GPAX:           *student.GPAX,
-			MathGPA:        *student.MathGPA,
-			EngGPA:         *student.EngGPA,
-			SciGPA:         *student.SciGPA,
-			School:         student.School,
-			City:           student.City,
-			Year:           student.Year,
-			Admission:      student.Admission,
-			Remark:         student.Remark,
+			Id:           student.Id,
+			FirstNameTH:  student.FirstNameTH,
+			LastNameTH:   student.LastNameTH,
+			FirstNameEN:  student.FirstNameEN,
+			LastNameEN:   student.LastNameEN,
+			Email:        student.Email,
+			ProgrammeId:  student.ProgrammeId,
+			DepartmentId: student.DepartmentId,
+			GPAX:         *student.GPAX,
+			MathGPA:      *student.MathGPA,
+			EngGPA:       *student.EngGPA,
+			SciGPA:       *student.SciGPA,
+			School:       student.School,
+			City:         student.City,
+			Year:         student.Year,
+			Admission:    student.Admission,
+			Remark:       student.Remark,
 		})
 	}
 
@@ -135,23 +135,23 @@ func (u studentUseCase) Update(id string, student *entity.UpdateStudentPayload) 
 
 	err = u.studentRepo.Update(id,
 		&entity.Student{
-			Id:             student.Id,
-			FirstNameTH:    student.FirstNameTH,
-			LastNameTH:     student.LastNameTH,
-			FirstNameEN:    student.FirstNameEN,
-			LastNameEN:     student.LastNameEN,
-			Email:          student.Email,
-			ProgrammeId:    student.ProgrammeId,
-			DepartmentName: student.DepartmentName,
-			GPAX:           *student.GPAX,
-			MathGPA:        *student.MathGPA,
-			EngGPA:         *student.EngGPA,
-			SciGPA:         *student.SciGPA,
-			School:         student.School,
-			City:           student.City,
-			Year:           student.Year,
-			Admission:      student.Admission,
-			Remark:         *student.Remark,
+			Id:           student.Id,
+			FirstNameTH:  student.FirstNameTH,
+			LastNameTH:   student.LastNameTH,
+			FirstNameEN:  student.FirstNameEN,
+			LastNameEN:   student.LastNameEN,
+			Email:        student.Email,
+			ProgrammeId:  student.ProgrammeId,
+			DepartmentId: student.DepartmentId,
+			GPAX:         *student.GPAX,
+			MathGPA:      *student.MathGPA,
+			EngGPA:       *student.EngGPA,
+			SciGPA:       *student.SciGPA,
+			School:       student.School,
+			City:         student.City,
+			Year:         student.Year,
+			Admission:    student.Admission,
+			Remark:       *student.Remark,
 		},
 	)
 

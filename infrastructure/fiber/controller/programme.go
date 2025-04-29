@@ -57,13 +57,13 @@ func (c ProgrammeController) GetAll(ctx *fiber.Ctx) error {
 }
 
 func (c ProgrammeController) GetByParams(ctx *fiber.Ctx) error {
-	departmentName := ctx.Query("department_name")
+	departmentId := ctx.Query("department_id")
 	year := ctx.Query("year")
 
 	programmes, err := c.ProgrammeUseCase.GetBy(
 		&entity.Programme{
-			Year:           year,
-			DepartmentName: departmentName,
+			Year:         year,
+			DepartmentId: departmentId,
 		},
 	)
 	if err != nil {

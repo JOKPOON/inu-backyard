@@ -76,15 +76,15 @@ func (u programmeUseCase) Create(payload entity.CreateProgrammePayload) error {
 	}
 
 	programme := &entity.Programme{
-		Id:             ulid.Make().String(),
-		NameTH:         payload.NameTH,
-		NameEN:         payload.NameEN,
-		DegreeTH:       payload.DegreeTH,
-		DegreeEN:       payload.DegreeEN,
-		DegreeShortTH:  payload.DegreeShortTH,
-		DegreeShortEN:  payload.DegreeShortEN,
-		Year:           payload.Year,
-		DepartmentName: payload.DepartmentName,
+		Id:            ulid.Make().String(),
+		NameTH:        payload.NameTH,
+		NameEN:        payload.NameEN,
+		DegreeTH:      payload.DegreeTH,
+		DegreeEN:      payload.DegreeEN,
+		DegreeShortTH: payload.DegreeShortTH,
+		DegreeShortEN: payload.DegreeShortEN,
+		Year:          payload.Year,
+		DepartmentId:  payload.DepartmentId,
 
 		Structure: json,
 	}
@@ -106,14 +106,14 @@ func (u programmeUseCase) Update(id string, programme *entity.UpdateProgrammePay
 	}
 
 	err = u.programmeRepo.Update(id, &entity.Programme{
-		NameTH:         programme.NameTH,
-		NameEN:         programme.NameEN,
-		DegreeTH:       programme.DegreeTH,
-		DegreeEN:       programme.DegreeEN,
-		DegreeShortTH:  programme.DegreeShortTH,
-		DegreeShortEN:  programme.DegreeShortEN,
-		Year:           programme.Year,
-		DepartmentName: programme.DepartmentName,
+		NameTH:        programme.NameTH,
+		NameEN:        programme.NameEN,
+		DegreeTH:      programme.DegreeTH,
+		DegreeEN:      programme.DegreeEN,
+		DegreeShortTH: programme.DegreeShortTH,
+		DegreeShortEN: programme.DegreeShortEN,
+		Year:          programme.Year,
+		DepartmentId:  programme.DepartmentId,
 
 		Structure: existProgramme.Structure,
 	})

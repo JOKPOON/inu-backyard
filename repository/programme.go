@@ -34,8 +34,8 @@ func (r programmeRepositoryGorm) GetBy(params *entity.Programme) ([]entity.Progr
 	db := r.gorm
 
 	if params != nil {
-		if params.DepartmentName != "" {
-			db = db.Where("department_name = ?", params.DepartmentName)
+		if params.DepartmentId != "" {
+			db = db.Where("department_id = ?", params.DepartmentId)
 		}
 		if params.Year != "" {
 			db = db.Where("year = ?", params.Year)

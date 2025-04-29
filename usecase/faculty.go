@@ -24,11 +24,11 @@ func (u FacultyUseCase) Create(faculty *entity.Faculty) error {
 	return nil
 }
 
-func (u FacultyUseCase) Delete(name string) error {
-	err := u.facultyRepo.Delete(name)
+func (u FacultyUseCase) Delete(id string) error {
+	err := u.facultyRepo.Delete(id)
 
 	if err != nil {
-		return errs.New(errs.ErrDeleteFaculty, "cannot delete faculty by name %s", name, err)
+		return errs.New(errs.ErrDeleteFaculty, "cannot delete faculty by name %s", id, err)
 	}
 
 	return nil
@@ -44,8 +44,8 @@ func (u FacultyUseCase) GetAll() ([]entity.Faculty, error) {
 	return faculties, nil
 }
 
-func (u FacultyUseCase) GetByName(id string) (*entity.Faculty, error) {
-	faculty, err := u.facultyRepo.GetByName(id)
+func (u FacultyUseCase) GetById(id string) (*entity.Faculty, error) {
+	faculty, err := u.facultyRepo.GetById(id)
 
 	if err != nil {
 		return nil, errs.New(errs.ErrQueryFaculty, "cannot get faculty by id %s", id, err)
@@ -54,11 +54,11 @@ func (u FacultyUseCase) GetByName(id string) (*entity.Faculty, error) {
 	return faculty, nil
 }
 
-func (u FacultyUseCase) Update(faculty *entity.Faculty, newName string) error {
-	err := u.facultyRepo.Update(faculty, newName)
+func (u FacultyUseCase) Update(faculty *entity.Faculty) error {
+	err := u.facultyRepo.Update(faculty)
 
 	if err != nil {
-		return errs.New(errs.ErrUpdateFaculty, "cannot update student by id %s", faculty.Name, err)
+		return errs.New(errs.ErrUpdateFaculty, "cannot update faculty", err)
 	}
 
 	return nil

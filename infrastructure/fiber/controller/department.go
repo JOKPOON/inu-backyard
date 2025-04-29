@@ -2,6 +2,7 @@ package controller
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/oklog/ulid/v2"
 	"github.com/team-inu/inu-backyard/entity"
 	"github.com/team-inu/inu-backyard/infrastructure/fiber/response"
 	"github.com/team-inu/inu-backyard/internal/validator"
@@ -27,8 +28,10 @@ func (c DepartmentController) Create(ctx *fiber.Ctx) error {
 	}
 
 	err := c.DepartmentUseCase.Create(&entity.Department{
-		Name:        payload.Name,
-		FacultyName: payload.FacultyName,
+		Id:        ulid.Make().String(),
+		NameTH:    payload.NameTH,
+		NameEN:    payload.NameEN,
+		FacultyId: payload.FacultyId,
 	})
 	if err != nil {
 		return err
@@ -38,14 +41,14 @@ func (c DepartmentController) Create(ctx *fiber.Ctx) error {
 }
 
 func (c DepartmentController) Delete(ctx *fiber.Ctx) error {
-	departmentName := ctx.Params("departmentName")
+	departmentId := ctx.Params("departmentId")
 
-	_, err := c.DepartmentUseCase.GetByName(departmentName)
+	_, err := c.DepartmentUseCase.GetById(departmentId)
 	if err != nil {
 		return err
 	}
 
-	err = c.DepartmentUseCase.Delete(departmentName)
+	err = c.DepartmentUseCase.Delete(departmentId)
 	if err != nil {
 		return err
 	}
@@ -63,9 +66,9 @@ func (c DepartmentController) GetAll(ctx *fiber.Ctx) error {
 }
 
 func (c DepartmentController) GetByName(ctx *fiber.Ctx) error {
-	departmentName := ctx.Params("departmentName")
+	departmentId := ctx.Params("departmentId")
 
-	department, err := c.DepartmentUseCase.GetByName(departmentName)
+	department, err := c.DepartmentUseCase.GetById(departmentId)
 	if err != nil {
 		return err
 	}
@@ -78,9 +81,9 @@ func (c DepartmentController) GetByName(ctx *fiber.Ctx) error {
 }
 
 func (c DepartmentController) Update(ctx *fiber.Ctx) error {
-	departmentName := ctx.Params("departmentName")
+	departmentId := ctx.Params("departmentId")
 
-	_, err := c.DepartmentUseCase.GetByName(departmentName)
+	_, err := c.DepartmentUseCase.GetById(departmentId)
 	if err != nil {
 		return err
 	}
@@ -92,9 +95,11 @@ func (c DepartmentController) Update(ctx *fiber.Ctx) error {
 	}
 
 	err = c.DepartmentUseCase.Update(&entity.Department{
-		Name:        departmentName,
-		FacultyName: payload.FacultyName,
-	}, payload.NewName)
+		Id:        departmentId,
+		NameTH:    payload.NameTH,
+		NameEN:    payload.NameEN,
+		FacultyId: payload.FacultyId,
+	})
 	if err != nil {
 		return err
 	}
