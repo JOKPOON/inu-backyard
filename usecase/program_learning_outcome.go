@@ -48,11 +48,12 @@ func (u programLearningOutcomeUseCase) Create(payload []entity.CreateProgramLear
 		id := ulid.Make().String()
 
 		plos = append(plos, entity.ProgramLearningOutcome{
-			Id:              id,
-			Code:            plo.Code,
-			DescriptionThai: plo.DescriptionThai,
-			DescriptionEng:  plo.DescriptionEng,
-			ProgramId:       plo.ProgramId,
+			Id:                              id,
+			Code:                            plo.Code,
+			DescriptionThai:                 plo.DescriptionThai,
+			DescriptionEng:                  plo.DescriptionEng,
+			ExpectedCoursePassingPercentage: plo.ExpectedCoursePassingPercentage,
+			ProgramId:                       plo.ProgramId,
 		})
 
 		for _, subPlo := range plo.SubProgramLearningOutcomes {

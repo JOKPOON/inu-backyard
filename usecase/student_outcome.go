@@ -40,11 +40,12 @@ func (u StudentOutcomeUsecase) Create(payload []entity.CreateStudentOutcome) err
 	for _, so := range payload {
 		id := ulid.Make().String()
 		sos = append(sos, &entity.StudentOutcome{
-			Id:              id,
-			Code:            so.Code,
-			DescriptionThai: so.DescriptionThai,
-			DescriptionEng:  so.DescriptionEng,
-			ProgramId:       so.ProgramId,
+			Id:                              id,
+			Code:                            so.Code,
+			DescriptionThai:                 so.DescriptionThai,
+			DescriptionEng:                  so.DescriptionEng,
+			ExpectedCoursePassingPercentage: so.ExpectedCoursePassingPercentage,
+			ProgramId:                       so.ProgramId,
 		})
 
 		for _, sso := range so.SubStudentOutcomes {
@@ -83,10 +84,11 @@ func (u StudentOutcomeUsecase) Update(id string, payload *entity.UpdateStudentOu
 	}
 
 	err = u.studentOutcomeRepo.Update(id, &entity.StudentOutcome{
-		Code:            payload.Code,
-		DescriptionThai: payload.DescriptionThai,
-		DescriptionEng:  payload.DescriptionEng,
-		ProgramId:       payload.ProgramId,
+		Code:                            payload.Code,
+		DescriptionThai:                 payload.DescriptionThai,
+		DescriptionEng:                  payload.DescriptionEng,
+		ExpectedCoursePassingPercentage: payload.ExpectedCoursePassingPercentage,
+		ProgramId:                       payload.ProgramId,
 	})
 
 	if err != nil {

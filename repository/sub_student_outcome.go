@@ -22,7 +22,7 @@ func (r StudentOutcomeRepositoryGorm) GetAllSubSO() ([]entity.SubStudentOutcome,
 
 func (r StudentOutcomeRepositoryGorm) GetSubSOById(id string) (*entity.SubStudentOutcome, error) {
 	var sso entity.SubStudentOutcome
-	err := r.gorm.Preload("StudentOutcome").Where("id = ?", id).First(&sso).Error
+	err := r.gorm.Where("id = ?", id).First(&sso).Error
 
 	if err == gorm.ErrRecordNotFound {
 		return nil, nil

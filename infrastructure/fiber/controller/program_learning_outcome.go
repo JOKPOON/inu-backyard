@@ -68,9 +68,10 @@ func (c ProgramLearningOutcomeController) Update(ctx *fiber.Ctx) error {
 	id := ctx.Params("ploId")
 
 	err := c.ProgramLearningOutcomeUseCase.Update(id, &entity.ProgramLearningOutcome{
-		Code:            payload.Code,
-		DescriptionThai: payload.DescriptionThai,
-		DescriptionEng:  *payload.DescriptionEng, // because description eng can be empty string
+		Code:                            payload.Code,
+		DescriptionThai:                 payload.DescriptionThai,
+		DescriptionEng:                  *payload.DescriptionEng, // because description eng can be empty string
+		ExpectedCoursePassingPercentage: payload.ExpectedCoursePassingPercentage,
 	})
 
 	if err != nil {

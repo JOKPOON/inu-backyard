@@ -38,13 +38,37 @@ type ProgramLearningOutcomeUseCase interface {
 }
 
 type ProgramLearningOutcome struct {
-	Id              string `json:"id" gorm:"primaryKey;type:char(255)"`
-	Code            string `json:"code"`
-	DescriptionThai string `json:"description_thai"`
-	DescriptionEng  string `json:"description_eng"`
-	ProgramId       string `json:"program_id" gorm:"type:char(255)"`
+	Id                              string  `json:"id" gorm:"primaryKey;type:char(255)"`
+	Code                            string  `json:"code"`
+	DescriptionThai                 string  `json:"description_thai"`
+	DescriptionEng                  string  `json:"description_eng"`
+	ExpectedCoursePassingPercentage float64 `json:"expected_course_passing_percentage"`
+	ProgramId                       string  `json:"program_id" gorm:"type:char(255)"`
 
 	SubProgramLearningOutcomes []SubProgramLearningOutcome `json:"sub_program_learning_outcomes"`
+	Programme                  *Programme                  `json:"programme,omitempty" gorm:"foreignKey:ProgramId"`
+}
+
+type CreateProgramLearningOutcome struct {
+	Code                            string                            `validate:"required" json:"code"`
+	DescriptionThai                 string                            `validate:"required" json:"description_thai"`
+	DescriptionEng                  string                            `json:"description_eng"`
+	ExpectedCoursePassingPercentage float64                           `validate:"required" json:"expected_course_passing_percentage"`
+	ProgramId                       string                            `validate:"required" json:"program_id"`
+	SubProgramLearningOutcomes      []CreateSubProgramLearningOutcome `json:"sub_program_learning_outcomes"`
+}
+
+type CreateProgramLearningOutcomePayload struct {
+	ProgramLearningOutcomes []CreateProgramLearningOutcome `json:"program_learning_outcomes" validate:"required,dive"`
+}
+
+type UpdateProgramLearningOutcomePayload struct {
+	Id                              string  `json:"id" validate:"required" `
+	Code                            string  `json:"code"`
+	DescriptionThai                 string  `json:"description_thai"`
+	DescriptionEng                  *string `json:"description_eng"`
+	ExpectedCoursePassingPercentage float64 `json:"expected_course_passing_percentage"`
+	ProgramId                       string  `json:"program_id"`
 }
 
 type SubProgramLearningOutcome struct {
@@ -60,26 +84,6 @@ type CreateSubProgramLearningOutcomeDto struct {
 	DescriptionThai          string `json:"description_thai"`
 	DescriptionEng           string `json:"description_eng"`
 	ProgramLearningOutcomeId string `json:"program_learning_outcome_id"`
-}
-
-type CreateProgramLearningOutcome struct {
-	Code                       string                            `validate:"required" json:"code"`
-	DescriptionThai            string                            `validate:"required" json:"description_thai"`
-	DescriptionEng             string                            `json:"description_eng"`
-	ProgramId                  string                            `validate:"required" json:"program_id"`
-	SubProgramLearningOutcomes []CreateSubProgramLearningOutcome `json:"sub_program_learning_outcomes"`
-}
-
-type CreateProgramLearningOutcomePayload struct {
-	ProgramLearningOutcomes []CreateProgramLearningOutcome `json:"program_learning_outcomes" validate:"required,dive"`
-}
-
-type UpdateProgramLearningOutcomePayload struct {
-	Id              string  `json:"id" validate:"required" `
-	Code            string  `json:"code"`
-	DescriptionThai string  `json:"description_thai"`
-	DescriptionEng  *string `json:"description_eng"`
-	ProgramId       string  `json:"program_id"`
 }
 
 type CreateSubProgramLearningOutcome struct {
