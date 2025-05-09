@@ -33,23 +33,17 @@ func (r studentRepositoryGorm) GetById(id string) (*entity.Student, error) {
 
 func (r studentRepositoryGorm) GetAll() ([]entity.Student, error) {
 	var students []entity.Student
-
-	err := r.gorm.Find(&students).Error
-	if err == gorm.ErrRecordNotFound {
-		return nil, nil
-	} else if err != nil {
-		return nil, fmt.Errorf("cannot query to get students: %w", err)
-	}
-
 	return students, nil
 }
 
-func (r studentRepositoryGorm) GetByParams(query string, params *entity.Student, limit, offset int) ([]entity.Student, error) {
+func (r studentRepositoryGorm) GetByParams(query string, params *entity.Student, limit, offset int) (*entity.GetStudentsResponse, error) {
 	var students []entity.Student
+	var total int64
+	var TotalPage int64
 
-	db := r.gorm
+	db := r.gorm.Model(&entity.Student{})
 
-	fmt.Println(params)
+	// Apply filters if params is provided
 	if params != nil {
 		if params.ProgrammeId != "" {
 			db = db.Where("programme_id = ?", params.ProgrammeId)
@@ -58,17 +52,39 @@ func (r studentRepositoryGorm) GetByParams(query string, params *entity.Student,
 			db = db.Where("year = ?", params.Year)
 		}
 		if params.DepartmentId != "" {
-			db = db.Where("department_name = ?", params.DepartmentId)
+			db = db.Where("department_id = ?", params.DepartmentId) // fixed here
 		}
 	}
 
+	// Apply search query
 	if query != "" {
-		searchPattern := "%" + query + "%"
-		db = db.Where("first_name_th LIKE ? OR last_name_th LIKE ? OR first_name_en LIKE ? OR last_name_en LIKE ? OR id LIKE ?",
-			searchPattern, searchPattern, searchPattern, searchPattern, searchPattern)
+		search := "%" + query + "%"
+		db = db.Where(`
+			first_name_th LIKE ? OR
+			last_name_th LIKE ? OR
+			first_name_en LIKE ? OR
+			last_name_en LIKE ? OR
+			id LIKE ?`,
+			search, search, search, search, search,
+		)
+	}
+	// Count total records
+	err := db.Count(&total).Error
+	if err != nil {
+		return nil, fmt.Errorf("cannot count students: %w", err)
 	}
 
-	err := db.Limit(limit).Offset(offset).Find(&students).Error
+	// Calculate total pages
+	TotalPage = total / int64(limit)
+	if total%int64(limit) != 0 {
+		TotalPage++
+	}
+
+	// Preload related Programme and Department data
+	err = db.Preload("Programme").Preload("Department").
+		Limit(limit).Offset(offset).
+		Find(&students).Error
+
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
@@ -76,7 +92,12 @@ func (r studentRepositoryGorm) GetByParams(query string, params *entity.Student,
 		return nil, fmt.Errorf("cannot query students: %w", err)
 	}
 
-	return students, nil
+	return &entity.GetStudentsResponse{
+		Students:  students,
+		Total:     int(total),
+		Page:      offset + 1,
+		TotalPage: int(TotalPage),
+	}, nil
 }
 
 func (r studentRepositoryGorm) Create(student *entity.Student) error {
@@ -102,16 +123,8 @@ func (r studentRepositoryGorm) Update(id string, student *entity.Student) error 
 		"id":              student.Id,
 		"first_name":      student.FirstNameTH,
 		"last_name":       student.LastNameTH,
-		"gpax":            student.GPAX,
-		"math_gpa":        student.MathGPA,
-		"eng_gpa":         student.EngGPA,
-		"sci_gpa":         student.SciGPA,
-		"school":          student.School,
-		"city":            student.City,
 		"email":           student.Email,
 		"year":            student.Year,
-		"admission":       student.Admission,
-		"remark":          student.Remark,
 		"programme_id":    student.ProgrammeId,
 		"department_name": student.DepartmentId,
 	}).Error

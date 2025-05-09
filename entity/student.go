@@ -3,7 +3,7 @@ package entity
 type StudentRepository interface {
 	GetById(id string) (*Student, error)
 	GetAll() ([]Student, error)
-	GetByParams(query string, params *Student, limit int, offset int) ([]Student, error)
+	GetByParams(query string, params *Student, limit int, offset int) (*GetStudentsResponse, error)
 	Create(student *Student) error
 	CreateMany(student []Student) error
 	Update(id string, student *Student) error
@@ -17,7 +17,7 @@ type StudentRepository interface {
 type StudentUseCase interface {
 	GetById(id string) (*Student, error)
 	GetAll() ([]Student, error)
-	GetByParams(query string, params *Student, limit int, offset int) ([]Student, error)
+	GetByParams(query string, params *Student, limit int, offset int) (*GetStudentsResponse, error)
 	CreateMany(student []CreateStudentPayload) error
 	Update(id string, student *UpdateStudentPayload) error
 	Delete(id string) error
@@ -29,26 +29,19 @@ type StudentUseCase interface {
 }
 
 type Student struct {
-	Id           string  `gorm:"primaryKey;type:char(255)" json:"id"`
-	FirstNameTH  string  `json:"first_name_th"`
-	LastNameTH   string  `json:"last_name_th"`
-	FirstNameEN  string  `json:"first_name_en"`
-	LastNameEN   string  `json:"last_name_en"`
-	Email        string  `json:"email"`
-	ProgrammeId  string  `json:"programme_id"`
-	DepartmentId string  `json:"department_id"`
-	GPAX         float64 `json:"gpax"`
-	MathGPA      float64 `json:"math_gpa"`
-	EngGPA       float64 `json:"eng_gpa"`
-	SciGPA       float64 `json:"sci_gpa"`
-	School       string  `json:"school"`
-	City         string  `json:"city"`
-	Year         string  `json:"year"`
-	Admission    string  `json:"admission"`
-	Remark       string  `json:"remark"`
+	Id          string `gorm:"primaryKey;type:char(255)" json:"id"`
+	FirstNameTH string `json:"first_name_th"`
+	LastNameTH  string `json:"last_name_th"`
+	FirstNameEN string `json:"first_name_en"`
+	LastNameEN  string `json:"last_name_en"`
+	Email       string `json:"email"`
+	Year        string `json:"year"`
 
-	Programme  *Programme  `json:"programme,omitempty"`
-	Department *Department `json:"department,omitempty"`
+	ProgrammeId string    `json:"programme_id"`
+	Programme   Programme `gorm:"foreignKey:ProgrammeId" json:"programme"`
+
+	DepartmentId string     `json:"department_id"`
+	Department   Department `gorm:"foreignKey:DepartmentId" json:"department"`
 }
 
 type CreateBulkStudentsPayload struct {
@@ -56,21 +49,13 @@ type CreateBulkStudentsPayload struct {
 }
 
 type CreateStudentPayload struct {
-	Id          string   `json:"id" validate:"required"`
-	FirstNameTH string   `json:"first_name_th" validate:"required"`
-	LastNameTH  string   `json:"last_name_th" validate:"required"`
-	FirstNameEN string   `json:"first_name_en" validate:"required"`
-	LastNameEN  string   `json:"last_name_en" validate:"required"`
-	GPAX        *float64 `json:"gpax" validate:"required"`
-	MathGPA     *float64 `json:"math_gpa" validate:"required"`
-	EngGPA      *float64 `json:"eng_gpa" validate:"required"`
-	SciGPA      *float64 `json:"sci_gpa" validate:"required"`
-	School      string   `json:"school" validate:"required"`
-	City        string   `json:"city" validate:"required"`
-	Email       string   `json:"email" validate:"required"`
-	Year        string   `json:"year" validate:"required"`
-	Admission   string   `json:"admission" validate:"required"`
-	Remark      string   `json:"remark"`
+	Id          string `json:"id" validate:"required"`
+	FirstNameTH string `json:"first_name_th"`
+	LastNameTH  string `json:"last_name_th"`
+	FirstNameEN string `json:"first_name_en" validate:"required"`
+	LastNameEN  string `json:"last_name_en" validate:"required"`
+	Email       string `json:"email" validate:"required"`
+	Year        string `json:"year" validate:"required"`
 
 	ProgrammeId  string `json:"programme_id" validate:"required"`
 	DepartmentId string `json:"department_id" validate:"required"`
@@ -83,22 +68,21 @@ type GetStudentsByParamsPayload struct {
 }
 
 type UpdateStudentPayload struct {
-	Id          string   `json:"id" validate:"required"`
-	FirstNameTH string   `json:"first_name_th" validate:"required"`
-	LastNameTH  string   `json:"last_name_th" validate:"required"`
-	FirstNameEN string   `json:"first_name_en" validate:"required"`
-	LastNameEN  string   `json:"last_name_en" validate:"required"`
-	GPAX        *float64 `json:"gpax" validate:"required"`
-	MathGPA     *float64 `json:"math_gpa" validate:"required"`
-	EngGPA      *float64 `json:"eng_gpa" validate:"required"`
-	SciGPA      *float64 `json:"sci_gpa" validate:"required"`
-	School      string   `json:"school" validate:"required"`
-	City        string   `json:"city" validate:"required"`
-	Email       string   `json:"email" validate:"required"`
-	Year        string   `json:"year" validate:"required"`
-	Admission   string   `json:"admission" validate:"required"`
-	Remark      *string  `json:"remark" validate:"required"`
+	Id          string `json:"id" validate:"required"`
+	FirstNameTH string `json:"first_name_th"`
+	LastNameTH  string `json:"last_name_th" `
+	FirstNameEN string `json:"first_name_en"`
+	LastNameEN  string `json:"last_name_en"`
+	Email       string `json:"email" validate:"required"`
+	Year        string `json:"year" validate:"required"`
 
 	ProgrammeId  string `json:"programme_id" validate:"required"`
 	DepartmentId string `json:"department_id" validate:"required"`
+}
+
+type GetStudentsResponse struct {
+	Students  []Student `json:"students"`
+	Total     int       `json:"total"`
+	Page      int       `json:"page"`
+	TotalPage int       `json:"total_page"`
 }

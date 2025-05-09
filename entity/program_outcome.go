@@ -24,7 +24,6 @@ type ProgramOutcomeUseCase interface {
 type ProgramOutcome struct {
 	Id                              string  `json:"id" gorm:"primaryKey;type:char(255)"`
 	Code                            string  `json:"code"`
-	Name                            string  `json:"name"`
 	Description                     string  `json:"description"`
 	ExpectedCoursePassingPercentage float64 `json:"expected_course_passing_percentage"`
 	Category                        string  `json:"category"`
@@ -35,7 +34,6 @@ type ProgramOutcome struct {
 
 type CreateProgramOutcome struct {
 	Code                            string  `json:"code" validate:"required"`
-	Name                            string  `json:"name" validate:"required"`
 	Description                     string  `json:"description" validate:"required"`
 	ExpectedCoursePassingPercentage float64 `json:"expected_course_passing_percentage" validate:"required"`
 	Category                        string  `json:"category" validate:"required"`
@@ -49,7 +47,6 @@ type CreateProgramOutcomePayload struct {
 type UpdateProgramOutcomePayload struct {
 	Id                              string  `json:"id" validate:"required"`
 	Code                            string  `json:"code" `
-	Name                            string  `json:"name" `
 	Description                     string  `json:"description" `
 	ExpectedCoursePassingPercentage float64 `json:"expected_course_passing_percentage" `
 	Category                        string  `json:"category" `

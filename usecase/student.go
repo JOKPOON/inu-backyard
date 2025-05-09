@@ -42,7 +42,7 @@ func (u studentUseCase) GetAll() ([]entity.Student, error) {
 	return students, nil
 }
 
-func (u studentUseCase) GetByParams(query string, params *entity.Student, limit int, offset int) ([]entity.Student, error) {
+func (u studentUseCase) GetByParams(query string, params *entity.Student, limit int, offset int) (*entity.GetStudentsResponse, error) {
 	students, err := u.studentRepo.GetByParams(query, params, limit, offset)
 
 	if err != nil {
@@ -105,15 +105,7 @@ func (u studentUseCase) CreateMany(students []entity.CreateStudentPayload) error
 			Email:        student.Email,
 			ProgrammeId:  student.ProgrammeId,
 			DepartmentId: student.DepartmentId,
-			GPAX:         *student.GPAX,
-			MathGPA:      *student.MathGPA,
-			EngGPA:       *student.EngGPA,
-			SciGPA:       *student.SciGPA,
-			School:       student.School,
-			City:         student.City,
 			Year:         student.Year,
-			Admission:    student.Admission,
-			Remark:       student.Remark,
 		})
 	}
 
@@ -143,15 +135,7 @@ func (u studentUseCase) Update(id string, student *entity.UpdateStudentPayload) 
 			Email:        student.Email,
 			ProgrammeId:  student.ProgrammeId,
 			DepartmentId: student.DepartmentId,
-			GPAX:         *student.GPAX,
-			MathGPA:      *student.MathGPA,
-			EngGPA:       *student.EngGPA,
-			SciGPA:       *student.SciGPA,
-			School:       student.School,
-			City:         student.City,
 			Year:         student.Year,
-			Admission:    student.Admission,
-			Remark:       *student.Remark,
 		},
 	)
 

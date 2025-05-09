@@ -55,7 +55,6 @@ func (u programOutcomeUseCase) Create(dto []entity.CreateProgramOutcome) error {
 		pos = append(pos, entity.ProgramOutcome{
 			Id:                              ulid.Make().String(),
 			Code:                            po.Code,
-			Name:                            po.Name,
 			Description:                     po.Description,
 			ExpectedCoursePassingPercentage: po.ExpectedCoursePassingPercentage,
 			Category:                        po.Category,

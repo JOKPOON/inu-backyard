@@ -69,7 +69,6 @@ func (c ProgramOutcomeController) Update(ctx *fiber.Ctx) error {
 
 	err := c.ProgramOutcomeUseCase.Update(id, &entity.ProgramOutcome{
 		Code:        payload.Code,
-		Name:        payload.Name,
 		Description: payload.Description,
 	})
 

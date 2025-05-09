@@ -1,6 +1,9 @@
 package controller
 
 import (
+	"errors"
+	"strconv"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/team-inu/inu-backyard/entity"
 	"github.com/team-inu/inu-backyard/infrastructure/fiber/response"
@@ -49,6 +52,22 @@ func (c StudentController) GetStudents(ctx *fiber.Ctx) error {
 	programmeId := ctx.Query("programme_id")
 	departmentName := ctx.Query("department_name")
 	year := ctx.Query("year")
+	limit := ctx.Query("limit")
+	offset := ctx.Query("offset")
+	if limit == "" {
+		limit = "10"
+	}
+	if offset == "" {
+		offset = "0"
+	}
+	limitNum, err := strconv.Atoi(limit)
+	if err != nil {
+		return errors.New("invalid limit")
+	}
+	offsetNum, err := strconv.Atoi(offset)
+	if err != nil {
+		return errors.New("invalid offset")
+	}
 
 	students, err := c.StudentUseCase.GetByParams(
 		query,
@@ -57,8 +76,8 @@ func (c StudentController) GetStudents(ctx *fiber.Ctx) error {
 			Year:         year,
 			DepartmentId: departmentName,
 		},
-		10,
-		0,
+		limitNum,
+		offsetNum,
 	)
 
 	if err != nil {
