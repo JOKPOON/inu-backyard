@@ -33,3 +33,4 @@ config.dev.yml
 session.txt
 
 certs/*
+output/*

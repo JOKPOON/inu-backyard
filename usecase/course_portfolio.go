@@ -4,10 +4,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"math"
+	"os"
+	"path/filepath"
 	"sort"
+	"time"
 
 	"github.com/team-inu/inu-backyard/entity"
 	errs "github.com/team-inu/inu-backyard/entity/error"
+	"github.com/team-inu/inu-backyard/utils"
+	"github.com/xuri/excelize/v2"
 )
 
 // TODO: refactor (real)
@@ -904,4 +909,370 @@ func (u coursePortfolioUseCase) GetOutcomesByStudentId(studentId string) ([]enti
 	}
 
 	return students, nil
+}
+
+func (u coursePortfolioUseCase) GetCourseLinkedOutcomes(programmeId string, fromSerm, toSerm int) error {
+	rows, err := u.CoursePortfolioRepository.GetCourseLinkedOutcomes(programmeId, fromSerm, toSerm)
+	if err != nil {
+		return errs.New(errs.SameCode, "cannot get course linked outcomes %s", err)
+	}
+
+	// Process to nested structure
+	output := ProcessToNestedStructure(rows)
+
+	jsonData, err := json.MarshalIndent(output, "", "  ")
+	if err != nil {
+		return errs.New(errs.SameCode, "cannot marshal course linked outcomes %s", err)
+	}
+
+	fmt.Println(string(jsonData))
+
+	fileDir := filepath.Join("output", "course_linked_outcomes")
+	if err := os.MkdirAll(fileDir, os.ModePerm); err != nil {
+		return errs.New(errs.SameCode, "cannot create directory %s", err)
+	}
+	filepath := filepath.Join(fileDir, fmt.Sprintf("course_linked_outcomes_%s.xlsx", time.Now().Format("20060102150405")))
+
+	err = WriteToExcel(output, filepath)
+	if err != nil {
+		return errs.New(errs.SameCode, "cannot write to excel %s", err)
+	}
+
+	return nil
+}
+
+func WriteToExcel(outputs []Output, filename string) error {
+	f := excelize.NewFile()
+	sheet := "Sheet1"
+	f.SetSheetName(f.GetSheetName(0), sheet)
+
+	// Create central style
+	style, err := f.NewStyle(&excelize.Style{
+		Alignment: &excelize.Alignment{
+			Horizontal: "center",
+			Vertical:   "center",
+		},
+		Font: &excelize.Font{
+			Bold: true,
+		},
+	})
+	if err != nil {
+		return fmt.Errorf("failed to create style: %v", err)
+	}
+
+	// Collect unique outcomes
+	uniquePLOs := map[string]map[string]bool{}
+	uniqueSOs := map[string]map[string]bool{}
+	uniquePOs := map[string]bool{}
+
+	for _, output := range outputs {
+		for _, clo := range output.CLOs {
+			for _, assessment := range clo.Assessments {
+				for plo, splos := range assessment.PLOs {
+					if uniquePLOs[plo] == nil {
+						uniquePLOs[plo] = map[string]bool{}
+					}
+					for splo := range splos {
+						uniquePLOs[plo][splo] = true
+					}
+				}
+				for so, ssos := range assessment.SOs {
+					if uniqueSOs[so] == nil {
+						uniqueSOs[so] = map[string]bool{}
+					}
+					for sso := range ssos {
+						uniqueSOs[so][sso] = true
+					}
+				}
+				for po := range assessment.POs {
+					uniquePOs[po] = true
+				}
+			}
+		}
+	}
+
+	// Write static headers
+	staticHeaders := []string{"Course Code", "Semester", "Course Name", "CLO", "Assessment"}
+	for i, h := range staticHeaders {
+		col := i + 1
+		cell1, _ := excelize.CoordinatesToCellName(col, 1)
+		cell2, _ := excelize.CoordinatesToCellName(col, 2)
+		if err := f.SetCellValue(sheet, cell1, h); err != nil {
+			return err
+		}
+		if err := f.MergeCell(sheet, cell1, cell2); err != nil {
+			return err
+		}
+		if err := f.SetCellStyle(sheet, cell1, cell2, style); err != nil {
+			return err
+		}
+	}
+
+	// Write dynamic outcome headers
+	colIndex := len(staticHeaders) + 1
+	outcomeMap := map[string]int{}
+
+	writeOutcomeHeaders := func(header string, groups map[string]map[string]bool) error {
+		for mainKey, subMap := range groups {
+			startCol := colIndex
+			for _, subKey := range getSortedKeys(subMap) {
+				cellTop, _ := excelize.CoordinatesToCellName(colIndex, 1)
+				cellBottom, _ := excelize.CoordinatesToCellName(colIndex, 2)
+				if err := f.SetCellValue(sheet, cellTop, mainKey); err != nil {
+					return err
+				}
+				if err := f.SetCellValue(sheet, cellBottom, subKey); err != nil {
+					return err
+				}
+				if err := f.SetCellStyle(sheet, cellTop, cellBottom, style); err != nil {
+					return err
+				}
+				outcomeMap[subKey] = colIndex
+				colIndex++
+			}
+			startCell, _ := excelize.CoordinatesToCellName(startCol, 1)
+			endCell, _ := excelize.CoordinatesToCellName(colIndex-1, 1)
+			if err := f.MergeCell(sheet, startCell, endCell); err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+
+	if err := writeOutcomeHeaders("PLO", uniquePLOs); err != nil {
+		return err
+	}
+	if err := writeOutcomeHeaders("SO", uniqueSOs); err != nil {
+		return err
+	}
+
+	// Write POs
+	startCol := colIndex
+	for _, po := range getSortedKeysBoolMap(uniquePOs) {
+		cellTop, _ := excelize.CoordinatesToCellName(colIndex, 1)
+		cellBottom, _ := excelize.CoordinatesToCellName(colIndex, 2)
+		if err := f.SetCellValue(sheet, cellTop, "PO"); err != nil {
+			return err
+		}
+		if err := f.SetCellValue(sheet, cellBottom, po); err != nil {
+			return err
+		}
+		if err := f.SetCellStyle(sheet, cellTop, cellBottom, style); err != nil {
+			return err
+		}
+		outcomeMap[po] = colIndex
+		colIndex++
+	}
+	startPOCell, _ := excelize.CoordinatesToCellName(startCol, 1)
+	endPOCell, _ := excelize.CoordinatesToCellName(colIndex-1, 1)
+	if err := f.MergeCell(sheet, startPOCell, endPOCell); err != nil {
+		return err
+	}
+
+	// Write data rows
+	row := 3
+	for _, output := range outputs {
+		startRow := row
+		for _, clo := range output.CLOs {
+			cloStart := row
+			for _, assessment := range clo.Assessments {
+				f.SetCellValue(sheet, getCell(1, row), output.CourseCode)
+				f.SetCellValue(sheet, getCell(2, row), output.Semester)
+				f.SetCellValue(sheet, getCell(3, row), output.CourseName)
+				f.SetCellValue(sheet, getCell(4, row), clo.CLO)
+				f.SetCellValue(sheet, getCell(5, row), assessment.Name)
+
+				for plo := range assessment.PLOs {
+					for splo := range assessment.PLOs[plo] {
+						if col, ok := outcomeMap[splo]; ok {
+							f.SetCellValue(sheet, getCell(col, row), "X")
+							f.SetCellStyle(sheet, getCell(col, row), getCell(col, row), style)
+						}
+					}
+				}
+				for so := range assessment.SOs {
+					for sso := range assessment.SOs[so] {
+						if col, ok := outcomeMap[sso]; ok {
+							f.SetCellValue(sheet, getCell(col, row), "X")
+							f.SetCellStyle(sheet, getCell(col, row), getCell(col, row), style)
+						}
+					}
+				}
+				for po := range assessment.POs {
+					if col, ok := outcomeMap[po]; ok {
+						f.SetCellValue(sheet, getCell(col, row), "X")
+						f.SetCellStyle(sheet, getCell(col, row), getCell(col, row), style)
+					}
+				}
+				row++
+			}
+			if row > cloStart {
+				f.MergeCell(sheet, getCell(4, cloStart), getCell(4, row-1))
+			}
+		}
+		if row > startRow {
+			f.MergeCell(sheet, getCell(1, startRow), getCell(1, row-1))
+			f.MergeCell(sheet, getCell(2, startRow), getCell(2, row-1))
+			f.MergeCell(sheet, getCell(3, startRow), getCell(3, row-1))
+		}
+	}
+
+	// Adjust column widths
+	colWidths := make(map[int]int)
+	for r := 1; r < row; r++ {
+		for c := 1; c < colIndex; c++ {
+			cell, _ := excelize.CoordinatesToCellName(c, r)
+			val, err := f.GetCellValue(sheet, cell)
+			if err != nil {
+				continue
+			}
+			if len(val) > colWidths[c] {
+				colWidths[c] = len(val)
+			}
+		}
+	}
+
+	for colNum, maxLen := range colWidths {
+		colName, _ := excelize.ColumnNumberToName(colNum)
+		width := float64(maxLen + 10) // Add padding
+		if err := f.SetColWidth(sheet, colName, colName, width); err != nil {
+			return fmt.Errorf("failed to set column width for %s: %v", colName, err)
+		}
+	}
+
+	// Save file
+	if err := f.SaveAs(filename); err != nil {
+		return err
+	}
+
+	// Cleanup old files
+	fileFolder := filepath.Dir(filename)
+	if err := utils.DeleteOldFiles(fileFolder, 1); err != nil {
+		return fmt.Errorf("cannot delete old files: %w", err)
+	}
+
+	return nil
+}
+
+// Helper Functions
+func getCell(col, row int) string {
+	cell, _ := excelize.CoordinatesToCellName(col, row)
+	return cell
+}
+
+func getSortedKeys(m map[string]bool) []string {
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	return keys
+}
+
+func getSortedKeysBoolMap(m map[string]bool) []string {
+	return getSortedKeys(m)
+}
+
+func ProcessToNestedStructure(rows []entity.FlatRow) []Output {
+	courseMap := make(map[string]*Output)
+
+	for _, row := range rows {
+		courseKey := row.CourseCode + "_" + row.Semester
+
+		// Initialize course
+		if _, exists := courseMap[courseKey]; !exists {
+			courseMap[courseKey] = &Output{
+				CourseCode: row.CourseCode,
+				Semester:   row.Semester,
+				CourseName: row.CourseName,
+			}
+		}
+
+		course := courseMap[courseKey]
+
+		// Find or add CLO
+		var clo *CLOGroup
+		for i := range course.CLOs {
+			if course.CLOs[i].CLO == row.CloDescription {
+				clo = &course.CLOs[i]
+				break
+			}
+		}
+		if clo == nil {
+			course.CLOs = append(course.CLOs, CLOGroup{CLO: row.CloDescription})
+			clo = &course.CLOs[len(course.CLOs)-1]
+		}
+
+		if row.AssessmentID == "" {
+			continue
+		}
+
+		// Find or add Assessment
+		var assessment *Assessment
+		for i := range clo.Assessments {
+			if clo.Assessments[i].Name == row.AssessmentName {
+				assessment = &clo.Assessments[i]
+				break
+			}
+		}
+		if assessment == nil {
+			newAssessment := Assessment{
+				Name: row.AssessmentName,
+				PLOs: map[string]map[string]string{},
+				SOs:  map[string]map[string]string{},
+				POs:  map[string]string{},
+			}
+			clo.Assessments = append(clo.Assessments, newAssessment)
+			assessment = &clo.Assessments[len(clo.Assessments)-1]
+		}
+
+		// Populate maps
+		// Populate nested PLO map
+		if row.PLOCode != "" && row.SPLOCode != "" {
+			if _, exists := assessment.PLOs[row.PLOCode]; !exists {
+				assessment.PLOs[row.PLOCode] = map[string]string{}
+			}
+			assessment.PLOs[row.PLOCode][row.SPLOCode] = "X"
+		}
+
+		// Populate nested SO map
+		if row.SOCode != "" && row.SSOCode != "" {
+			if _, exists := assessment.SOs[row.SOCode]; !exists {
+				assessment.SOs[row.SOCode] = map[string]string{}
+			}
+			assessment.SOs[row.SOCode][row.SSOCode] = "X"
+		}
+
+		// Populate PO map
+		if row.POCode != "" {
+			assessment.POs[row.POCode] = "O"
+		}
+
+	}
+
+	// Convert map to slice
+	output := make([]Output, 0, len(courseMap))
+	for _, v := range courseMap {
+		output = append(output, *v)
+	}
+	return output
+}
+
+type Output struct {
+	CourseCode string     `json:"course_code"`
+	Semester   string     `json:"semester"`
+	CourseName string     `json:"course_name"`
+	CLOs       []CLOGroup `json:"CLOs"`
+}
+
+type CLOGroup struct {
+	CLO         string       `json:"CLO"`
+	Assessments []Assessment `json:"assessments"`
+}
+
+type Assessment struct {
+	Name string                       `json:"name"`
+	PLOs map[string]map[string]string `json:"PLOs"` // PLO -> SPLO -> "X"
+	SOs  map[string]map[string]string `json:"SOs"`  // SO -> SSO -> "X"
+	POs  map[string]string            `json:"POs"`  // PO -> "O"
 }

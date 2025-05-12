@@ -1101,3 +1101,73 @@ func cacheOutcomes(gorm *gorm.DB, selector TabeeSelector) {
 	gorm.Exec(drop)
 	gorm.Exec(query)
 }
+
+func (r coursePortfolioRepositoryGorm) GetCourseLinkedOutcomes(programmeId string, fromSerm, toSerm int) ([]entity.FlatRow, error) {
+	query := `
+		SELECT
+			c.code AS course_code,
+			s.year AS semester,
+			c.name AS course_name,
+			clo.id AS clo_id,
+			clo.code AS clo_description,
+			a.id AS assessment_id,
+			a.name AS assessment_name,
+			splo.code AS splo_code,
+			plo.code AS plo_code,
+			sso.code AS sso_code,
+			so.code AS so_code,
+			po.code AS po_code
+		FROM
+			course c
+		JOIN semester s ON
+			s.id = c.semester_id
+		JOIN course_learning_outcome clo ON
+			clo.course_id = c.id
+		LEFT JOIN clo_assignment ca ON
+			ca.course_learning_outcome_id = clo.id
+		LEFT JOIN assignment a ON
+			a.id = ca.assignment_id
+			-- Join to SPLOs and their parent PLOs
+		LEFT JOIN clo_subplo csp ON
+			csp.course_learning_outcome_id = clo.id
+		LEFT JOIN sub_program_learning_outcome splo ON
+			splo.id = csp.sub_program_learning_outcome_id
+		LEFT JOIN program_learning_outcome plo ON
+			plo.id = splo.program_learning_outcome_id
+			-- Join to SSOs and their parent SOs
+		LEFT JOIN clo_subso csso ON
+			csso.course_learning_outcome_id = clo.id
+		LEFT JOIN sub_student_outcome sso ON
+			sso.id = csso.sub_student_outcome_id
+		LEFT JOIN student_outcome so ON
+			so.id = sso.student_outcome_id
+			-- Join to POs
+		LEFT JOIN clo_po cpo ON
+			cpo.course_learning_outcome_id = clo.id
+		LEFT JOIN program_outcome po ON
+			po.id = cpo.program_outcome_id
+		WHERE
+			c.programme_id = ? AND s.year BETWEEN ? AND ?
+		ORDER BY
+			c.code,
+			s.year,
+			clo.code,
+			a.name;
+	`
+
+	var rows []entity.FlatRow
+	tx := r.gorm.Raw(query, programmeId, fromSerm, toSerm).Scan(&rows)
+	if tx.Error != nil {
+		return nil, fmt.Errorf("cannot query to get course linked outcomes: %w", tx.Error)
+	}
+	if tx.RowsAffected == 0 {
+		return nil, fmt.Errorf("no data found for the given parameters")
+	}
+	for _, row := range rows {
+		fmt.Printf("Course Code: %s, Semester: %s, Course Name: %s, CLO ID: %s, CLO Description: %s, Assessment ID: %s, Assessment Name: %s, SPLO Code: %s, SSO Code: %s, PO Code: %s\n",
+			row.CourseCode, row.Semester, row.CourseName, row.CloID, row.CloDescription, row.AssessmentID, row.AssessmentName,
+			row.SPLOCode, row.SSOCode, row.POCode)
+	}
+
+	return rows, nil
+}

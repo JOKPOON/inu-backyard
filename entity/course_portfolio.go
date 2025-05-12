@@ -13,6 +13,7 @@ type CoursePortfolioRepository interface {
 	EvaluateAllPoCourses() ([]PoCoursesGorm, error)
 	EvaluateProgramLearningOutcomesByStudentId(studentId string) ([]StudentPlosGorm, error)
 	EvaluateProgramOutcomesByStudentId(studentId string) ([]StudentPosGorm, error)
+	GetCourseLinkedOutcomes(programmeId string, fromSerm, toSerm int) ([]FlatRow, error)
 
 	UpdateCoursePortfolio(courseId string, data datatypes.JSON) error
 }
@@ -26,6 +27,7 @@ type CoursePortfolioUseCase interface {
 	GetAllProgramLearningOutcomeCourses() ([]PloCourses, error)
 	GetAllProgramOutcomeCourses() ([]PoCourses, error)
 	GetOutcomesByStudentId(studentId string) ([]StudentOutcomes, error)
+	GetCourseLinkedOutcomes(programmeId string, fromSerm, toSerm int) error
 
 	UpdateCoursePortfolio(courseId string, summary CourseSummary, development CourseDevelopment) error
 }
@@ -360,4 +362,19 @@ type PortfolioData struct {
 type SaveCoursePortfolioPayload struct {
 	CourseSummary     CourseSummary     `json:"summary" validate:"required"`
 	CourseDevelopment CourseDevelopment `json:"development" validate:"required"`
+}
+
+type FlatRow struct {
+	CourseCode     string `json:"course_code"`
+	Semester       string `json:"semester"` // Assuming this is a string, adjust if it's an int
+	CourseName     string `json:"course_name"`
+	CloID          string `json:"clo_id"`
+	CloDescription string `json:"clo_description"`
+	AssessmentID   string `json:"assessment_id"`
+	AssessmentName string `json:"assessment_name"`
+	PLOCode        string `json:"plo_code"`
+	SPLOCode       string `json:"splo_code"`
+	SOCode         string `json:"so_code"`
+	SSOCode        string `json:"sso_code"`
+	POCode         string `json:"po_code"`
 }
