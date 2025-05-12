@@ -911,29 +911,29 @@ func (u coursePortfolioUseCase) GetOutcomesByStudentId(studentId string) ([]enti
 	return students, nil
 }
 
-func (u coursePortfolioUseCase) GetCourseLinkedOutcomes(programmeId string, fromSerm, toSerm int) error {
-	rows, err := u.CoursePortfolioRepository.GetCourseLinkedOutcomes(programmeId, fromSerm, toSerm)
+func (u coursePortfolioUseCase) GetCourseCloAssessment(programmeId string, fromSerm, toSerm int) error {
+	rows, err := u.CoursePortfolioRepository.GetCourseCloAssessment(programmeId, fromSerm, toSerm)
 	if err != nil {
-		return errs.New(errs.SameCode, "cannot get course linked outcomes %s", err)
+		return errs.New(errs.SameCode, "cannot get course clo assessment %s", err)
 	}
 
 	// Process to nested structure
-	output := ProcessToNestedStructure(rows)
+	output := ProcessCourseCloAssessment(rows)
 
 	jsonData, err := json.MarshalIndent(output, "", "  ")
 	if err != nil {
-		return errs.New(errs.SameCode, "cannot marshal course linked outcomes %s", err)
+		return errs.New(errs.SameCode, "cannot marshal course clo assessment %s", err)
 	}
 
 	fmt.Println(string(jsonData))
 
-	fileDir := filepath.Join("output", "course_linked_outcomes")
+	fileDir := filepath.Join("output", "course_clo_assessment")
 	if err := os.MkdirAll(fileDir, os.ModePerm); err != nil {
 		return errs.New(errs.SameCode, "cannot create directory %s", err)
 	}
-	filepath := filepath.Join(fileDir, fmt.Sprintf("course_linked_outcomes_%s.xlsx", time.Now().Format("20060102150405")))
+	filepath := filepath.Join(fileDir, fmt.Sprintf("course_clo_assessment_%s.xlsx", time.Now().Format("20060102150405")))
 
-	err = WriteToExcel(output, filepath)
+	err = WriteCourseCloAssessmentToExcel(output, filepath)
 	if err != nil {
 		return errs.New(errs.SameCode, "cannot write to excel %s", err)
 	}
@@ -941,7 +941,7 @@ func (u coursePortfolioUseCase) GetCourseLinkedOutcomes(programmeId string, from
 	return nil
 }
 
-func WriteToExcel(outputs []Output, filename string) error {
+func WriteCourseCloAssessmentToExcel(outputs []Output, filename string) error {
 	f := excelize.NewFile()
 	sheet := "Sheet1"
 	f.SetSheetName(f.GetSheetName(0), sheet)
@@ -1012,7 +1012,7 @@ func WriteToExcel(outputs []Output, filename string) error {
 	colIndex := len(staticHeaders) + 1
 	outcomeMap := map[string]int{}
 
-	writeOutcomeHeaders := func(header string, groups map[string]map[string]bool) error {
+	writeOutcomeHeaders := func(groups map[string]map[string]bool) error {
 		for mainKey, subMap := range groups {
 			startCol := colIndex
 			for _, subKey := range getSortedKeys(subMap) {
@@ -1039,10 +1039,10 @@ func WriteToExcel(outputs []Output, filename string) error {
 		return nil
 	}
 
-	if err := writeOutcomeHeaders("PLO", uniquePLOs); err != nil {
+	if err := writeOutcomeHeaders(uniquePLOs); err != nil {
 		return err
 	}
-	if err := writeOutcomeHeaders("SO", uniqueSOs); err != nil {
+	if err := writeOutcomeHeaders(uniqueSOs); err != nil {
 		return err
 	}
 
@@ -1173,7 +1173,37 @@ func getSortedKeysBoolMap(m map[string]bool) []string {
 	return getSortedKeys(m)
 }
 
-func ProcessToNestedStructure(rows []entity.FlatRow) []Output {
+func (u coursePortfolioUseCase) GetCourseLinkedOutcomes(programmeId string, fromSerm, toSerm int) error {
+	rows, err := u.CoursePortfolioRepository.GetCourseLinkedOutcomes(programmeId, fromSerm, toSerm)
+	if err != nil {
+		return errs.New(errs.SameCode, "cannot get course linked outcomes %s", err)
+	}
+
+	// Process to nested structure
+	output := ProcessCourseLinkedOutcome(rows)
+
+	jsonData, err := json.MarshalIndent(output, "", "  ")
+	if err != nil {
+		return errs.New(errs.SameCode, "cannot marshal course linked outcomes %s", err)
+	}
+
+	fmt.Println(string(jsonData))
+
+	fileDir := filepath.Join("output", "course_linked_outcomes")
+	if err := os.MkdirAll(fileDir, os.ModePerm); err != nil {
+		return errs.New(errs.SameCode, "cannot create directory %s", err)
+	}
+	filepath := filepath.Join(fileDir, fmt.Sprintf("course_linked_outcomes_%s.xlsx", time.Now().Format("20060102150405")))
+
+	err = WriteCourseLinkedOutcomes(output, filepath)
+	if err != nil {
+		return errs.New(errs.SameCode, "cannot write to excel %s", err)
+	}
+
+	return nil
+}
+
+func ProcessCourseCloAssessment(rows []entity.FlatRow) []Output {
 	courseMap := make(map[string]*Output)
 
 	for _, row := range rows {
@@ -1272,7 +1302,265 @@ type CLOGroup struct {
 
 type Assessment struct {
 	Name string                       `json:"name"`
-	PLOs map[string]map[string]string `json:"PLOs"` // PLO -> SPLO -> "X"
-	SOs  map[string]map[string]string `json:"SOs"`  // SO -> SSO -> "X"
-	POs  map[string]string            `json:"POs"`  // PO -> "O"
+	PLOs map[string]map[string]string `json:"PLOs"`
+	SOs  map[string]map[string]string `json:"SOs"`
+	POs  map[string]string            `json:"POs"`
+}
+
+type CourseLinkedOutcome struct {
+	CourseCode string                       `json:"course_code"`
+	CourseName string                       `json:"course_name"`
+	Year       string                       `json:"year"`
+	PLOs       map[string]map[string]string `json:"PLOs"`
+	SOs        map[string]map[string]string `json:"SOs"`
+	POs        map[string]string            `json:"POs"`
+}
+
+func ProcessCourseLinkedOutcome(rows []entity.FlatRow) []CourseLinkedOutcome {
+	courseMap := make(map[string]*CourseLinkedOutcome)
+
+	for _, row := range rows {
+		courseKey := row.CourseCode + "_" + row.Semester
+
+		// Initialize course
+		if _, exists := courseMap[courseKey]; !exists {
+			courseMap[courseKey] = &CourseLinkedOutcome{
+				CourseCode: row.CourseCode,
+				CourseName: row.CourseName,
+				Year:       row.Semester,
+				PLOs:       map[string]map[string]string{},
+				SOs:        map[string]map[string]string{},
+				POs:        map[string]string{},
+			}
+		}
+
+		course := courseMap[courseKey]
+
+		// Populate nested PLO map
+		if row.PLOCode != "" && row.SPLOCode != "" {
+			if _, exists := course.PLOs[row.PLOCode]; !exists {
+				course.PLOs[row.PLOCode] = map[string]string{}
+			}
+			course.PLOs[row.PLOCode][row.SPLOCode] = "X"
+		}
+
+		// Populate nested SO map
+		if row.SOCode != "" && row.SSOCode != "" {
+			if _, exists := course.SOs[row.SOCode]; !exists {
+				course.SOs[row.SOCode] = map[string]string{}
+			}
+			course.SOs[row.SOCode][row.SSOCode] = "X"
+		}
+
+		// Populate PO map
+		if row.POCode != "" {
+			course.POs[row.POCode] = "X"
+		}
+	}
+
+	//sort the courseMap by CourseCode
+	sortedKeys := make([]string, 0, len(courseMap))
+	for k := range courseMap {
+		sortedKeys = append(sortedKeys, k)
+	}
+	sort.Strings(sortedKeys)
+
+	output := make([]CourseLinkedOutcome, 0, len(courseMap))
+	for _, v := range courseMap {
+		output = append(output, *v)
+	}
+	return output
+}
+
+func WriteCourseLinkedOutcomes(outputs []CourseLinkedOutcome, filename string) error {
+	f := excelize.NewFile()
+	sheet := "Sheet1"
+	f.SetSheetName(f.GetSheetName(0), sheet)
+
+	// Create central style
+	style, err := f.NewStyle(&excelize.Style{
+		Alignment: &excelize.Alignment{
+			Horizontal: "center",
+			Vertical:   "center",
+		},
+		Font: &excelize.Font{
+			Bold: true,
+		},
+	})
+	if err != nil {
+		return fmt.Errorf("failed to create style: %v", err)
+	}
+
+	// Collect unique outcomes
+	uniquePLOs := map[string]map[string]bool{}
+	uniqueSOs := map[string]map[string]bool{}
+	uniquePOs := map[string]bool{}
+
+	for _, output := range outputs {
+		for plo, splos := range output.PLOs {
+			if uniquePLOs[plo] == nil {
+				uniquePLOs[plo] = map[string]bool{}
+			}
+			for splo := range splos {
+				uniquePLOs[plo][splo] = true
+			}
+		}
+		for so, ssos := range output.SOs {
+			if uniqueSOs[so] == nil {
+				uniqueSOs[so] = map[string]bool{}
+			}
+			for sso := range ssos {
+				uniqueSOs[so][sso] = true
+			}
+		}
+		for po := range output.POs {
+			uniquePOs[po] = true
+		}
+
+	}
+
+	// Write static headers
+	staticHeaders := []string{"Course Code", "Course Name", "Year"}
+	for i, h := range staticHeaders {
+		col := i + 1
+		cell1, _ := excelize.CoordinatesToCellName(col, 1)
+		cell2, _ := excelize.CoordinatesToCellName(col, 2)
+		if err := f.SetCellValue(sheet, cell1, h); err != nil {
+			return err
+		}
+		if err := f.MergeCell(sheet, cell1, cell2); err != nil {
+			return err
+		}
+		if err := f.SetCellStyle(sheet, cell1, cell2, style); err != nil {
+			return err
+		}
+	}
+
+	// Write dynamic outcome headers
+	colIndex := len(staticHeaders) + 1
+	outcomeMap := map[string]int{}
+
+	writeOutcomeHeaders := func(groups map[string]map[string]bool) error {
+		for mainKey, subMap := range groups {
+			startCol := colIndex
+			for _, subKey := range getSortedKeys(subMap) {
+				cellTop, _ := excelize.CoordinatesToCellName(colIndex, 1)
+				cellBottom, _ := excelize.CoordinatesToCellName(colIndex, 2)
+				if err := f.SetCellValue(sheet, cellTop, mainKey); err != nil {
+					return err
+				}
+				if err := f.SetCellValue(sheet, cellBottom, subKey); err != nil {
+					return err
+				}
+				if err := f.SetCellStyle(sheet, cellTop, cellBottom, style); err != nil {
+					return err
+				}
+				outcomeMap[subKey] = colIndex
+				colIndex++
+			}
+			startCell, _ := excelize.CoordinatesToCellName(startCol, 1)
+			endCell, _ := excelize.CoordinatesToCellName(colIndex-1, 1)
+			if err := f.MergeCell(sheet, startCell, endCell); err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+
+	if err := writeOutcomeHeaders(uniquePLOs); err != nil {
+		return err
+	}
+	if err := writeOutcomeHeaders(uniqueSOs); err != nil {
+		return err
+	}
+
+	// Write POs
+	startCol := colIndex
+	for _, po := range getSortedKeysBoolMap(uniquePOs) {
+		cellTop, _ := excelize.CoordinatesToCellName(colIndex, 1)
+		cellBottom, _ := excelize.CoordinatesToCellName(colIndex, 2)
+		if err := f.SetCellValue(sheet, cellTop, "PO"); err != nil {
+			return err
+		}
+		if err := f.SetCellValue(sheet, cellBottom, po); err != nil {
+			return err
+		}
+		if err := f.SetCellStyle(sheet, cellTop, cellBottom, style); err != nil {
+			return err
+		}
+		outcomeMap[po] = colIndex
+		colIndex++
+	}
+	startPOCell, _ := excelize.CoordinatesToCellName(startCol, 1)
+	endPOCell, _ := excelize.CoordinatesToCellName(colIndex-1, 1)
+	if err := f.MergeCell(sheet, startPOCell, endPOCell); err != nil {
+		return err
+	}
+
+	// Write data rows
+	row := 3
+	for _, output := range outputs {
+		f.SetCellValue(sheet, getCell(1, row), output.CourseCode)
+		f.SetCellValue(sheet, getCell(2, row), output.CourseName)
+		f.SetCellValue(sheet, getCell(3, row), output.Year)
+		for plo := range output.PLOs {
+			for splo := range output.PLOs[plo] {
+				if col, ok := outcomeMap[splo]; ok {
+					f.SetCellValue(sheet, getCell(col, row), "X")
+					f.SetCellStyle(sheet, getCell(col, row), getCell(col, row), style)
+				}
+			}
+		}
+		for so := range output.SOs {
+			for sso := range output.SOs[so] {
+				if col, ok := outcomeMap[sso]; ok {
+					f.SetCellValue(sheet, getCell(col, row), "X")
+					f.SetCellStyle(sheet, getCell(col, row), getCell(col, row), style)
+				}
+			}
+		}
+		for po := range output.POs {
+			if col, ok := outcomeMap[po]; ok {
+				f.SetCellValue(sheet, getCell(col, row), "X")
+				f.SetCellStyle(sheet, getCell(col, row), getCell(col, row), style)
+			}
+		}
+		row++
+	}
+
+	// Adjust column widths
+	colWidths := make(map[int]int)
+	for r := 1; r < row; r++ {
+		for c := 1; c < colIndex; c++ {
+			cell, _ := excelize.CoordinatesToCellName(c, r)
+			val, err := f.GetCellValue(sheet, cell)
+			if err != nil {
+				continue
+			}
+			if len(val) > colWidths[c] {
+				colWidths[c] = len(val)
+			}
+		}
+	}
+
+	for colNum, maxLen := range colWidths {
+		colName, _ := excelize.ColumnNumberToName(colNum)
+		width := float64(maxLen + 10) // Add padding
+		if err := f.SetColWidth(sheet, colName, colName, width); err != nil {
+			return fmt.Errorf("failed to set column width for %s: %v", colName, err)
+		}
+	}
+
+	// Save file
+	if err := f.SaveAs(filename); err != nil {
+		return err
+	}
+
+	// Cleanup old files
+	fileFolder := filepath.Dir(filename)
+	if err := utils.DeleteOldFiles(fileFolder, 1); err != nil {
+		return fmt.Errorf("cannot delete old files: %w", err)
+	}
+
+	return nil
 }

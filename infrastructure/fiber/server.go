@@ -384,6 +384,7 @@ func (f *fiberServer) initController() error {
 	programme.Delete("/:programmeId", programmeController.Delete)
 
 	//programme.Get("/:programmeId/outcomes", programmeController.GetAllCourseOutcomeLinked)
+	programme.Get("/:programmeId/assessment", coursePortfolioController.GetCourseCloAssessment)
 	programme.Get("/:programmeId/outcomes", coursePortfolioController.GetCourseLinkedOutcomes)
 	programme.Get("/outcomes/po", programmeController.GetAllCourseLinkedPO)
 	programme.Get("/outcomes/plo", programmeController.GetAllCourseLinkedPLO)

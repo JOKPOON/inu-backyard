@@ -13,6 +13,7 @@ type CoursePortfolioRepository interface {
 	EvaluateAllPoCourses() ([]PoCoursesGorm, error)
 	EvaluateProgramLearningOutcomesByStudentId(studentId string) ([]StudentPlosGorm, error)
 	EvaluateProgramOutcomesByStudentId(studentId string) ([]StudentPosGorm, error)
+	GetCourseCloAssessment(programmeId string, fromSerm, toSerm int) ([]FlatRow, error)
 	GetCourseLinkedOutcomes(programmeId string, fromSerm, toSerm int) ([]FlatRow, error)
 
 	UpdateCoursePortfolio(courseId string, data datatypes.JSON) error
@@ -27,6 +28,7 @@ type CoursePortfolioUseCase interface {
 	GetAllProgramLearningOutcomeCourses() ([]PloCourses, error)
 	GetAllProgramOutcomeCourses() ([]PoCourses, error)
 	GetOutcomesByStudentId(studentId string) ([]StudentOutcomes, error)
+	GetCourseCloAssessment(programmeId string, fromSerm, toSerm int) error
 	GetCourseLinkedOutcomes(programmeId string, fromSerm, toSerm int) error
 
 	UpdateCoursePortfolio(courseId string, summary CourseSummary, development CourseDevelopment) error

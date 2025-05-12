@@ -106,6 +106,31 @@ func (c CoursePortfolioController) GetCourseResult(ctx *fiber.Ctx) error {
 	return response.NewSuccessResponse(ctx, fiber.StatusOK, result)
 }
 
+func (c CoursePortfolioController) GetCourseCloAssessment(ctx *fiber.Ctx) error {
+	programmeId := ctx.Params("programmeId")
+	toSerm, err := strconv.Atoi(ctx.Query("toSerm"))
+	if err != nil {
+	}
+	fromSerm, err := strconv.Atoi(ctx.Query("fromSerm"))
+	if err != nil {
+	}
+	if toSerm == 0 {
+		toSerm = 2022
+	}
+	if fromSerm == 0 {
+		fromSerm = 2025
+	}
+	if toSerm < fromSerm {
+		return response.NewErrorResponse(ctx, fiber.StatusBadRequest, nil)
+	}
+
+	err = c.CoursePortfolioUseCase.GetCourseCloAssessment(programmeId, fromSerm, toSerm)
+	if err != nil {
+		return err
+	}
+	return response.NewSuccessResponse(ctx, fiber.StatusOK, nil)
+}
+
 func (c CoursePortfolioController) GetCourseLinkedOutcomes(ctx *fiber.Ctx) error {
 	programmeId := ctx.Params("programmeId")
 	toSerm, err := strconv.Atoi(ctx.Query("toSerm"))

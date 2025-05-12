@@ -200,6 +200,7 @@ func (u courseUseCase) Update(user entity.User, id string, payload entity.Update
 		Code:                         payload.Code,
 		ProgrammeId:                  payload.ProgrammeId,
 		Description:                  payload.Description,
+		SemesterId:                   payload.SemesterId,
 		Credit:                       payload.Credit,
 		AcademicYear:                 payload.AcademicYear,
 		GraduateYear:                 payload.GraduateYear,
