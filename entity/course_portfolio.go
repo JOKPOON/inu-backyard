@@ -15,6 +15,7 @@ type CoursePortfolioRepository interface {
 	EvaluateProgramOutcomesByStudentId(studentId string) ([]StudentPosGorm, error)
 	GetCourseCloAssessment(programmeId string, fromSerm, toSerm int) ([]FlatRow, error)
 	GetCourseLinkedOutcomes(programmeId string, fromSerm, toSerm int) ([]FlatRow, error)
+	GetCourseOutcomesSuccessRate(programmeId string, fromSerm, toSerm int) ([]CourseOutcomeSuccessRate, error)
 
 	UpdateCoursePortfolio(courseId string, data datatypes.JSON) error
 }
@@ -28,8 +29,9 @@ type CoursePortfolioUseCase interface {
 	GetAllProgramLearningOutcomeCourses() ([]PloCourses, error)
 	GetAllProgramOutcomeCourses() ([]PoCourses, error)
 	GetOutcomesByStudentId(studentId string) ([]StudentOutcomes, error)
-	GetCourseCloAssessment(programmeId string, fromSerm, toSerm int) error
-	GetCourseLinkedOutcomes(programmeId string, fromSerm, toSerm int) error
+	GetCourseCloAssessment(programmeId string, fromSerm, toSerm int) (*FileResponse, error)
+	GetCourseLinkedOutcomes(programmeId string, fromSerm, toSerm int) (*FileResponse, error)
+	GetCourseOutcomesSuccessRate(programmeId string, fromSerm, toSerm int) (*FileResponse, error)
 
 	UpdateCoursePortfolio(courseId string, summary CourseSummary, development CourseDevelopment) error
 }
@@ -379,4 +381,11 @@ type FlatRow struct {
 	SOCode         string `json:"so_code"`
 	SSOCode        string `json:"sso_code"`
 	POCode         string `json:"po_code"`
+}
+
+type FileResponse struct {
+	FileName string `json:"file_name"`
+	FilePath string `json:"file_path"`
+	FileType string `json:"file_type"`
+	FileUrl  string `json:"file_url"`
 }

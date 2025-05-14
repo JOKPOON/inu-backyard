@@ -188,3 +188,13 @@ type GetCloResponse struct {
 	ProgramLearningOutcomes []ProgramLearningOutcome `json:"program_learning_outcomes"`
 	SubStudentOutcomes      []StudentOutcome         ` json:"student_outcomes"`
 }
+
+type CourseOutcomeSuccessRate struct {
+	CourseId       string
+	CourseCode     string
+	CourseName     string
+	CourseSemester string
+	PLOs           map[string]map[string]float64
+	SOs            map[string]map[string]float64
+	POs            map[string]float64
+}

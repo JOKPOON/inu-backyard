@@ -2,6 +2,7 @@ package repository
 
 import (
 	"fmt"
+	"sort"
 
 	"github.com/team-inu/inu-backyard/entity"
 	"gorm.io/datatypes"
@@ -1224,4 +1225,394 @@ func (r coursePortfolioRepositoryGorm) GetCourseLinkedOutcomes(programmeId strin
 	fmt.Printf("rows: %v", rows)
 
 	return rows, nil
+}
+
+type JoinedScore struct {
+	StudentID                           string
+	Score                               float64
+	AssignmentID                        string
+	AssignmentName                      string
+	MaxScore                            float64
+	ExpectedScorePercentage             float64
+	ExpectedPassingStudentPercentage    float64
+	CLOID                               string
+	CLOCode                             string
+	ExpectedPassingAssignmentPercentage float64
+	ExpectedPassingCLOPercentage        float64
+	POID                                string
+	POCode                              string
+	PLOID                               string
+	PLOCode                             string
+	SPLOID                              string
+	SPLOCode                            string
+	SOID                                string
+	SOCode                              string
+	SSOID                               string
+	SSOCode                             string
+}
+
+func (r coursePortfolioRepositoryGorm) GetCourseOutcomesSuccessRate(programmeId string, fromSerm, toSerm int) ([]entity.CourseOutcomeSuccessRate, error) {
+	var joinedScores []JoinedScore
+	type Courses struct {
+		Id       string `json:"id"`
+		Code     string `json:"code"`
+		Name     string `json:"name"`
+		Semester string `json:"semester"`
+	}
+	var courses []Courses
+	db := r.gorm.Raw(`
+		SELECT
+			c.id,
+			c.code,
+			c.name,
+			CONCAT(s.semester_sequence, '/', s.year) AS semester
+		FROM
+			course c
+		LEFT JOIN semester s ON
+			c.semester_id = s.id
+		WHERE
+			c.programme_id = ? AND s.year BETWEEN ? AND ?
+		ORDER BY
+			c.code,
+			s.year ASC,
+			s.semester_sequence ASC
+		`,
+		programmeId, fromSerm, toSerm,
+	).Scan(&courses)
+	if db.Error != nil {
+		return nil, fmt.Errorf("cannot query to get courses: %w", db.Error)
+	}
+
+	coursesOutcomeSuccessRate := make(map[string]entity.CourseOutcomeSuccessRate)
+
+	fmt.Println("Courses: ", courses)
+	for _, course := range courses {
+		coursesOutcomeSuccessRate[course.Id] = entity.CourseOutcomeSuccessRate{
+			CourseId:       course.Id,
+			CourseCode:     course.Code,
+			CourseName:     course.Name,
+			CourseSemester: course.Semester,
+			PLOs:           make(map[string]map[string]float64),
+			SOs:            make(map[string]map[string]float64),
+			POs:            make(map[string]float64),
+		}
+
+		r.gorm.Raw(`
+		SELECT
+			s.student_id,
+			s.score,
+			a.id AS assignment_id,
+			a.name AS assignment_name,
+			a.max_score,
+			a.expected_score_percentage,
+			a.expected_passing_student_percentage,
+			clo.id AS clo_id,
+			clo.code AS clo_code,
+			clo.expected_passing_assignment_percentage,
+			c.expected_passing_clo_percentage,
+			po.id AS po_id,
+			po.code AS po_code,
+			plo.id AS plo_id,
+			plo.code AS plo_code,
+			splo.id AS splo_id,
+			splo.code AS splo_code,
+			so.id AS so_id,
+			so.code AS so_code,
+			sso.id AS sso_id,
+			sso.code AS sso_code
+		FROM
+			score s
+		LEFT JOIN assignment a ON
+			s.assignment_id = a.id
+		LEFT JOIN clo_assignment clo_a ON
+			a.id = clo_a.assignment_id
+		LEFT JOIN course_learning_outcome clo ON
+			clo_a.course_learning_outcome_id = clo.id
+		LEFT JOIN course c ON
+			clo.course_id = c.id
+		LEFT JOIN clo_po ON clo.id = clo_po.course_learning_outcome_id
+		LEFT JOIN program_outcome po ON
+			clo_po.program_outcome_id = po.id
+		LEFT JOIN clo_subplo ON
+			clo_subplo.course_learning_outcome_id = clo.id
+		LEFT JOIN sub_program_learning_outcome splo ON
+    		clo_subplo.sub_program_learning_outcome_id = splo.id
+		LEFT JOIN program_learning_outcome plo ON
+			splo.program_learning_outcome_id = plo.id
+		LEFT JOIN clo_subso ON
+			clo_subso.course_learning_outcome_id = clo.id
+		LEFT JOIN sub_student_outcome sso ON
+    		clo_subso.sub_student_outcome_id = sso.id
+		LEFT JOIN student_outcome so ON
+			sso.student_outcome_id = so.id
+		WHERE
+			a.is_included_in_clo = TRUE
+			AND c.id = ?
+		ORDER BY
+			s.student_id,
+			a.id,
+			clo.id
+	`, course.Id).Scan(&joinedScores)
+
+		type StudentStats struct {
+			StudentID        string
+			PassedAssignment map[string]bool
+			PassedCLOs       map[string]bool
+			PassedPOs        map[string]bool
+			PassedSPLOs      map[string]bool
+			PassedSSOs       map[string]bool
+		}
+
+		type CLOStats struct {
+			CLOID                               string
+			CLOCode                             string
+			ExpectedPassingAssignmentPercentage float64
+			Assignments                         map[string]bool
+		}
+
+		type POStats struct {
+			POID                         string
+			POCode                       string
+			PassedPercentage             float64
+			ExpectedPassingCloPercentage float64
+			CLOs                         map[string]bool
+		}
+
+		type SPLOStats struct {
+			SPLOID                       string
+			SPLOCode                     string
+			PLOID                        string
+			PLOCode                      string
+			PassedPercentage             float64
+			ExpectedPassingCloPercentage float64
+			CLOs                         map[string]bool
+		}
+
+		type SSOStats struct {
+			SOID                         string
+			SOCode                       string
+			SSOID                        string
+			SSOCode                      string
+			PassedPercentage             float64
+			ExpectedPassingCloPercentage float64
+			CLOs                         map[string]bool
+		}
+
+		studentStats := make(map[string]*StudentStats)
+		cloStats := make(map[string]*CLOStats)
+		poStats := make(map[string]*POStats)
+		sploStats := make(map[string]*SPLOStats)
+		ssoStats := make(map[string]*SSOStats)
+
+		for _, row := range joinedScores {
+			if _, ok := studentStats[row.StudentID]; !ok {
+				studentStats[row.StudentID] = &StudentStats{
+					StudentID:        row.StudentID,
+					PassedAssignment: make(map[string]bool),
+					PassedCLOs:       make(map[string]bool),
+					PassedPOs:        make(map[string]bool),
+					PassedSPLOs:      make(map[string]bool),
+					PassedSSOs:       make(map[string]bool),
+				}
+			}
+			studentStats[row.StudentID].PassedAssignment[row.AssignmentID] = (row.Score/row.MaxScore)*100 >= row.ExpectedScorePercentage
+
+			if _, ok := cloStats[row.CLOID]; !ok {
+				cloStats[row.CLOID] = &CLOStats{
+					CLOID:                               row.CLOID,
+					CLOCode:                             row.CLOCode,
+					ExpectedPassingAssignmentPercentage: row.ExpectedPassingAssignmentPercentage,
+					Assignments:                         make(map[string]bool),
+				}
+			}
+			if _, ok := cloStats[row.CLOID].Assignments[row.AssignmentID]; !ok {
+				cloStats[row.CLOID].Assignments[row.AssignmentID] = true
+			}
+
+			if _, ok := poStats[row.POID]; !ok {
+				poStats[row.POID] = &POStats{
+					POID:                         row.POID,
+					POCode:                       row.POCode,
+					ExpectedPassingCloPercentage: row.ExpectedPassingCLOPercentage,
+					CLOs:                         make(map[string]bool),
+				}
+			}
+			if _, ok := poStats[row.POID].CLOs[row.CLOID]; !ok {
+				poStats[row.POID].CLOs[row.CLOID] = true
+			}
+
+			if _, ok := sploStats[row.SPLOID]; !ok {
+				sploStats[row.SPLOID] = &SPLOStats{
+					PLOID:                        row.PLOID,
+					PLOCode:                      row.PLOCode,
+					SPLOID:                       row.SPLOID,
+					SPLOCode:                     row.SPLOCode,
+					ExpectedPassingCloPercentage: row.ExpectedPassingCLOPercentage,
+					CLOs:                         make(map[string]bool),
+				}
+			}
+			if _, ok := sploStats[row.SPLOID].CLOs[row.CLOID]; !ok {
+				sploStats[row.SPLOID].CLOs[row.CLOID] = true
+			}
+
+			if _, ok := ssoStats[row.SSOID]; !ok {
+				ssoStats[row.SSOID] = &SSOStats{
+					SOID:                         row.SOID,
+					SOCode:                       row.SOCode,
+					SSOID:                        row.SSOID,
+					SSOCode:                      row.SSOCode,
+					ExpectedPassingCloPercentage: row.ExpectedPassingCLOPercentage,
+					CLOs:                         make(map[string]bool),
+				}
+			}
+			if _, ok := ssoStats[row.SSOID].CLOs[row.CLOID]; !ok {
+				ssoStats[row.SSOID].CLOs[row.CLOID] = true
+			}
+		}
+
+		for _, studentStat := range studentStats {
+			for _, cloStat := range cloStats {
+				passedAssignmentCount := 0
+				for assignmentID := range cloStat.Assignments {
+					if studentStat.PassedAssignment[assignmentID] {
+						passedAssignmentCount++
+					}
+				}
+
+				if (float64(passedAssignmentCount) / float64(len(cloStat.Assignments)) * 100) >= cloStat.ExpectedPassingAssignmentPercentage {
+					studentStat.PassedCLOs[cloStat.CLOID] = true
+				} else {
+					studentStat.PassedCLOs[cloStat.CLOID] = false
+				}
+			}
+
+		}
+
+		for _, studentStat := range studentStats {
+			for _, poStat := range poStats {
+				passedCLOCount := 0
+				for cloID := range poStat.CLOs {
+					if studentStat.PassedCLOs[cloID] {
+						passedCLOCount++
+					}
+				}
+				if (float64(passedCLOCount) / float64(len(poStat.CLOs)) * 100) >= poStat.ExpectedPassingCloPercentage {
+					studentStat.PassedPOs[poStat.POID] = true
+				} else {
+					studentStat.PassedPOs[poStat.POID] = false
+				}
+			}
+
+			for _, sploStat := range sploStats {
+				passedCLOCount := 0
+				for cloID := range sploStat.CLOs {
+					if studentStat.PassedCLOs[cloID] {
+						passedCLOCount++
+					}
+				}
+				if (float64(passedCLOCount) / float64(len(sploStat.CLOs)) * 100) >= sploStat.ExpectedPassingCloPercentage {
+					studentStat.PassedSPLOs[sploStat.SPLOID] = true
+				} else {
+					studentStat.PassedSPLOs[sploStat.SPLOID] = false
+				}
+			}
+
+			for _, ssoStat := range ssoStats {
+				passedCLOCount := 0
+				for cloID := range ssoStat.CLOs {
+					if studentStat.PassedCLOs[cloID] {
+						passedCLOCount++
+					}
+				}
+				if (float64(passedCLOCount) / float64(len(ssoStat.CLOs)) * 100) >= ssoStat.ExpectedPassingCloPercentage {
+					studentStat.PassedSSOs[ssoStat.SSOID] = true
+				} else {
+					studentStat.PassedSSOs[ssoStat.SSOID] = false
+				}
+			}
+		}
+
+		fmt.Printf("Course %s (%s , %s) passing rate:\n", course.Code, course.Name, course.Semester)
+		for _, poStat := range poStats {
+			passPOCount := 0
+			for _, studentStat := range studentStats {
+				if studentStat.PassedPOs[poStat.POID] {
+					passPOCount++
+				}
+			}
+			poStat.PassedPercentage = (float64(passPOCount) / float64(len(studentStats))) * 100
+
+			coursesOutcomeSuccessRate[course.Id].POs[poStat.POCode] = poStat.PassedPercentage
+
+			fmt.Printf("PO %s: %.2f%%\n", poStat.POCode, poStat.PassedPercentage)
+		}
+		for _, sploStat := range sploStats {
+			passSPLOCount := 0
+			for _, studentStat := range studentStats {
+				if studentStat.PassedSPLOs[sploStat.SPLOID] {
+					passSPLOCount++
+				}
+			}
+			sploStat.PassedPercentage = (float64(passSPLOCount) / float64(len(studentStats))) * 100
+
+			if _, ok := coursesOutcomeSuccessRate[course.Id].PLOs[sploStat.PLOID]; !ok {
+				coursesOutcomeSuccessRate[course.Id].PLOs[sploStat.PLOCode] = make(map[string]float64)
+			}
+			coursesOutcomeSuccessRate[course.Id].PLOs[sploStat.PLOCode][sploStat.SPLOCode] = sploStat.PassedPercentage
+
+			fmt.Printf("SPLO %s: %.2f%%\n", sploStat.SPLOCode, sploStat.PassedPercentage)
+
+		}
+		for _, ssoStat := range ssoStats {
+			passSSOCount := 0
+			for _, studentStat := range studentStats {
+				if studentStat.PassedSSOs[ssoStat.SSOID] {
+					passSSOCount++
+				}
+			}
+			ssoStat.PassedPercentage = (float64(passSSOCount) / float64(len(studentStats))) * 100
+
+			if _, ok := coursesOutcomeSuccessRate[course.Id].SOs[ssoStat.SOCode]; !ok {
+				coursesOutcomeSuccessRate[course.Id].SOs[ssoStat.SOCode] = make(map[string]float64)
+			}
+			coursesOutcomeSuccessRate[course.Id].SOs[ssoStat.SOCode][ssoStat.SSOCode] = ssoStat.PassedPercentage
+
+			fmt.Printf("SSO %s: %.2f%%\n", ssoStat.SSOCode, ssoStat.PassedPercentage)
+		}
+	}
+
+	coursesOutcomeSuccessRateList := make([]entity.CourseOutcomeSuccessRate, 0, len(coursesOutcomeSuccessRate))
+	for _, course := range coursesOutcomeSuccessRate {
+		coursesOutcomeSuccessRateList = append(coursesOutcomeSuccessRateList, course)
+	}
+	sort.Slice(coursesOutcomeSuccessRateList, func(i, j int) bool {
+		if coursesOutcomeSuccessRateList[i].CourseCode == coursesOutcomeSuccessRateList[j].CourseCode {
+			return coursesOutcomeSuccessRateList[i].CourseSemester < coursesOutcomeSuccessRateList[j].CourseSemester
+		}
+		return coursesOutcomeSuccessRateList[i].CourseCode < coursesOutcomeSuccessRateList[j].CourseCode
+	})
+
+	for _, course := range coursesOutcomeSuccessRateList {
+		fmt.Printf("Course %s (%s , %s) passing rate:\n", course.CourseCode, course.CourseName, course.CourseSemester)
+		for ploID, splo := range course.PLOs {
+			fmt.Printf("PLO %s: ", ploID)
+			for sploID, rate := range splo {
+				fmt.Printf("SPLO %s: %.2f%% ", sploID, rate)
+			}
+			fmt.Println()
+		}
+		for soID, sso := range course.SOs {
+			fmt.Printf("SO %s: ", soID)
+			for ssoID, rate := range sso {
+				fmt.Printf("SSO %s: %.2f%% ", ssoID, rate)
+			}
+			fmt.Println()
+		}
+		for poID, rate := range course.POs {
+			fmt.Printf("PO %s: %.2f%% ", poID, rate)
+		}
+		fmt.Println()
+	}
+
+	return coursesOutcomeSuccessRateList, nil
 }
