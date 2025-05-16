@@ -103,7 +103,7 @@ type Course struct {
 
 	Lecturers []*User   `gorm:"many2many:course_lecturer" json:"lecturers"`
 	Semester  Semester  `json:"semester" gorm:"foreignKey:SemesterId"`
-	Programme Programme `json:"programme"`
+	Programme Programme `json:"programme" gorm:"foreignKey:ProgrammeId"`
 }
 
 type CreateCoursePayload struct {
@@ -121,16 +121,16 @@ type CreateCoursePayload struct {
 }
 
 type UpdateCoursePayload struct {
-	SemesterId                   string   `json:"semester_id" validate:"required"`
-	LecturerIds                  []string `json:"lecturer_ids" validate:"required"`
-	Name                         string   `json:"name" validate:"required"`
-	Code                         string   `json:"code" validate:"required"`
-	AcademicYear                 string   `json:"academic_year" validate:"required"`
-	GraduateYear                 string   `json:"graduate_year" validate:"required"`
-	Credit                       int      `json:"credit" validate:"required"`
-	Description                  string   `json:"description" validate:"required"`
-	ExpectedPassingCloPercentage float64  `json:"expected_passing_clo_percentage" validate:"required"`
-	ProgrammeId                  string   `json:"programme_id" validate:"required"`
+	SemesterId                   string   `json:"semester_id"`
+	LecturerIds                  []string `json:"lecturer_ids" `
+	Name                         string   `json:"name" `
+	Code                         string   `json:"code" `
+	AcademicYear                 string   `json:"academic_year"`
+	GraduateYear                 string   `json:"graduate_year" `
+	Credit                       int      `json:"credit" `
+	Description                  string   `json:"description" `
+	ExpectedPassingCloPercentage float64  `json:"expected_passing_clo_percentage" `
+	ProgrammeId                  string   `json:"programme_id" `
 	CriteriaGrade
 }
 

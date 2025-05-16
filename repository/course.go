@@ -42,7 +42,7 @@ func (r courseRepositoryGorm) GetAll(query, serm, program string) ([]entity.Cour
 
 func (r courseRepositoryGorm) GetById(id string) (*entity.Course, error) {
 	var course entity.Course
-	err := r.gorm.Preload("Lecturers").Preload("Semester").Preload("Programme").Where("id = ?", id).First(&course).Error
+	err := r.gorm.Preload("Lecturers").Preload("Semester").Preload("Programme").Preload("Programme.Department").Preload("Programme.Department.Faculty").Where("id = ?", id).First(&course).Error
 	if err == gorm.ErrRecordNotFound {
 		return nil, nil
 	} else if err != nil {

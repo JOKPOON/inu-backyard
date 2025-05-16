@@ -205,21 +205,21 @@ func (u coursePortfolioUseCase) Generate(courseId string) (*entity.CoursePortfol
 	}
 
 	courseDevelopment := entity.CourseDevelopment{
-		Plans:       portfolioData.Development.Plans,
-		DoAndChecks: portfolioData.Development.DoAndChecks,
-		Acts:        portfolioData.Development.Acts,
+		// Plans:       portfolioData.Development.Plans,
+		// DoAndChecks: portfolioData.Development.DoAndChecks,
+		// Acts:        portfolioData.Development.Acts,
 		SubjectComments: entity.SubjectComments{
 			UpstreamSubjects:   upstreamSubject,
 			DownstreamSubjects: downStreamSubject,
-			Other:              portfolioData.Development.SubjectComments.Other,
+			// Other:              portfolioData.Development.SubjectComments.Other,
 		},
-		OtherComment: portfolioData.Development.OtherComment,
+		// OtherComment: portfolioData.Development.OtherComment,
 	}
 
 	courseSummary := entity.CourseSummary{
-		TeachingMethods: portfolioData.Summary.TeachingMethods,
-		Objectives:      portfolioData.Summary.Objectives,
-		OnlineTools:     portfolioData.Summary.OnlineTools,
+		// TeachingMethods: portfolioData.Summary.TeachingMethods,
+		// Objectives:      portfolioData.Summary.Objectives,
+		// OnlineTools:     portfolioData.Summary.OnlineTools,
 	}
 
 	coursePortfolio := &entity.CoursePortfolio{
@@ -729,10 +729,11 @@ func (u coursePortfolioUseCase) GetAllProgramOutcomeCourses() ([]entity.PoCourse
 	return pos, nil
 }
 
-func (u coursePortfolioUseCase) UpdateCoursePortfolio(courseId string, summary entity.CourseSummary, development entity.CourseDevelopment) error {
+func (u coursePortfolioUseCase) UpdateCoursePortfolio(courseId string, implement entity.Implementation, educationOutcomes entity.EducationOutcome, continuous entity.ContinuousDevelopment) error {
 	portfolioData := &entity.PortfolioData{
-		Summary:     summary,
-		Development: development,
+		Implementation:        implement,
+		EducationOutcomes:     educationOutcomes,
+		ContinuousDevelopment: continuous,
 	}
 
 	JsonByte, err := json.Marshal(*portfolioData)

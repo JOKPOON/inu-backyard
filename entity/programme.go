@@ -91,7 +91,7 @@ type Programme struct {
 
 	Structure datatypes.JSON `json:"structure" gorm:"type:json"`
 
-	Department              Department                `gorm:"foreignKey:DepartmentId" json:"-"`
+	Department              Department                `gorm:"foreignKey:DepartmentId" json:"department"`
 	ProgramOutcomes         []*ProgramOutcome         `gorm:"many2many:programme_po" json:"program_outcomes"`
 	ProgramLearningOutcomes []*ProgramLearningOutcome `gorm:"many2many:programme_plo" json:"program_learning_outcomes"`
 	StudentOutcomes         []*StudentOutcome         `gorm:"many2many:programme_so" json:"student_outcomes"`

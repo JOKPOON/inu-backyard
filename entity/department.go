@@ -24,7 +24,7 @@ type Department struct {
 	NameEN    string `json:"name_en" gorm:"type:char(255)"`
 	FacultyId string `json:"faculty_id" gorm:"type:char(255)"`
 
-	Faculty    Faculty     `gorm:"foreignKey:FacultyId" json:"-"`
+	Faculty    Faculty     `gorm:"foreignKey:FacultyId" json:"faculty"`
 	Programmes []Programme `gorm:"foreignKey:DepartmentId" json:"programmes"`
 }
 

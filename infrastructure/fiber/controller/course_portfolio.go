@@ -76,8 +76,7 @@ func (c CoursePortfolioController) Update(ctx *fiber.Ctx) error {
 
 	courseId := ctx.Params("courseId")
 
-	fmt.Println(payload)
-	err := c.CoursePortfolioUseCase.UpdateCoursePortfolio(courseId, payload.CourseSummary, payload.CourseDevelopment)
+	err := c.CoursePortfolioUseCase.UpdateCoursePortfolio(courseId, payload.Implementation, payload.EducationOutcomes, payload.ContinuousDevelopment)
 	if err != nil {
 		return err
 	}
@@ -108,18 +107,21 @@ func (c CoursePortfolioController) GetCourseResult(ctx *fiber.Ctx) error {
 
 func (c CoursePortfolioController) GetCourseCloAssessment(ctx *fiber.Ctx) error {
 	programmeId := ctx.Params("programmeId")
-	toSerm, err := strconv.Atoi(ctx.Query("toSerm"))
+	toSerm, err := strconv.Atoi(ctx.Query("to"))
 	if err != nil {
-	}
-	fromSerm, err := strconv.Atoi(ctx.Query("fromSerm"))
-	if err != nil {
+		return response.NewErrorResponse(ctx, fiber.StatusBadRequest, nil)
 	}
 	if toSerm == 0 {
-		toSerm = 2022
+		return response.NewErrorResponse(ctx, fiber.StatusBadRequest, nil)
+	}
+	fromSerm, err := strconv.Atoi(ctx.Query("from"))
+	if err != nil {
+		return response.NewErrorResponse(ctx, fiber.StatusBadRequest, nil)
 	}
 	if fromSerm == 0 {
-		fromSerm = 2025
+		return response.NewErrorResponse(ctx, fiber.StatusBadRequest, nil)
 	}
+
 	if toSerm < fromSerm {
 		return response.NewErrorResponse(ctx, fiber.StatusBadRequest, nil)
 	}
@@ -138,18 +140,21 @@ func (c CoursePortfolioController) GetCourseCloAssessment(ctx *fiber.Ctx) error 
 
 func (c CoursePortfolioController) GetCourseLinkedOutcomes(ctx *fiber.Ctx) error {
 	programmeId := ctx.Params("programmeId")
-	toSerm, err := strconv.Atoi(ctx.Query("toSerm"))
+	toSerm, err := strconv.Atoi(ctx.Query("to"))
 	if err != nil {
-	}
-	fromSerm, err := strconv.Atoi(ctx.Query("fromSerm"))
-	if err != nil {
+		return response.NewErrorResponse(ctx, fiber.StatusBadRequest, nil)
 	}
 	if toSerm == 0 {
-		toSerm = 2022
+		return response.NewErrorResponse(ctx, fiber.StatusBadRequest, nil)
+	}
+	fromSerm, err := strconv.Atoi(ctx.Query("from"))
+	if err != nil {
+		return response.NewErrorResponse(ctx, fiber.StatusBadRequest, nil)
 	}
 	if fromSerm == 0 {
-		fromSerm = 2025
+		return response.NewErrorResponse(ctx, fiber.StatusBadRequest, nil)
 	}
+
 	if toSerm < fromSerm {
 		return response.NewErrorResponse(ctx, fiber.StatusBadRequest, nil)
 	}
@@ -168,18 +173,21 @@ func (c CoursePortfolioController) GetCourseLinkedOutcomes(ctx *fiber.Ctx) error
 
 func (c CoursePortfolioController) GetCourseOutcomesSuccessRate(ctx *fiber.Ctx) error {
 	programmeId := ctx.Params("programmeId")
-	toSerm, err := strconv.Atoi(ctx.Query("toSerm"))
+	toSerm, err := strconv.Atoi(ctx.Query("to"))
 	if err != nil {
-	}
-	fromSerm, err := strconv.Atoi(ctx.Query("fromSerm"))
-	if err != nil {
+		return response.NewErrorResponse(ctx, fiber.StatusBadRequest, nil)
 	}
 	if toSerm == 0 {
-		toSerm = 2022
+		return response.NewErrorResponse(ctx, fiber.StatusBadRequest, nil)
+	}
+	fromSerm, err := strconv.Atoi(ctx.Query("from"))
+	if err != nil {
+		return response.NewErrorResponse(ctx, fiber.StatusBadRequest, nil)
 	}
 	if fromSerm == 0 {
-		fromSerm = 2025
+		return response.NewErrorResponse(ctx, fiber.StatusBadRequest, nil)
 	}
+
 	if toSerm < fromSerm {
 		return response.NewErrorResponse(ctx, fiber.StatusBadRequest, nil)
 	}

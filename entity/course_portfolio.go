@@ -33,7 +33,7 @@ type CoursePortfolioUseCase interface {
 	GetCourseLinkedOutcomes(programmeId string, fromSerm, toSerm int) (*FileResponse, error)
 	GetCourseOutcomesSuccessRate(programmeId string, fromSerm, toSerm int) (*FileResponse, error)
 
-	UpdateCoursePortfolio(courseId string, summary CourseSummary, development CourseDevelopment) error
+	UpdateCoursePortfolio(courseId string, implement Implementation, educationOutcomes EducationOutcome, continuous ContinuousDevelopment) error
 }
 
 // [1] Info
@@ -358,14 +358,15 @@ type StudentPosGorm struct {
 // 	OtherComment    string          `json:"other_comment"`
 // }
 
-type PortfolioData struct {
-	Summary     CourseSummary     `json:"summary"`
-	Development CourseDevelopment `json:"development"`
-}
+// type PortfolioData struct {
+// 	Summary     CourseSummary     `json:"summary"`
+// 	Development CourseDevelopment `json:"development"`
+// }
 
 type SaveCoursePortfolioPayload struct {
-	CourseSummary     CourseSummary     `json:"summary" validate:"required"`
-	CourseDevelopment CourseDevelopment `json:"development" validate:"required"`
+	Implementation        Implementation        `json:"implementation" validate:"required"`
+	ContinuousDevelopment ContinuousDevelopment `json:"continuous_development" validate:"required"`
+	EducationOutcomes     EducationOutcome      `json:"education_outcomes" validate:"required"`
 }
 
 type FlatRow struct {
@@ -388,4 +389,39 @@ type FileResponse struct {
 	FilePath string `json:"file_path"`
 	FileType string `json:"file_type"`
 	FileUrl  string `json:"file_url"`
+}
+
+type PortfolioData struct {
+	Implementation        Implementation        `json:"implementation"`
+	EducationOutcomes     EducationOutcome      `json:"education_outcomes"`
+	ContinuousDevelopment ContinuousDevelopment `json:"continuous_development"`
+}
+
+type Implementation struct {
+	Methods            []string `json:"methods"`
+	OnlineMedia        []string `json:"online_media"`
+	TeachingObjectives []string `json:"teaching_objectives"`
+}
+
+type ContinuousDevelopment struct {
+	Plans       []string  `json:"plans"`
+	DoAndChecks []string  `json:"do_and_checks"`
+	Acts        []string  `json:"acts"`
+	Feedbacks   Feedbacks `json:"feedbacks"`
+}
+
+type Feedbacks struct {
+	UpstreamFeedbacks   []FeedbackJson `json:"upstream_subjects"`
+	DownstreamFeedbacks []FeedbackJson `json:"downstream_subjects"`
+}
+
+type FeedbackJson struct {
+	CourseCode string `json:"course_code"`
+	CourseName string `json:"course_name"`
+	Comment    string `json:"comment"`
+	Sender     string `json:"sender"`
+}
+
+type EducationOutcome struct {
+	GradeDistribution GradeDistribution `json:"grade_distribution"`
 }
