@@ -16,6 +16,7 @@ type CoursePortfolioRepository interface {
 	GetCourseCloAssessment(programmeId string, fromSerm, toSerm int) ([]FlatRow, error)
 	GetCourseLinkedOutcomes(programmeId string, fromSerm, toSerm int) ([]FlatRow, error)
 	GetCourseOutcomesSuccessRate(programmeId string, fromSerm, toSerm int) ([]CourseOutcomeSuccessRate, error)
+	GetCourseOutcomes(courseId string) (*CoursePortfolioOutcome, error)
 
 	UpdateCoursePortfolio(courseId string, data datatypes.JSON) error
 }
@@ -32,6 +33,7 @@ type CoursePortfolioUseCase interface {
 	GetCourseCloAssessment(programmeId string, fromSerm, toSerm int) (*FileResponse, error)
 	GetCourseLinkedOutcomes(programmeId string, fromSerm, toSerm int) (*FileResponse, error)
 	GetCourseOutcomesSuccessRate(programmeId string, fromSerm, toSerm int) (*FileResponse, error)
+	GetCourseOutcomes(courseId string) (*CoursePortfolioOutcome, error)
 
 	UpdateCoursePortfolio(courseId string, implement Implementation, educationOutcomes EducationOutcome, continuous ContinuousDevelopment) error
 }
@@ -424,4 +426,65 @@ type FeedbackJson struct {
 
 type EducationOutcome struct {
 	GradeDistribution GradeDistribution `json:"grade_distribution"`
+}
+
+type AssignmentPassingRate struct {
+	AssignmentID                        string
+	AssignmentName                      string
+	PassedPercentage                    float64
+	ExpectedPassingAssignmentPercentage float64
+}
+
+type CloPassingRate struct {
+	CLOID                               string
+	CLOCode                             string
+	PassedPercentage                    float64
+	ExpectedPassingAssignmentPercentage float64
+	Assignments                         map[string]AssignmentPassingRate
+}
+
+type PoPassingRate struct {
+	POID                         string
+	POCode                       string
+	PassedPercentage             float64
+	ExpectedPassingCloPercentage float64
+	CLOPassingRate               map[string]CloPassingRate
+}
+
+type SploPassingRate struct {
+	SPLOID                       string
+	SPLOCode                     string
+	PLOID                        string
+	PLOCode                      string
+	PassedPercentage             float64
+	ExpectedPassingCloPercentage float64
+	CLOPassingRate               map[string]CloPassingRate
+}
+
+type SsoPassingRate struct {
+	SOID                         string
+	SOCode                       string
+	SSOID                        string
+	SSOCode                      string
+	PassedPercentage             float64
+	ExpectedPassingCloPercentage float64
+	CLOPassingRate               map[string]CloPassingRate
+}
+
+type CourseOutcomeSuccessRate struct {
+	CourseId       string
+	CourseCode     string
+	CourseName     string
+	CourseSemester string
+	CLOs           map[string]float64
+	PLOs           map[string]map[string]float64
+	SOs            map[string]map[string]float64
+	POs            map[string]float64
+}
+
+type CoursePortfolioOutcome struct {
+	CLOs map[string]CloPassingRate  `json:"clos"`
+	PLOs map[string]SploPassingRate `json:"plos"`
+	POs  map[string]PoPassingRate   `json:"pos"`
+	SOs  map[string]SsoPassingRate  `json:"sos"`
 }

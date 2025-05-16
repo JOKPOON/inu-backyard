@@ -204,3 +204,14 @@ func (c CoursePortfolioController) GetCourseOutcomesSuccessRate(ctx *fiber.Ctx) 
 	// Send file from disk
 	return ctx.SendFile(file.FilePath)
 }
+
+func (c CoursePortfolioController) GetCourseOutcomesSuccessRateByCourseId(ctx *fiber.Ctx) error {
+	courseId := ctx.Params("courseId")
+
+	result, err := c.CoursePortfolioUseCase.GetCourseOutcomes(courseId)
+	if err != nil {
+		return err
+	}
+
+	return response.NewSuccessResponse(ctx, fiber.StatusOK, result)
+}

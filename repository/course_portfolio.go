@@ -1616,3 +1616,470 @@ func (r coursePortfolioRepositoryGorm) GetCourseOutcomesSuccessRate(programmeId 
 
 	return coursesOutcomeSuccessRateList, nil
 }
+
+func (r coursePortfolioRepositoryGorm) GetCourseOutcomes(courseId string) (*entity.CoursePortfolioOutcome, error) {
+	var joinedScores []JoinedScore
+
+	coursesOutcomeSuccessRate := entity.CourseOutcomeSuccessRate{
+		PLOs: make(map[string]map[string]float64),
+		SOs:  make(map[string]map[string]float64),
+		POs:  make(map[string]float64),
+	}
+
+	r.gorm.Raw(`
+		SELECT
+			s.student_id,
+			s.score,
+			a.id AS assignment_id,
+			a.name AS assignment_name,
+			a.max_score,
+			a.expected_score_percentage,
+			a.expected_passing_student_percentage,
+			clo.id AS clo_id,
+			clo.code AS clo_code,
+			clo.expected_passing_assignment_percentage,
+			c.expected_passing_clo_percentage,
+			po.id AS po_id,
+			po.code AS po_code,
+			plo.id AS plo_id,
+			plo.code AS plo_code,
+			splo.id AS splo_id,
+			splo.code AS splo_code,
+			so.id AS so_id,
+			so.code AS so_code,
+			sso.id AS sso_id,
+			sso.code AS sso_code
+		FROM
+			score s
+		LEFT JOIN assignment a ON
+			s.assignment_id = a.id
+		LEFT JOIN clo_assignment clo_a ON
+			a.id = clo_a.assignment_id
+		LEFT JOIN course_learning_outcome clo ON
+			clo_a.course_learning_outcome_id = clo.id
+		LEFT JOIN course c ON
+			clo.course_id = c.id
+		LEFT JOIN clo_po ON clo.id = clo_po.course_learning_outcome_id
+		LEFT JOIN program_outcome po ON
+			clo_po.program_outcome_id = po.id
+		LEFT JOIN clo_subplo ON
+			clo_subplo.course_learning_outcome_id = clo.id
+		LEFT JOIN sub_program_learning_outcome splo ON
+    		clo_subplo.sub_program_learning_outcome_id = splo.id
+		LEFT JOIN program_learning_outcome plo ON
+			splo.program_learning_outcome_id = plo.id
+		LEFT JOIN clo_subso ON
+			clo_subso.course_learning_outcome_id = clo.id
+		LEFT JOIN sub_student_outcome sso ON
+    		clo_subso.sub_student_outcome_id = sso.id
+		LEFT JOIN student_outcome so ON
+			sso.student_outcome_id = so.id
+		WHERE
+			a.is_included_in_clo = TRUE
+			AND c.id = ?
+		ORDER BY
+			s.student_id,
+			a.id,
+			clo.id
+	`, courseId).Scan(&joinedScores)
+
+	type Metrics struct {
+		IsPass   bool
+		Expected float64
+		Actual   float64
+	}
+
+	type StudentStats struct {
+		StudentID  string
+		Assignment map[string]Metrics
+		CLOs       map[string]Metrics
+		POs        map[string]Metrics
+		SPLOs      map[string]Metrics
+		SSOs       map[string]Metrics
+	}
+
+	type AssignmentStats struct {
+		AssignmentID                        string
+		AssignmentName                      string
+		PassedPercentage                    float64
+		ExpectedPassingAssignmentPercentage float64
+	}
+
+	type CLOStats struct {
+		CLOID                               string
+		CLOCode                             string
+		PassedPercentage                    float64
+		ExpectedPassingAssignmentPercentage float64
+		Assignments                         map[string]Metrics
+	}
+
+	type POStats struct {
+		POID                         string
+		POCode                       string
+		PassedPercentage             float64
+		ExpectedPassingCloPercentage float64
+		CLOs                         map[string]Metrics
+	}
+
+	type SPLOStats struct {
+		SPLOID                       string
+		SPLOCode                     string
+		PLOID                        string
+		PLOCode                      string
+		PassedPercentage             float64
+		ExpectedPassingCloPercentage float64
+		CLOs                         map[string]Metrics
+	}
+
+	type SSOStats struct {
+		SOID                         string
+		SOCode                       string
+		SSOID                        string
+		SSOCode                      string
+		PassedPercentage             float64
+		ExpectedPassingCloPercentage float64
+		CLOs                         map[string]Metrics
+	}
+
+	studentStats := make(map[string]*StudentStats)
+	cloStats := make(map[string]*CLOStats)
+	poStats := make(map[string]*POStats)
+	sploStats := make(map[string]*SPLOStats)
+	ssoStats := make(map[string]*SSOStats)
+	assignmentStats := make(map[string]*AssignmentStats)
+
+	for _, row := range joinedScores {
+		if _, ok := studentStats[row.StudentID]; !ok {
+			studentStats[row.StudentID] = &StudentStats{
+				StudentID:  row.StudentID,
+				Assignment: make(map[string]Metrics),
+				CLOs:       make(map[string]Metrics),
+				POs:        make(map[string]Metrics),
+				SPLOs:      make(map[string]Metrics),
+				SSOs:       make(map[string]Metrics),
+			}
+		} else {
+			continue
+		}
+	}
+
+	for _, row := range joinedScores {
+		if _, ok := assignmentStats[row.AssignmentID]; !ok {
+			assignmentStats[row.AssignmentID] = &AssignmentStats{
+				AssignmentID:   row.AssignmentID,
+				AssignmentName: row.AssignmentName,
+			}
+			assignmentStats[row.AssignmentID].ExpectedPassingAssignmentPercentage = row.ExpectedPassingAssignmentPercentage
+		} else {
+			continue
+		}
+	}
+
+	for _, row := range joinedScores {
+		if _, ok := cloStats[row.CLOID]; !ok {
+			cloStats[row.CLOID] = &CLOStats{
+				CLOID:                               row.CLOID,
+				CLOCode:                             row.CLOCode,
+				ExpectedPassingAssignmentPercentage: row.ExpectedPassingAssignmentPercentage,
+				Assignments:                         make(map[string]Metrics),
+			}
+		}
+		if _, ok := cloStats[row.CLOID].Assignments[row.AssignmentID]; !ok {
+			cloStats[row.CLOID].Assignments[row.AssignmentID] = Metrics{}
+		}
+
+		if _, ok := poStats[row.POID]; !ok {
+			poStats[row.POID] = &POStats{
+				POID:                         row.POID,
+				POCode:                       row.POCode,
+				ExpectedPassingCloPercentage: row.ExpectedPassingCLOPercentage,
+				CLOs:                         make(map[string]Metrics),
+			}
+		}
+		if _, ok := poStats[row.POID].CLOs[row.CLOID]; !ok {
+			poStats[row.POID].CLOs[row.CLOID] = Metrics{}
+		}
+
+		if _, ok := sploStats[row.SPLOID]; !ok {
+			sploStats[row.SPLOID] = &SPLOStats{
+				PLOID:                        row.PLOID,
+				PLOCode:                      row.PLOCode,
+				SPLOID:                       row.SPLOID,
+				SPLOCode:                     row.SPLOCode,
+				ExpectedPassingCloPercentage: row.ExpectedPassingCLOPercentage,
+				CLOs:                         make(map[string]Metrics),
+			}
+		}
+		if _, ok := sploStats[row.SPLOID].CLOs[row.CLOID]; !ok {
+			sploStats[row.SPLOID].CLOs[row.CLOID] = Metrics{}
+		}
+
+		if _, ok := ssoStats[row.SSOID]; !ok {
+			ssoStats[row.SSOID] = &SSOStats{
+				SOID:                         row.SOID,
+				SOCode:                       row.SOCode,
+				SSOID:                        row.SSOID,
+				SSOCode:                      row.SSOCode,
+				ExpectedPassingCloPercentage: row.ExpectedPassingCLOPercentage,
+				CLOs:                         make(map[string]Metrics),
+			}
+		}
+		if _, ok := ssoStats[row.SSOID].CLOs[row.CLOID]; !ok {
+			ssoStats[row.SSOID].CLOs[row.CLOID] = Metrics{}
+		}
+	}
+
+	for _, row := range joinedScores {
+		if _, ok := studentStats[row.StudentID].Assignment[row.AssignmentID]; !ok {
+			metrics := Metrics{
+				IsPass:   (row.Score/row.MaxScore)*100 >= row.ExpectedScorePercentage,
+				Expected: row.ExpectedScorePercentage,
+				Actual:   (row.Score / row.MaxScore) * 100,
+			}
+			studentStats[row.StudentID].Assignment[row.AssignmentID] = metrics
+		} else {
+			continue
+		}
+	}
+
+	for _, studentStat := range studentStats {
+		for _, cloStat := range cloStats {
+			passedAssignmentCount := 0
+			for assignmentID := range cloStat.Assignments {
+				if studentStat.Assignment[assignmentID].IsPass {
+					passedAssignmentCount++
+				}
+			}
+
+			if (float64(passedAssignmentCount) / float64(len(cloStat.Assignments)) * 100) >= cloStat.ExpectedPassingAssignmentPercentage {
+				studentStat.CLOs[cloStat.CLOID] = Metrics{
+					IsPass:   true,
+					Expected: cloStat.ExpectedPassingAssignmentPercentage,
+					Actual:   (float64(passedAssignmentCount) / float64(len(cloStat.Assignments))) * 100,
+				}
+			} else {
+				studentStat.CLOs[cloStat.CLOID] = Metrics{
+					IsPass:   false,
+					Expected: cloStat.ExpectedPassingAssignmentPercentage,
+					Actual:   (float64(passedAssignmentCount) / float64(len(cloStat.Assignments))) * 100,
+				}
+			}
+		}
+	}
+
+	for _, studentStat := range studentStats {
+		for _, poStat := range poStats {
+			passedCLOCount := 0
+			for cloID := range poStat.CLOs {
+				if studentStat.CLOs[cloID].IsPass {
+					passedCLOCount++
+				}
+			}
+			if (float64(passedCLOCount) / float64(len(poStat.CLOs)) * 100) >= poStat.ExpectedPassingCloPercentage {
+				studentStat.POs[poStat.POID] = Metrics{
+					IsPass:   true,
+					Expected: poStat.ExpectedPassingCloPercentage,
+					Actual:   (float64(passedCLOCount) / float64(len(poStat.CLOs))) * 100,
+				}
+			} else {
+				studentStat.POs[poStat.POID] = Metrics{
+					IsPass:   false,
+					Expected: poStat.ExpectedPassingCloPercentage,
+					Actual:   (float64(passedCLOCount) / float64(len(poStat.CLOs))) * 100,
+				}
+			}
+		}
+
+		for _, sploStat := range sploStats {
+			passedCLOCount := 0
+			for cloID := range sploStat.CLOs {
+				if studentStat.CLOs[cloID].IsPass {
+					passedCLOCount++
+				}
+			}
+			if (float64(passedCLOCount) / float64(len(sploStat.CLOs)) * 100) >= sploStat.ExpectedPassingCloPercentage {
+				studentStat.SPLOs[sploStat.SPLOID] = Metrics{
+					IsPass:   true,
+					Expected: sploStat.ExpectedPassingCloPercentage,
+					Actual:   (float64(passedCLOCount) / float64(len(sploStat.CLOs))) * 100,
+				}
+			} else {
+				studentStat.SPLOs[sploStat.SPLOID] = Metrics{
+					IsPass:   false,
+					Expected: sploStat.ExpectedPassingCloPercentage,
+					Actual:   (float64(passedCLOCount) / float64(len(sploStat.CLOs))) * 100,
+				}
+			}
+		}
+
+		for _, ssoStat := range ssoStats {
+			passedCLOCount := 0
+			for cloID := range ssoStat.CLOs {
+				if studentStat.CLOs[cloID].IsPass {
+					passedCLOCount++
+				}
+			}
+			if (float64(passedCLOCount) / float64(len(ssoStat.CLOs)) * 100) >= ssoStat.ExpectedPassingCloPercentage {
+				studentStat.SSOs[ssoStat.SSOID] = Metrics{
+					IsPass:   true,
+					Expected: ssoStat.ExpectedPassingCloPercentage,
+					Actual:   (float64(passedCLOCount) / float64(len(ssoStat.CLOs))) * 100,
+				}
+			} else {
+				studentStat.SSOs[ssoStat.SSOID] = Metrics{
+					IsPass:   false,
+					Expected: ssoStat.ExpectedPassingCloPercentage,
+					Actual:   (float64(passedCLOCount) / float64(len(ssoStat.CLOs))) * 100,
+				}
+			}
+		}
+	}
+
+	for _, assignmentStat := range assignmentStats {
+		passedAssignmentCount := 0
+		for _, studentStat := range studentStats {
+			if studentStat.Assignment[assignmentStat.AssignmentID].IsPass {
+				passedAssignmentCount++
+			}
+		}
+		assignmentStat.PassedPercentage = (float64(passedAssignmentCount) / float64(len(studentStats))) * 100
+		fmt.Printf("Assignment %s: %.2f%% actual, %.2f%% expected\n", assignmentStat.AssignmentName, assignmentStat.PassedPercentage, assignmentStat.ExpectedPassingAssignmentPercentage)
+	}
+
+	fmt.Println("CLOs passing rate:")
+	for _, cloStat := range cloStats {
+		passedAssignmentCount := 0
+		for _, studentStat := range studentStats {
+			if studentStat.CLOs[cloStat.CLOID].IsPass {
+				passedAssignmentCount++
+			}
+		}
+
+		cloStat.PassedPercentage = (float64(passedAssignmentCount) / float64(len(studentStats))) * 100
+
+		fmt.Printf("CLO %s: %.2f%% actual, %.2f%% expected\n", cloStat.CLOCode, cloStat.PassedPercentage, cloStat.ExpectedPassingAssignmentPercentage)
+	}
+
+	for _, poStat := range poStats {
+		passPOCount := 0
+		for _, studentStat := range studentStats {
+			if studentStat.POs[poStat.POID].IsPass {
+				passPOCount++
+			}
+		}
+		poStat.PassedPercentage = (float64(passPOCount) / float64(len(studentStats))) * 100
+
+		coursesOutcomeSuccessRate.POs[poStat.POCode] = poStat.PassedPercentage
+
+		fmt.Printf("PO %s: %.2f%% actual, %.2f%% expected\n", poStat.POCode, poStat.PassedPercentage, poStat.ExpectedPassingCloPercentage)
+	}
+	for _, sploStat := range sploStats {
+		passSPLOCount := 0
+		for _, studentStat := range studentStats {
+			if studentStat.SPLOs[sploStat.SPLOID].IsPass {
+				passSPLOCount++
+			}
+		}
+		sploStat.PassedPercentage = (float64(passSPLOCount) / float64(len(studentStats))) * 100
+
+		if _, ok := coursesOutcomeSuccessRate.PLOs[sploStat.PLOID]; !ok {
+			coursesOutcomeSuccessRate.PLOs[sploStat.PLOCode] = make(map[string]float64)
+		}
+		coursesOutcomeSuccessRate.PLOs[sploStat.PLOCode][sploStat.SPLOCode] = sploStat.PassedPercentage
+
+		fmt.Printf("SPLO %s: %.2f%% actual, %.2f%% expected\n", sploStat.SPLOCode, sploStat.PassedPercentage, sploStat.ExpectedPassingCloPercentage)
+
+	}
+	for _, ssoStat := range ssoStats {
+		passSSOCount := 0
+		for _, studentStat := range studentStats {
+			if studentStat.SSOs[ssoStat.SSOID].IsPass {
+				passSSOCount++
+			}
+		}
+		ssoStat.PassedPercentage = (float64(passSSOCount) / float64(len(studentStats))) * 100
+
+		if _, ok := coursesOutcomeSuccessRate.SOs[ssoStat.SOCode]; !ok {
+			coursesOutcomeSuccessRate.SOs[ssoStat.SOCode] = make(map[string]float64)
+		}
+		coursesOutcomeSuccessRate.SOs[ssoStat.SOCode][ssoStat.SSOCode] = ssoStat.PassedPercentage
+
+		fmt.Printf("SSO %s: %.2f%% actual, %.2f%% expected\n", ssoStat.SSOCode, ssoStat.PassedPercentage, ssoStat.ExpectedPassingCloPercentage)
+	}
+
+	closPassingRate := map[string]entity.CloPassingRate{}
+	for cloId, cloStat := range cloStats {
+		assignments := map[string]entity.AssignmentPassingRate{}
+		for assignmentID := range cloStat.Assignments {
+			assignments[assignmentID] = entity.AssignmentPassingRate{
+				AssignmentID:                        assignmentID,
+				AssignmentName:                      assignmentStats[assignmentID].AssignmentName,
+				PassedPercentage:                    assignmentStats[assignmentID].PassedPercentage,
+				ExpectedPassingAssignmentPercentage: assignmentStats[assignmentID].ExpectedPassingAssignmentPercentage,
+			}
+		}
+		closPassingRate[cloId] = entity.CloPassingRate{
+			CLOID:                               cloStat.CLOID,
+			CLOCode:                             cloStat.CLOCode,
+			PassedPercentage:                    cloStat.PassedPercentage,
+			ExpectedPassingAssignmentPercentage: cloStat.ExpectedPassingAssignmentPercentage,
+			Assignments:                         assignments,
+		}
+	}
+
+	poPassingRate := map[string]entity.PoPassingRate{}
+	for _, poStat := range poStats {
+		clos := make(map[string]entity.CloPassingRate)
+		for cloId := range poStat.CLOs {
+			clos[cloId] = closPassingRate[cloId]
+		}
+		poPassingRate[poStat.POID] = entity.PoPassingRate{
+			POID:                         poStat.POID,
+			POCode:                       poStat.POCode,
+			PassedPercentage:             poStat.PassedPercentage,
+			ExpectedPassingCloPercentage: poStat.ExpectedPassingCloPercentage,
+			CLOPassingRate:               clos,
+		}
+	}
+
+	sploPassingRate := map[string]entity.SploPassingRate{}
+	for _, sploStat := range sploStats {
+		clos := make(map[string]entity.CloPassingRate)
+		for cloId := range sploStat.CLOs {
+			clos[cloId] = closPassingRate[cloId]
+		}
+		sploPassingRate[sploStat.SPLOID] = entity.SploPassingRate{
+			SPLOID:                       sploStat.SPLOID,
+			SPLOCode:                     sploStat.SPLOCode,
+			PLOID:                        sploStat.PLOID,
+			PLOCode:                      sploStat.PLOCode,
+			PassedPercentage:             sploStat.PassedPercentage,
+			ExpectedPassingCloPercentage: sploStat.ExpectedPassingCloPercentage,
+			CLOPassingRate:               clos,
+		}
+	}
+
+	ssoPassingRate := map[string]entity.SsoPassingRate{}
+	for _, ssoStat := range ssoStats {
+		clos := make(map[string]entity.CloPassingRate)
+		for cloId := range ssoStat.CLOs {
+			clos[cloId] = closPassingRate[cloId]
+		}
+		ssoPassingRate[ssoStat.SSOID] = entity.SsoPassingRate{
+			SOID:                         ssoStat.SOID,
+			SOCode:                       ssoStat.SOCode,
+			SSOID:                        ssoStat.SSOID,
+			SSOCode:                      ssoStat.SSOCode,
+			PassedPercentage:             ssoStat.PassedPercentage,
+			ExpectedPassingCloPercentage: ssoStat.ExpectedPassingCloPercentage,
+			CLOPassingRate:               clos,
+		}
+	}
+
+	return &entity.CoursePortfolioOutcome{
+		CLOs: closPassingRate,
+		POs:  poPassingRate,
+		PLOs: sploPassingRate,
+		SOs:  ssoPassingRate,
+	}, nil
+}

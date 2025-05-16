@@ -1794,3 +1794,12 @@ func WriteCourseOutcomesSuccessRate(outputs []entity.CourseOutcomeSuccessRate, f
 
 	return nil
 }
+
+func (u coursePortfolioUseCase) GetCourseOutcomes(courseId string) (*entity.CoursePortfolioOutcome, error) {
+	course, err := u.CoursePortfolioRepository.GetCourseOutcomes(courseId)
+	if err != nil {
+		return nil, errs.New(errs.SameCode, "cannot get course outcomes %s", err)
+	}
+
+	return course, nil
+}

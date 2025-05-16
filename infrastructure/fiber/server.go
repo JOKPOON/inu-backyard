@@ -228,6 +228,7 @@ func (f *fiberServer) initController() error {
 	course.Get("/:courseId/assignment-groups", assignmentController.GetGroupByCourseId)
 	course.Get("/:courseId/survey", surveyController.GetByCourseId)
 	course.Get("/:courseId", courseController.GetById)
+	course.Get("/:courseId/portfolio/outcomes", coursePortfolioController.GetCourseOutcomesSuccessRateByCourseId)
 
 	// course learning outcome route
 	clo := api.Group("/clos", authMiddleware)
