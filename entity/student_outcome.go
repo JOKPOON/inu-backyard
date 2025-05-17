@@ -48,8 +48,8 @@ type StudentOutcome struct {
 
 type CreateStudentOutcome struct {
 	Code                            string                    `validate:"required" json:"code"`
-	DescriptionThai                 string                    `validate:"required" json:"description_thai"`
-	DescriptionEng                  string                    `json:"description_eng"`
+	DescriptionThai                 string                    `json:"description_thai"`
+	DescriptionEng                  string                    `json:"description_eng" validate:"required"`
 	ExpectedCoursePassingPercentage float64                   `json:"expected_course_passing_percentage" validate:"required"`
 	SubStudentOutcomes              []CreateSubStudentOutcome `json:"sub_student_outcomes" validate:"required,dive"`
 	ProgramId                       string                    `json:"program_id" validate:"required"`
@@ -78,8 +78,8 @@ type SubStudentOutcome struct {
 
 type CreateSubStudentOutcome struct {
 	Code             string `validate:"required" json:"code"`
-	DescriptionThai  string `validate:"required" json:"description_thai"`
-	DescriptionEng   string `json:"description_eng"`
+	DescriptionThai  string `json:"description_thai"`
+	DescriptionEng   string `json:"description_eng" validate:"required" `
 	StudentOutcomeId string `json:"student_outcome_id"`
 }
 

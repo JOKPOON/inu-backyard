@@ -71,8 +71,8 @@ type Category struct {
 }
 
 type ProgrammeStructure struct {
-	Category     []Category `json:"category" validate:"required"`
-	TotalsCredit int        `json:"totals_credit" validate:"required"`
+	Category     []Category `json:"category" `
+	TotalsCredit int        `json:"totals_credit" `
 }
 
 type Programme struct {
@@ -102,14 +102,14 @@ type CreateProgrammePayload struct {
 	NameEN        string `json:"name_en" validate:"required"`
 	DegreeTH      string `json:"degree_th" validate:"required"`
 	DegreeEN      string `json:"degree_en" validate:"required"`
-	DescriptionTH string `json:"description_th" gorm:"not null" validate:"required"`
-	DescriptionEN string `json:"description_en" gorm:"not null" validate:"required"`
 	DegreeShortTH string `json:"degree_short_th" validate:"required"`
 	DegreeShortEN string `json:"degree_short_en" validate:"required"`
+	DescriptionTH string `json:"description_th" gorm:"not null" validate:"required"`
+	DescriptionEN string `json:"description_en" gorm:"not null" validate:"required"`
 	Year          string `json:"year" validate:"required"`
 	DepartmentId  string `json:"department_id" validate:"required"`
 
-	Structure ProgrammeStructure `json:"structure" validate:"required"`
+	Structure ProgrammeStructure `json:"structure"`
 }
 
 type GetProgrammesByParamsPayload struct {

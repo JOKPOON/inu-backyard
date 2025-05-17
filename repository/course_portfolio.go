@@ -1239,6 +1239,7 @@ type JoinedScore struct {
 	CLOCode                             string
 	ExpectedPassingAssignmentPercentage float64
 	ExpectedPassingCLOPercentage        float64
+	CourseID                            string
 	POID                                string
 	POCode                              string
 	PLOID                               string
@@ -1310,6 +1311,7 @@ func (r coursePortfolioRepositoryGorm) GetCourseOutcomesSuccessRate(programmeId 
 			clo.code AS clo_code,
 			clo.expected_passing_assignment_percentage,
 			c.expected_passing_clo_percentage,
+			c.id AS course_id,
 			po.id AS po_id,
 			po.code AS po_code,
 			plo.id AS plo_id,
@@ -1405,6 +1407,9 @@ func (r coursePortfolioRepositoryGorm) GetCourseOutcomesSuccessRate(programmeId 
 		ssoStats := make(map[string]*SSOStats)
 
 		for _, row := range joinedScores {
+			if course.Id != row.CourseID {
+				continue
+			}
 			if _, ok := studentStats[row.StudentID]; !ok {
 				studentStats[row.StudentID] = &StudentStats{
 					StudentID:        row.StudentID,
