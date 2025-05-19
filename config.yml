@@ -3,7 +3,7 @@ database:
   port: 3306
   user: root
   password: root
-  databaseName: inu_2
+  databaseName: inu-2-dev
 client:
   auth:
     session:
