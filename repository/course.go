@@ -188,27 +188,20 @@ func (r courseRepositoryGorm) GetStudentsPassingCLOs(courseId string) (*entity.S
 		sc.score AS score
 	FROM
 		student s
-	JOIN enrollment e ON
+	LEFT JOIN enrollment e ON
 		s.id = e.student_id
-	JOIN course c ON
+	LEFT JOIN course c ON
 		e.course_id = c.id
-	JOIN course_learning_outcome clo ON
+	LEFT JOIN course_learning_outcome clo ON
 		c.id = clo.course_id
-	JOIN clo_assignment ca ON
+	LEFT JOIN clo_assignment ca ON
 		clo.id = ca.course_learning_outcome_id
-	JOIN assignment a ON
+	LEFT JOIN assignment a ON
 		ca.assignment_id = a.id
-	JOIN score sc ON
+	LEFT JOIN score sc ON
 		a.id = sc.assignment_id AND s.id = sc.student_id
 	WHERE
 		c.id = ?
-	GROUP BY
-		a.id,
-		s.id,
-		clo.id,
-		clo.code,
-		clo.expected_passing_assignment_percentage,
-		sc.score
 	ORDER BY
 		s.id,
 		clo.id;
@@ -404,11 +397,11 @@ func (r courseRepositoryGorm) GetStudentsPassingOutcomes(
 
 		calculatePassOutcomes := func(count, total map[string]int, codes map[string]string) []entity.PassOutcome {
 			var passOutcomes []entity.PassOutcome
-			for id, cnt := range count {
+			for id := range total {
 				passOutcomes = append(passOutcomes, entity.PassOutcome{
 					Id:   id,
 					Code: codes[id],
-					Pass: (float64(cnt)/float64(total[id]))*100 >= studentMap[student.StudentID].ExpectedPassingCLOPercentage,
+					Pass: (float64(count[id])/float64(total[id]))*100 >= studentMap[student.StudentID].ExpectedPassingCLOPercentage,
 				})
 			}
 			return passOutcomes
