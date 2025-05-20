@@ -58,6 +58,12 @@ func (u courseUseCase) GetAll(query string, serm string, program string) (*entit
 				NameTH: c.Programme.NameTH,
 				NameEN: c.Programme.NameEN,
 			},
+			Semester: entity.Semester{
+				Id:               c.Semester.Id,
+				Year:             c.Semester.Year,
+				SemesterSequence: c.Semester.SemesterSequence,
+			},
+
 			Lecturers: lec,
 		})
 	}

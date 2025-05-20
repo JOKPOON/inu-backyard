@@ -43,6 +43,8 @@ func (u studentUseCase) GetAll() ([]entity.Student, error) {
 }
 
 func (u studentUseCase) GetByParams(query string, params *entity.Student, limit int, offset int) (*entity.GetStudentsResponse, error) {
+	offset = offset * limit
+
 	students, err := u.studentRepo.GetByParams(query, params, limit, offset)
 
 	if err != nil {

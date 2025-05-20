@@ -150,12 +150,13 @@ type CourseSimpleData struct {
 	Id           string     `json:"id"`
 	Code         string     `json:"code"`
 	Name         string     `json:"name"`
-	Program      Program    `json:"program"`
 	Lecturers    []Lecturer `json:"lecturers"`
 	Description  string     `json:"description"`
 	Credit       int        `json:"credit"`
 	AcademicYear string     `json:"academic_year"`
 	GraduateYear string     `json:"graduate_year"`
+	Program      Program    `json:"program"`
+	Semester     Semester   `json:"semester"`
 }
 
 type GetAllCourseResponse struct {
