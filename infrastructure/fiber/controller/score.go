@@ -56,8 +56,9 @@ func (c ScoreController) GetById(ctx *fiber.Ctx) error {
 
 func (c ScoreController) GetByAssignmentId(ctx *fiber.Ctx) error {
 	assignmentId := ctx.Params("assignmentId")
+	courseId := ctx.Query("courseId")
 
-	assignmentScore, err := c.ScoreUseCase.GetByAssignmentId(assignmentId)
+	assignmentScore, err := c.ScoreUseCase.GetByAssignmentId(assignmentId, courseId)
 	if err != nil {
 		return err
 	}

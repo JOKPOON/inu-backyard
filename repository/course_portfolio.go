@@ -1656,6 +1656,8 @@ func (r coursePortfolioRepositoryGorm) GetCourseOutcomes(courseId string) (*enti
 			sso.code AS sso_code
 		FROM
 			score s
+		LEFT JOIN enrollment e ON
+			s.student_id = e.student_id
 		LEFT JOIN assignment a ON
 			s.assignment_id = a.id
 		LEFT JOIN clo_assignment clo_a ON
@@ -1681,6 +1683,7 @@ func (r coursePortfolioRepositoryGorm) GetCourseOutcomes(courseId string) (*enti
 			sso.student_outcome_id = so.id
 		WHERE
 			a.is_included_in_clo = TRUE
+			AND e.status = 'ENROLL'
 			AND c.id = ?
 		ORDER BY
 			s.student_id,

@@ -52,14 +52,14 @@ func (r scoreRepository) GetById(id string) (*entity.Score, error) {
 	return &score, nil
 }
 
-func (r scoreRepository) GetByAssignmentId(assignmentId string) ([]entity.Score, error) {
+func (r scoreRepository) GetByAssignmentId(assignmentId string, courseId string) ([]entity.Score, error) {
 	var scores []entity.Score
 
 	err := r.gorm.
 		Model(&scores).
 		Select("score.*, student.first_name_th, student.last_name_th, student.first_name_en, student.last_name_en, student.email").
-		Joins("LEFT JOIN student on student.id = score.student_id").
-		Where("assignment_id = ?", assignmentId).
+		Joins("LEFT JOIN enrollment e ON score.student_id = e.student_id LEFT JOIN student ON e.student_id = student.id").
+		Where("assignment_id = ? AND e.course_id = ? AND e.status = 'ENROLL'", assignmentId, courseId).
 		Find(&scores).
 		Error
 	if err != nil {

@@ -3,7 +3,7 @@ package entity
 type ScoreRepository interface {
 	GetAll() ([]Score, error)
 	GetById(id string) (*Score, error)
-	GetByAssignmentId(assignmentId string) ([]Score, error)
+	GetByAssignmentId(assignmentId string, courseId string) ([]Score, error)
 	GetByUserId(userId string) ([]Score, error)
 	GetByStudentId(studentId string) ([]Score, error)
 	Create(score *Score) error
@@ -16,7 +16,7 @@ type ScoreRepository interface {
 type ScoreUseCase interface {
 	GetAll() ([]Score, error)
 	GetById(id string) (*Score, error)
-	GetByAssignmentId(assignmentId string) (*AssignmentScore, error)
+	GetByAssignmentId(assignmentId string, courseId string) (*AssignmentScore, error)
 	GetByUserId(userId string) ([]Score, error)
 	GetByStudentId(studentId string) ([]Score, error)
 	CreateMany(userId string, assignmentId string, studentScores []StudentScore) error

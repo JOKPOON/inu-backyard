@@ -257,7 +257,7 @@ func (u coursePortfolioUseCase) CalculateGradeDistribution(courseId string) (*en
 			sumGroupScoreByGroupId[group.Id] += assignment.MaxScore
 
 			// Get scores for the assignment
-			assignmentScores, _ := u.ScoreUseCase.GetByAssignmentId(assignment.Id)
+			assignmentScores, _ := u.ScoreUseCase.GetByAssignmentId(assignment.Id, group.CourseId)
 			for _, score := range assignmentScores.Scores {
 				sumScoreByStudentId[score.StudentId] += (score.Score * float64(group.Weight)) / float64(assignment.MaxScore)
 			}

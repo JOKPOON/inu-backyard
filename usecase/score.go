@@ -52,7 +52,7 @@ func (u scoreUseCase) GetById(id string) (*entity.Score, error) {
 	return score, nil
 }
 
-func (u scoreUseCase) GetByAssignmentId(assignmentId string) (*entity.AssignmentScore, error) {
+func (u scoreUseCase) GetByAssignmentId(assignmentId string, courseId string) (*entity.AssignmentScore, error) {
 	assignment, err := u.assignmentUseCase.GetById(assignmentId)
 	if err != nil {
 		return nil, errs.New(errs.SameCode, "cannot get assignment when finding score", err)
@@ -65,7 +65,7 @@ func (u scoreUseCase) GetByAssignmentId(assignmentId string) (*entity.Assignment
 		return nil, errs.New(errs.SameCode, "cannot get assignment group when finding score", err)
 	}
 
-	scores, err := u.scoreRepo.GetByAssignmentId(assignmentId)
+	scores, err := u.scoreRepo.GetByAssignmentId(assignmentId, courseId)
 	if err != nil {
 		return nil, errs.New(errs.SameCode, "cannot get all scores", err)
 	}

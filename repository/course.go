@@ -201,7 +201,7 @@ func (r courseRepositoryGorm) GetStudentsPassingCLOs(courseId string) (*entity.S
 	LEFT JOIN score sc ON
 		a.id = sc.assignment_id AND s.id = sc.student_id
 	WHERE
-		c.id = ? AND e.status = 'ENROLL'
+		c.id = ? AND e.status = 'ENROLL' AND s.programme_id = c.programme_id
 	ORDER BY
 		s.id,
 		clo.id;
@@ -326,7 +326,7 @@ func (r courseRepositoryGorm) GetStudentsPassingOutcomes(
 		LEFT JOIN clo_subso csso ON clo.id = csso.course_learning_outcome_id
 		LEFT JOIN sub_student_outcome sso ON csso.sub_student_outcome_id = sso.id
 		LEFT JOIN student_outcome so ON sso.student_outcome_id = so.id
-		WHERE c.id = ? AND e.status = 'ENROLL'
+		WHERE c.id = ? AND e.status = 'ENROLL' AND s.programme_id = c.programme_id
 		ORDER BY s.id, clo.id, po.id, plo.id, so.id`, courseId).Scan(&rawQueryResults).Error
 	if err != nil {
 		return nil
