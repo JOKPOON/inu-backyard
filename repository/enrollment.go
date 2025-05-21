@@ -59,7 +59,7 @@ func (r enrollmentRepositoryGorm) GetByCourseId(courseId, query string) ([]entit
 		Model(&entity.Enrollment{}).
 		Select("enrollment.*, student.first_name_th, student.last_name_th, student.first_name_en, student.last_name_en, student.email").
 		Joins("LEFT JOIN student ON student.id = enrollment.student_id").
-		Where("enrollment.course_id = ?", courseId)
+		Where("enrollment.course_id = ?", courseId).Order("student.id ASC")
 
 	if query != "" {
 		search := "%" + query + "%"
